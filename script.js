@@ -475,7 +475,16 @@ function initGalleryAccordion() {
     });
   };
 
+  // Track whether the interaction started inside the grid
+  // so the outside-click collapse doesn't fire on the same tap
+  let interactingWithGrid = false;
+
   cards.forEach((card) => {
+    // Use pointerdown so it works on both touch and mouse
+    card.addEventListener("pointerdown", () => {
+      interactingWithGrid = true;
+    });
+
     card.addEventListener("click", (e) => {
       e.stopPropagation();
       const alreadyExpanded = card.classList.contains("is-expanded");
@@ -491,11 +500,18 @@ function initGalleryAccordion() {
     });
   });
 
-  // Click outside the gallery grid collapses everything
-  document.addEventListener("click", (e) => {
+  // Collapse when tapping/clicking outside the grid
+  document.addEventListener("pointerdown", (e) => {
     if (!grid.contains(e.target)) {
+      interactingWithGrid = false;
+    }
+  });
+
+  document.addEventListener("click", (e) => {
+    if (!interactingWithGrid && !grid.contains(e.target)) {
       collapseAll();
     }
+    interactingWithGrid = false;
   });
 }
 
