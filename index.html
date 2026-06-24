@@ -1,0 +1,380 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Hiruy Gym &amp; Spa — Train. Restore. Elevate.</title>
+  <meta name="description" content="Hiruy Gym & Spa — a premium fitness and wellness sanctuary. Strength training, recovery, and spa rituals under one roof." />
+
+  <!-- Favicon (placeholder) -->
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><circle cx=%2250%22 cy=%2250%22 r=%2245%22 fill=%22%230B1B3A%22/></svg>" />
+
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600&family=Manrope:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+
+  <!-- Stylesheet -->
+  <link rel="stylesheet" href="style.css" />
+
+  <!-- Preload hero image for fastest possible paint -->
+  <link
+    rel="preload"
+    as="image"
+    href="https://res.cloudinary.com/dhoymhers/image/upload/f_auto,q_auto,w_1600/v1782302191/hiruy_gym_xtaefk.jpg"
+    fetchpriority="high"
+  />
+</head>
+<body>
+
+  <!-- ============================== -->
+  <!-- LOADER -->
+  <!-- ============================== -->
+  <div id="loader" aria-hidden="true">
+    <div class="loader-mark">HIRUY</div>
+    <div class="loader-bar"><span></span></div>
+  </div>
+
+  <!-- ============================== -->
+  <!-- 3D BACKGROUND CANVAS (persistent) -->
+  <!-- ============================== -->
+  <canvas id="bg-canvas" aria-hidden="true"></canvas>
+
+  <!-- ============================== -->
+  <!-- NAVIGATION -->
+  <!-- ============================== -->
+  <header class="site-header" id="site-header">
+    <nav class="nav" aria-label="Primary">
+      <a href="#home" class="logo">
+        <span class="logo-mark">H</span>
+        <span class="logo-text">Hiruy <em>Gym &amp; Spa</em></span>
+      </a>
+
+      <ul class="nav-links" id="nav-links">
+        <li><a href="#home" class="nav-link active" data-section="home">Home</a></li>
+        <li><a href="#about" class="nav-link" data-section="about">About</a></li>
+        <li><a href="#gym" class="nav-link" data-section="gym">Gym</a></li>
+        <li><a href="#spa" class="nav-link" data-section="spa">Spa</a></li>
+        <li><a href="#membership" class="nav-link" data-section="membership">Membership</a></li>
+        <li><a href="#gallery" class="nav-link" data-section="gallery">Gallery</a></li>
+        <li><a href="#contact" class="nav-link" data-section="contact">Contact</a></li>
+      </ul>
+
+      <a href="#contact" class="nav-cta">Book a Visit</a>
+
+      <button class="hamburger" id="hamburger" aria-label="Open menu" aria-expanded="false" aria-controls="mobile-menu">
+        <span></span>
+        <span></span>
+        <span></span>
+      </button>
+    </nav>
+
+    <!-- Mobile full-screen menu -->
+    <div class="mobile-menu" id="mobile-menu">
+      <ul class="mobile-links">
+        <li><a href="#home" class="nav-link" data-section="home">Home</a></li>
+        <li><a href="#about" class="nav-link" data-section="about">About</a></li>
+        <li><a href="#gym" class="nav-link" data-section="gym">Gym</a></li>
+        <li><a href="#spa" class="nav-link" data-section="spa">Spa</a></li>
+        <li><a href="#membership" class="nav-link" data-section="membership">Membership</a></li>
+        <li><a href="#gallery" class="nav-link" data-section="gallery">Gallery</a></li>
+        <li><a href="#contact" class="nav-link" data-section="contact">Contact</a></li>
+      </ul>
+      <a href="#contact" class="mobile-cta">Book a Visit</a>
+    </div>
+  </header>
+
+  <main>
+
+    <!-- ============================== -->
+    <!-- HERO -->
+    <!-- ============================== -->
+    <section class="hero" id="home">
+      <div class="hero-media">
+        <img
+          class="hero-bg-img"
+          src="https://res.cloudinary.com/dhoymhers/image/upload/f_auto,q_auto,w_1600/v1782302191/hiruy_gym_xtaefk.jpg"
+          srcset="
+            https://res.cloudinary.com/dhoymhers/image/upload/f_auto,q_auto,w_800/v1782302191/hiruy_gym_xtaefk.jpg 800w,
+            https://res.cloudinary.com/dhoymhers/image/upload/f_auto,q_auto,w_1200/v1782302191/hiruy_gym_xtaefk.jpg 1200w,
+            https://res.cloudinary.com/dhoymhers/image/upload/f_auto,q_auto,w_1600/v1782302191/hiruy_gym_xtaefk.jpg 1600w,
+            https://res.cloudinary.com/dhoymhers/image/upload/f_auto,q_auto,w_2000/v1782302191/hiruy_gym_xtaefk.jpg 2000w
+          "
+          sizes="100vw"
+          alt="Hiruy Gym training floor"
+          fetchpriority="high"
+          decoding="async"
+        />
+        <div class="hero-overlay"></div>
+      </div>
+
+      <div class="hero-content">
+        <p class="eyebrow">Addis Ababa &middot; Premium Fitness &amp; Wellness</p>
+        <h1 class="hero-title">
+          Where <span class="accent">strength</span><br />
+          meets <span class="accent">stillness</span>.
+        </h1>
+        <p class="hero-sub">
+          Hiruy Gym &amp; Spa brings world-class training and restorative spa
+          rituals together under one roof — built for people who take their
+          body as seriously as their ambition.
+        </p>
+        <div class="hero-actions">
+          <a href="#membership" class="btn btn-primary">Explore Membership</a>
+          <a href="#about" class="btn btn-ghost">Discover Hiruy</a>
+        </div>
+      </div>
+      <div class="scroll-cue" aria-hidden="true">
+        <span></span>
+        <p>Scroll</p>
+      </div>
+    </section>
+
+    <!-- ============================== -->
+    <!-- ABOUT -->
+    <!-- ============================== -->
+    <section class="about" id="about">
+      <div class="section-inner about-grid">
+        <div class="about-media">
+          <img src="https://res.cloudinary.com/dhoymhers/image/upload/v1782309391/hiry_gym_owner_g9obzg.jpg" alt="Hiruy Gym owner" loading="lazy" />
+          <div class="comment-card">
+            <div class="comment-card-header">
+              <span class="comment-card-name">Dawit</span>
+              <span class="comment-card-badge">
+                <svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor" aria-hidden="true">
+                  <path d="M9 16.2l-3.5-3.5L4 14.2l5 5 11-11-1.5-1.5z"/>
+                </svg>
+                Verified
+              </span>
+            </div>
+            <p class="comment-card-role">Owner, Hiruy Gym &amp; Spa</p>
+            <p class="comment-card-text">"ጥንካሬ የሚገነባው በትግስት ነው፤ እያንዳንዱ ቀን አንድ እርምጃ ወደ ግባችሁ ነው።"</p>
+          </div>
+        </div>
+        <div class="about-copy">
+          <p class="eyebrow">About Hiruy</p>
+          <h2>Two disciplines. One philosophy.</h2>
+          <p>
+            We built Hiruy on a simple belief: real wellbeing needs both
+            effort and rest. Our gym floor is designed for serious training —
+            our spa exists to help your body recover from it. Neither half
+            works without the other.
+          </p>
+          <p>
+            Every detail, from our lighting to our equipment to our
+            treatment rooms, is chosen to make the hour you spend with us
+            feel considered, not rushed.
+          </p>
+          <div class="about-stats">
+            <div class="stat">
+              <span class="stat-num">12+</span>
+              <span class="stat-label">Years in Addis</span>
+            </div>
+            <div class="stat">
+              <span class="stat-num">30+</span>
+              <span class="stat-label">Trainers &amp; Therapists</span>
+            </div>
+            <div class="stat">
+              <span class="stat-num">5</span>
+              <span class="stat-label">Treatment Suites</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================== -->
+    <!-- SPA -->
+    <!-- ============================== -->
+    <section class="spa" id="spa">
+      <div class="section-inner spa-grid">
+        <div class="spa-copy">
+          <p class="eyebrow">The Spa</p>
+          <h2>Recovery is part of the work.</h2>
+          <p class="section-lead">
+            Our treatment rooms are designed for quiet. Massage, hydrotherapy,
+            and skin care chosen to help your body absorb the work you put
+            into it.
+          </p>
+          <ul class="spa-list">
+            <li>Deep tissue &amp; sports massage</li>
+            <li>Hydrotherapy &amp; sauna circuit</li>
+            <li>Skin &amp; body treatments</li>
+            <li>Guided breathwork sessions</li>
+          </ul>
+          <a href="#contact" class="btn btn-primary">Book a Treatment</a>
+        </div>
+        <div class="spa-media">
+          <img src="https://res.cloudinary.com/dhoymhers/image/upload/v1782307347/hayru_gym_spa_twizim.jpg" alt="Spa treatment room at Hiruy Gym & Spa" loading="lazy" />
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================== -->
+    <!-- MEMBERSHIP -->
+    <!-- ============================== -->
+    <section class="membership" id="membership">
+      <div class="section-inner">
+        <p class="eyebrow">Membership</p>
+        <h2>Choose how you train.</h2>
+
+        <div class="pricing-grid">
+          <article class="pricing-card">
+            <h3>Gym Access</h3>
+            <p class="price">ETB 2,000<span>/mo</span></p>
+            <ul>
+              <li>Full gym floor access</li>
+              <li>Group class access</li>
+              <li>Locker &amp; shower</li>
+            </ul>
+            <a href="#contact" class="btn btn-ghost">Get Started</a>
+          </article>
+
+          <article class="pricing-card featured">
+            <p class="badge">Most Popular</p>
+            <h3>Gym + Spa</h3>
+            <p class="price">ETB 3,000<span>/mo</span></p>
+            <ul>
+              <li>Full gym floor access</li>
+              <li>Spa treatments</li>
+              <li>Priority class booking</li>
+              <li>Locker &amp; shower</li>
+            </ul>
+            <a href="#contact" class="btn btn-primary">Get Started</a>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================== -->
+    <!-- GALLERY -->
+    <!-- ============================== -->
+    <section class="gallery" id="gallery">
+  <div class="section-inner">
+    <p class="eyebrow">Gallery</p>
+    <h2>Inside Hiruy.</h2>
+
+    <div class="gallery-grid" id="gallery-grid">
+      <article class="gallery-card" data-card="equipment">
+        <img src="https://res.cloudinary.com/dhoymhers/image/upload/v1782307349/hayru_gym_equioments_maiako.jpg" alt="Equipment at Hiruy Gym" loading="lazy" />
+        <div class="gallery-card-overlay">
+          <h3>Equipment</h3>
+          <p class="gallery-desc-en"><strong>Precision-built power.</strong> Free weights, racks, and platforms designed for serious lifting, at every training age.</p>
+          <p class="gallery-desc-am"><strong>ጥራት ያለው የአካል ብቃት መሣሪያ።</strong> ለማንኛውም የስልጠና ደረጃ የተዘጋጁ ማሽኖችና እቃዎች።</p>
+        </div>
+      </article>
+
+      <article class="gallery-card" data-card="aerobics">
+        <img src="https://res.cloudinary.com/dhoymhers/image/upload/v1782307348/hayru_gym_aerobics_kqqu8z.jpg" alt="Aerobics class at Hiruy Gym" loading="lazy" />
+        <div class="gallery-card-overlay">
+          <h3>Aerobics Class</h3>
+          <p class="gallery-desc-en"><strong>Move together, grow together.</strong> Conditioning, mobility, and strength classes guided by coaches who pay attention.</p>
+          <p class="gallery-desc-am"><strong>በጋራ ንቅናቄ፣ በጋራ ለውጥ።</strong> በልምድ ያላቸው አሰልጣኞች የሚመሩ የአካል ብቃት ክፍሎች።</p>
+        </div>
+      </article>
+
+      <article class="gallery-card" data-card="spa">
+        <img src="https://res.cloudinary.com/dhoymhers/image/upload/v1782307347/hayru_gym_spa_twizim.jpg" alt="Spa at Hiruy Gym" loading="lazy" />
+        <div class="gallery-card-overlay">
+          <h3>Spa</h3>
+          <p class="gallery-desc-en"><strong>Recovery is part of the work.</strong> Massage, hydrotherapy, and skin care designed to help your body absorb the effort you give it.</p>
+          <p class="gallery-desc-am"><strong>ማገገም የስራው አካል ነው።</strong> ሰውነትዎ የሰራውን ልፋት እንዲወክል የተዘጋጀ ማሳጅና ሕክምና።</p>
+        </div>
+      </article>
+
+      <article class="gallery-card" data-card="interior">
+        <img src="https://res.cloudinary.com/dhoymhers/image/upload/v1782302191/hiruy_gym_2_hacfxp.jpg" alt="Interior of Hiruy Gym" loading="lazy" />
+        <div class="gallery-card-overlay">
+          <h3>Interior</h3>
+          <p class="gallery-desc-en"><strong>Designed for stillness and focus.</strong> Every light, surface, and corner of Hiruy is chosen with intention.</p>
+          <p class="gallery-desc-am"><strong>ለትኩረትና ለሰላም የተነደፈ ቦታ።</strong> እያንዳንዱ ጥግ በዓላማ የተመረጠ ነው።</p>
+        </div>
+      </article>
+    </div>
+  </div>
+</section>
+
+    <!-- ============================== -->
+    <!-- CONTACT -->
+    <!-- ============================== -->
+    <section class="contact" id="contact">
+      <div class="section-inner contact-grid">
+        <div class="contact-copy">
+          <p class="eyebrow">Visit Us</p>
+          <h2>Let's get you started.</h2>
+          <p class="section-lead">
+            Drop us a message and our team will get back to you within one
+            business day.
+          </p>
+
+          <div class="contact-details">
+            <p><strong>Address</strong><br />Bole Road, Addis Ababa, Ethiopia</p>
+            <p><strong>Hours</strong><br />Mon – Sat, 6:00 — 22:00</p>
+            <p><strong>Phone</strong><br />+251 900 000 000</p>
+          </div>
+        </div>
+
+        <form class="contact-form" id="contact-form">
+          <label for="name">Name</label>
+          <input type="text" id="name" name="name" placeholder="Your full name" required />
+
+          <label for="email">Email</label>
+          <input type="email" id="email" name="email" placeholder="you@example.com" required />
+
+          <label for="interest">I'm interested in</label>
+          <select id="interest" name="interest">
+            <option value="gym">Gym Membership</option>
+            <option value="spa">Spa Treatments</option>
+            <option value="both">Gym + Spa</option>
+          </select>
+
+          <label for="message">Message</label>
+          <textarea id="message" name="message" rows="4" placeholder="Tell us a bit about your goals"></textarea>
+
+          <button type="submit" class="btn btn-primary">Send Message</button>
+        </form>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- ============================== -->
+  <!-- FOOTER -->
+  <!-- ============================== -->
+  <footer class="site-footer">
+    <div class="section-inner footer-grid">
+      <div class="footer-brand">
+        <span class="logo-mark">H</span>
+        <span class="logo-text">Hiruy <em>Gym &amp; Spa</em></span>
+        <p>Train. Restore. Elevate.</p>
+      </div>
+
+      <div class="footer-links">
+        <h4>Explore</h4>
+        <a href="#about">About</a>
+        <a href="#gym">Gym</a>
+        <a href="#spa">Spa</a>
+        <a href="#membership">Membership</a>
+      </div>
+
+      <div class="footer-links">
+        <h4>Connect</h4>
+        <a href="#">Instagram</a>
+        <a href="#">Facebook</a>
+        <a href="#">TikTok</a>
+      </div>
+    </div>
+    <p class="footer-bottom">&copy; 2026 Hiruy Gym &amp; Spa. All rights reserved.</p>
+  </footer>
+
+  <!-- Scripts -->
+  <script type="importmap">
+    {
+      "imports": {
+        "three": "https://unpkg.com/three@0.160.0/build/three.module.js"
+      }
+    }
+  </script>
+  <script type="module" src="script.js"></script>
+</body>
+</html>
