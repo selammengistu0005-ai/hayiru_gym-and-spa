@@ -228,6 +228,8 @@ function initAdminToggle() {
 
   // Open
   adminBtn.addEventListener("click", openAdmin);
+const adminBtnMobile = document.getElementById("admin-btn-mobile");
+if (adminBtnMobile) adminBtnMobile.addEventListener("click", () => { window._closeMobileMenu?.(); openAdmin(); });
 
   // FIX: Visible close button wired up
   if (closeBtn) {
