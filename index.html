@@ -68,31 +68,121 @@
       </div>
     </div>
 
-    <!-- Portal view (shown after correct access key) -->
+    
     <div class="admin-portal-view" id="admin-portal-view" aria-hidden="true">
-      <div class="portal-media">
-        <img src="https://res.cloudinary.com/dhoymhers/image/upload/v1782309391/hiry_gym_owner_g9obzg.jpg" alt="Hiruy Gym owner" />
 
-        <div class="portal-stat-card">
-          <div class="portal-stat-card-header">
-            <span class="comment-card-name">Dawit</span>
-            <span class="comment-card-badge">
-              <svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor" aria-hidden="true">
-                <path d="M9 16.2l-3.5-3.5L4 14.2l5 5 11-11-1.5-1.5z"/>
-              </svg>
-              Verified
-            </span>
-          </div>
-          <div class="portal-donut" id="portal-donut">
-            <svg viewBox="0 0 36 36">
-              <circle class="portal-donut-bg" cx="18" cy="18" r="15.5" />
-              <circle class="portal-donut-fill" id="portal-donut-fill" cx="18" cy="18" r="15.5" />
+  <!-- Single Overview pill -->
+  <div class="portal-tabs" id="portal-tabs">
+    <button type="button" class="portal-tab active" data-tab="overview">Overview</button>
+  </div>
+
+  <!-- OVERVIEW PANEL -->
+  <div class="portal-tab-panel" id="portal-panel-overview">
+    <div class="dash-layout">
+
+      <!-- LEFT: Analytics -->
+      <div class="dash-left">
+
+        <!-- Primary metric card -->
+        <div class="dash-primary-card">
+          <div class="dash-primary-icon">
+            <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7Z" />
+              <circle cx="12" cy="12" r="3" />
             </svg>
-            <span class="portal-donut-value" id="portal-donut-value">0%</span>
+          </div>
+          <div class="dash-primary-info">
+            <span class="dash-primary-number" id="portal-viewed-number">—</span>
+            <span class="dash-primary-label">Viewed</span>
+          </div>
+        </div>
+
+        <!-- Three small metric cards -->
+        <div class="dash-small-cards">
+
+          <!-- Card 1: Profile Views (live) -->
+          <div class="dash-small-card">
+            <div class="dash-small-card-top">
+              <span class="dash-small-label">Profile Views</span>
+            </div>
+            <span class="dash-small-number" id="dash-profile-views">—</span>
+            <canvas class="dash-mini-graph" id="dash-mini-graph" aria-hidden="true"></canvas>
+          </div>
+
+          <!-- Card 2: Engagement Rate (hardcoded) -->
+          <div class="dash-small-card">
+            <div class="dash-small-card-top">
+              <span class="dash-small-label">Engagement Rate</span>
+            </div>
+            <span class="dash-small-number">68%</span>
+            <div class="dash-mini-ring" aria-hidden="true">
+              <svg viewBox="0 0 36 36">
+                <circle class="dash-mini-ring-bg" cx="18" cy="18" r="15.5" />
+                <circle class="dash-mini-ring-fill" cx="18" cy="18" r="15.5" />
+              </svg>
+              <span>68%</span>
+            </div>
+          </div>
+
+          <!-- Card 3: Verification Status (hardcoded) -->
+          <div class="dash-small-card">
+            <div class="dash-small-card-top">
+              <span class="dash-small-label">Verification Status</span>
+            </div>
+            <span class="dash-small-number dash-verified-text">Verified</span>
+            <div class="dash-shield-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+              </svg>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- Large chart card -->
+        <div class="dash-chart-card">
+          <span class="dash-chart-title">Views Over Time</span>
+          <canvas id="portal-chart" class="dash-chart-canvas"></canvas>
+        </div>
+
+        <!-- Daily views table -->
+        <div class="dash-table-card">
+          <span class="dash-chart-title">Daily Breakdown</span>
+          <div id="portal-table" class="portal-table"></div>
+        </div>
+
+      </div>
+
+      <!-- RIGHT: Profile showcase -->
+      <div class="dash-right">
+        <div class="portal-media">
+          <img src="https://res.cloudinary.com/dhoymhers/image/upload/v1782309391/hiry_gym_owner_g9obzg.jpg" alt="Hiruy Gym owner" />
+          <div class="portal-stat-card">
+            <div class="portal-stat-card-header">
+              <span class="comment-card-name">Dawit</span>
+              <span class="comment-card-badge">
+                <svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor" aria-hidden="true">
+                  <path d="M9 16.2l-3.5-3.5L4 14.2l5 5 11-11-1.5-1.5z"/>
+                </svg>
+                Verified
+              </span>
+            </div>
+            <p class="comment-card-role">Owner, Hiruy Gym &amp; Spa</p>
+            <div class="portal-donut" id="portal-donut">
+              <svg viewBox="0 0 36 36">
+                <circle class="portal-donut-bg" cx="18" cy="18" r="15.5" />
+                <circle class="portal-donut-fill" id="portal-donut-fill" cx="18" cy="18" r="15.5" />
+              </svg>
+              <span class="portal-donut-value" id="portal-donut-value">0%</span>
+            </div>
           </div>
         </div>
       </div>
+
     </div>
+  </div>
+
+</div>
   </div>
 
   <!-- ============================== -->
