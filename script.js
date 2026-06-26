@@ -311,8 +311,15 @@ function drawChart(days, counts) {
   const ctx = canvas.getContext("2d");
 
   const dpr = window.devicePixelRatio || 1;
-  const W = canvas.parentElement.clientWidth - 36 || 300;
-  const H = 220;
+
+  // Measure the real available space inside the card, accounting for its padding
+  const cardStyles = getComputedStyle(canvas.parentElement);
+  const paddingLeft = parseFloat(cardStyles.paddingLeft) || 0;
+  const paddingRight = parseFloat(cardStyles.paddingRight) || 0;
+  const W = canvas.parentElement.clientWidth - paddingLeft - paddingRight || 300;
+
+  // Ask the actual screen what height the canvas is allowed to be right now
+  const H = window.innerWidth <= 900 ? 200 : 220;
 
   canvas.width  = W * dpr;
   canvas.height = H * dpr;
