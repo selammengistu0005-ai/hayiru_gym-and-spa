@@ -181,12 +181,13 @@ function initAdminToggle() {
   if (!adminBtn || !overlay) return;
 
   function openAdmin() {
-    overlay.classList.add("is-active");
-    overlay.setAttribute("aria-hidden", "false");
-    document.body.classList.add("admin-active");
-    document.body.style.overflow = "hidden";
-    setTimeout(() => passwordInput?.focus(), 300);
-  }
+  window._closeMobileMenu?.();
+  overlay.classList.add("is-active");
+  overlay.setAttribute("aria-hidden", "false");
+  document.body.classList.add("admin-active");
+  document.body.style.overflow = "hidden";
+  setTimeout(() => passwordInput?.focus(), 300);
+}
 
   function closeAdmin() {
     overlay.classList.remove("is-active");
