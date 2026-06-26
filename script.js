@@ -310,12 +310,15 @@ function drawChart(days, counts) {
   if (!canvas) return;
   const ctx = canvas.getContext("2d");
 
-  canvas.width  = canvas.offsetWidth  * window.devicePixelRatio;
-  canvas.height = canvas.offsetHeight * window.devicePixelRatio;
-  ctx.scale(window.devicePixelRatio, window.devicePixelRatio);
+  const dpr = window.devicePixelRatio || 1;
+  const W = canvas.parentElement.clientWidth - 36 || 300;
+  const H = 220;
 
-  const W = canvas.offsetWidth;
-  const H = canvas.offsetHeight;
+  canvas.width  = W * dpr;
+  canvas.height = H * dpr;
+  canvas.style.width  = W + "px";
+  canvas.style.height = H + "px";
+  ctx.scale(dpr, dpr);
   const pad = { top: 24, right: 24, bottom: 40, left: 44 };
   const chartW = W - pad.left - pad.right;
   const chartH = H - pad.top  - pad.bottom;
