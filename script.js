@@ -6,7 +6,7 @@
 import * as THREE from "three";
 
 import { initializeApp } from "firebase/app";
-import { getFirestore, collection, addDoc, serverTimestamp, doc, getDoc } from "firebase/firestore";
+import { getFirestore, collection, addDoc, serverTimestamp, doc, getDoc, onSnapshot, query, where, orderBy } from "firebase/firestore";
 
 const firebaseConfig = {
   apiKey: "AIzaSyD73Uyrrl8JDP5X_yxT2Zp1fV9oIpAvpXA",
@@ -178,6 +178,7 @@ function initAdminToggle() {
   const eyeToggle     = document.getElementById("admin-eye-toggle");
   const donutFill      = document.getElementById("portal-donut-fill");
   const donutValue     = document.getElementById("portal-donut-value");
+  let unsubscribeViewed = null;
   if (!adminBtn || !overlay) return;
 
   function openAdmin() {
@@ -190,29 +191,312 @@ function initAdminToggle() {
 }
 
   function closeAdmin() {
-    overlay.classList.remove("is-active");
-    overlay.setAttribute("aria-hidden", "true");
-    document.body.classList.remove("admin-active");
-    document.body.style.overflow = "";
-    if (passwordInput) passwordInput.value = "";
-    // Reset back to login view for next time
-    portalView?.classList.remove("is-active");
-    loginView?.classList.remove("is-hidden");
-  }
+  overlay.classList.remove("is-active");
+  overlay.setAttribute("aria-hidden", "true");
+  document.body.classList.remove("admin-active");
+  document.body.style.overflow = "";
+  if (passwordInput) passwordInput.value = "";
+  // Clean up Firestore listener
+  if (unsubscribeViewed) { unsubscribeViewed(); unsubscribeViewed = null; }
+  // Reset back to login view for next time
+  portalView?.classList.remove("is-active");
+  loginView?.classList.remove("is-hidden");
+  // Reset tabs back to overview
+  switchTab("overview");
+}
 
   function showPortal() {
-    loginView?.classList.add("is-hidden");
-    portalView?.classList.add("is-active");
-    // Placeholder stat — wire up real data later
-    const placeholderPercent = 68;
-    if (donutFill) {
-      const offset = 97.4 - (97.4 * placeholderPercent) / 100;
-      requestAnimationFrame(() => {
-        donutFill.style.strokeDashoffset = offset;
-      });
-    }
-    if (donutValue) donutValue.textContent = `${placeholderPercent}%`;
+  loginView?.classList.add("is-hidden");
+  portalView?.classList.add("is-active");
+  // Placeholder stat
+  const placeholderPercent = 68;
+  if (donutFill) {
+    const offset = 97.4 - (97.4 * placeholderPercent) / 100;
+    requestAnimationFrame(() => {
+      donutFill.style.strokeDashoffset = offset;
+    });
   }
+  if (donutValue) donutValue.textContent = `${placeholderPercent}%`;
+
+  // Real-time viewed count
+  initViewedCard();
+
+  // Tab switching
+  initPortalTabs();
+
+  // Analytics (chart + table)
+  initAnalytics();
+}
+
+function initPortalTabs() {
+  const tabs = document.querySelectorAll(".portal-tab");
+  tabs.forEach(tab => {
+    // Remove old listeners by replacing node
+    const clone = tab.cloneNode(true);
+    tab.parentNode.replaceChild(clone, tab);
+  });
+  document.querySelectorAll(".portal-tab").forEach(tab => {
+    tab.addEventListener("click", () => switchTab(tab.dataset.tab));
+  });
+}
+
+function switchTab(name) {
+  document.querySelectorAll(".portal-tab").forEach(t => {
+    t.classList.toggle("active", t.dataset.tab === name);
+  });
+  document.querySelectorAll(".portal-tab-panel").forEach(p => {
+    p.classList.toggle("is-hidden", p.id !== `portal-panel-${name}`);
+  });
+}
+
+function initViewedCard() {
+  const numberEl = document.getElementById("portal-viewed-number");
+  if (!numberEl) return;
+
+  // Unsubscribe any previous listener
+  if (unsubscribeViewed) { unsubscribeViewed(); unsubscribeViewed = null; }
+
+  const q = query(
+    collection(db, "agents", "hiruy_gym", "logs"),
+    where("action", "==", "booking_quiz")
+  );
+
+  unsubscribeViewed = onSnapshot(q, (snap) => {
+    numberEl.textContent = snap.size;
+  }, (err) => {
+    console.error("Viewed count error:", err);
+    numberEl.textContent = "—";
+  });
+}
+
+function initAnalytics() {
+  const q = query(
+    collection(db, "agents", "hiruy_gym", "logs"),
+    where("action", "==", "booking_quiz")
+  );
+
+  onSnapshot(q, (snap) => {
+    setTimeout(() => {
+    // Build a map of date -> count for last 14 days
+    const today = new Date();
+    const days = [];
+    for (let i = 13; i >= 0; i--) {
+      const d = new Date(today);
+      d.setDate(today.getDate() - i);
+      days.push(d.toISOString().slice(0, 10)); // "YYYY-MM-DD"
+    }
+
+    const counts = {};
+    days.forEach(d => counts[d] = 0);
+
+    snap.forEach(docSnap => {
+      const ts = docSnap.data().timestamp?.toDate?.();
+      if (!ts) return;
+      const key = ts.toISOString().slice(0, 10);
+      if (counts[key] !== undefined) counts[key]++;
+    });
+
+    drawChart(days, counts);
+      drawMiniGraph(days, counts);
+      drawTable(days, counts);
+    }, 350);
+  }, (err) => {
+    console.error("Analytics error:", err);
+  });
+}
+
+function drawChart(days, counts) {
+  const canvas = document.getElementById("portal-chart");
+  if (!canvas) return;
+  const ctx = canvas.getContext("2d");
+
+  canvas.width  = canvas.offsetWidth  * window.devicePixelRatio;
+  canvas.height = canvas.offsetHeight * window.devicePixelRatio;
+  ctx.scale(window.devicePixelRatio, window.devicePixelRatio);
+
+  const W = canvas.offsetWidth;
+  const H = canvas.offsetHeight;
+  const pad = { top: 24, right: 24, bottom: 40, left: 44 };
+  const chartW = W - pad.left - pad.right;
+  const chartH = H - pad.top  - pad.bottom;
+
+  ctx.clearRect(0, 0, W, H);
+
+  const values = days.map(d => counts[d]);
+  const maxVal = Math.max(...values, 1);
+  const xStep  = chartW / (days.length - 1);
+
+  // Y axis: nice round ticks
+  const yTickCount = 4;
+  const yTickStep  = Math.ceil(maxVal / yTickCount) || 1;
+  const yMax       = yTickStep * yTickCount;
+
+  // Point coordinates (use yMax so scale matches ticks)
+  const pts = values.map((v, i) => ({
+    x: pad.left + i * xStep,
+    y: pad.top + chartH - (v / yMax) * chartH,
+    v,
+  }));
+
+  // Smooth bezier path builder
+  function buildCurve() {
+    ctx.beginPath();
+    ctx.moveTo(pts[0].x, pts[0].y);
+    for (let i = 1; i < pts.length; i++) {
+      const cpx = (pts[i - 1].x + pts[i].x) / 2;
+      ctx.bezierCurveTo(cpx, pts[i - 1].y, cpx, pts[i].y, pts[i].x, pts[i].y);
+    }
+  }
+
+  // Y axis ticks + horizontal grid lines
+  ctx.font = "10px Manrope, sans-serif";
+  ctx.textAlign = "right";
+  for (let i = 0; i <= yTickCount; i++) {
+    const val = yTickStep * i;
+    const y   = pad.top + chartH - (val / yMax) * chartH;
+
+    // Grid line
+    ctx.strokeStyle = "rgba(255,255,255,0.05)";
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.moveTo(pad.left, y);
+    ctx.lineTo(pad.left + chartW, y);
+    ctx.stroke();
+
+    // Y label
+    ctx.fillStyle = "rgba(255,255,255,0.28)";
+    ctx.fillText(val, pad.left - 8, y + 3.5);
+  }
+
+  // X axis tick labels (day numbers 1–14)
+  ctx.textAlign = "center";
+  ctx.fillStyle = "rgba(255,255,255,0.28)";
+  days.forEach((_, i) => {
+    if (i % 2 !== 0) return;
+    const x = pad.left + i * xStep;
+    ctx.fillText(i + 1, x, H - 8);
+  });
+
+  // Axis lines
+  ctx.strokeStyle = "rgba(255,255,255,0.08)";
+  ctx.lineWidth = 1;
+  ctx.beginPath();
+  ctx.moveTo(pad.left, pad.top);
+  ctx.lineTo(pad.left, pad.top + chartH);
+  ctx.lineTo(pad.left + chartW, pad.top + chartH);
+  ctx.stroke();
+
+  // Gradient fill under curve
+  const grad = ctx.createLinearGradient(0, pad.top, 0, pad.top + chartH);
+  grad.addColorStop(0, "rgba(91,127,224,0.35)");
+  grad.addColorStop(1, "rgba(91,127,224,0)");
+
+  buildCurve();
+  ctx.lineTo(pts[pts.length - 1].x, pad.top + chartH);
+  ctx.lineTo(pts[0].x, pad.top + chartH);
+  ctx.closePath();
+  ctx.fillStyle = grad;
+  ctx.fill();
+
+  // Smooth blue line
+  buildCurve();
+  ctx.strokeStyle = "#5b7fe0";
+  ctx.lineWidth = 2.5;
+  ctx.lineJoin = "round";
+  ctx.lineCap  = "round";
+  ctx.stroke();
+
+  // Dots — glow on non-zero points
+  pts.forEach(({ x, y, v }) => {
+    const isActive = v > 0;
+
+    ctx.shadowBlur   = isActive ? 12 : 0;
+    ctx.shadowColor  = "rgba(91,127,224,0.7)";
+
+    ctx.beginPath();
+    ctx.arc(x, y, isActive ? 4.5 : 3, 0, Math.PI * 2);
+    ctx.fillStyle = "#5b7fe0";
+    ctx.fill();
+
+    ctx.shadowBlur = 0;
+    ctx.strokeStyle = isActive ? "rgba(255,255,255,0.9)" : "rgba(255,255,255,0.3)";
+    ctx.lineWidth = 1.5;
+    ctx.stroke();
+  });
+}
+
+function drawMiniGraph(days, counts) {
+  const canvas = document.getElementById("dash-mini-graph");
+  if (!canvas) return;
+  const ctx = canvas.getContext("2d");
+
+  canvas.width  = canvas.offsetWidth  * window.devicePixelRatio;
+  canvas.height = canvas.offsetHeight * window.devicePixelRatio;
+  ctx.scale(window.devicePixelRatio, window.devicePixelRatio);
+
+  const W = canvas.offsetWidth;
+  const H = canvas.offsetHeight;
+  const pad = 4;
+
+  ctx.clearRect(0, 0, W, H);
+
+  const values = days.map(d => counts[d]);
+  const maxVal = Math.max(...values, 1);
+  const xStep  = (W - pad * 2) / (values.length - 1);
+
+  const pts = values.map((v, i) => ({
+    x: pad + i * xStep,
+    y: H - pad - (v / maxVal) * (H - pad * 2),
+  }));
+
+  // Gradient fill
+  const grad = ctx.createLinearGradient(0, 0, 0, H);
+  grad.addColorStop(0, "rgba(91,127,224,0.4)");
+  grad.addColorStop(1, "rgba(91,127,224,0)");
+
+  ctx.beginPath();
+  ctx.moveTo(pts[0].x, pts[0].y);
+  for (let i = 1; i < pts.length; i++) {
+    const cpx = (pts[i - 1].x + pts[i].x) / 2;
+    ctx.bezierCurveTo(cpx, pts[i - 1].y, cpx, pts[i].y, pts[i].x, pts[i].y);
+  }
+  ctx.lineTo(pts[pts.length - 1].x, H);
+  ctx.lineTo(pts[0].x, H);
+  ctx.closePath();
+  ctx.fillStyle = grad;
+  ctx.fill();
+
+  // Line
+  ctx.beginPath();
+  ctx.moveTo(pts[0].x, pts[0].y);
+  for (let i = 1; i < pts.length; i++) {
+    const cpx = (pts[i - 1].x + pts[i].x) / 2;
+    ctx.bezierCurveTo(cpx, pts[i - 1].y, cpx, pts[i].y, pts[i].x, pts[i].y);
+  }
+  ctx.strokeStyle = "#5b7fe0";
+  ctx.lineWidth = 1.5;
+  ctx.lineJoin = "round";
+  ctx.lineCap  = "round";
+  ctx.stroke();
+}
+
+function drawTable(days, counts) {
+  const tableEl = document.getElementById("portal-table");
+  if (!tableEl) return;
+  tableEl.innerHTML = "";
+
+  const labels = [...days].reverse(); // today first
+  labels.forEach((d, i) => {
+    const row = document.createElement("div");
+    row.className = "portal-table-row";
+    const label = i === 0 ? "Today" : i === 1 ? "Yesterday" : d.slice(5);
+    row.innerHTML = `
+      <span class="portal-table-label">${label}</span>
+      <span class="portal-table-value">${counts[d]}</span>
+    `;
+    tableEl.appendChild(row);
+  });
+}
 
   async function checkAccessKey(value) {
     try {
