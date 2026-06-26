@@ -1546,18 +1546,35 @@ body.admin-active #bg-canvas {
 }
 
 .dash-primary-icon {
-  width: 64px;
-  height: 64px;
+  width: 3.5rem;
+  height: 3.5rem;
   border-radius: 50%;
   background: linear-gradient(145deg, #1a3a7a, #0d1b3e);
   border: 1px solid rgba(61, 90, 166, 0.35);
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
-  color: rgba(255, 255, 255, 0.85);
+  box-shadow: 0 0.5rem 1.5rem rgba(0, 0, 0, 0.4);
+  color: rgba(255, 255, 255, 0.92);
   display: flex;
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
-  padding-top: 18px; /* eye icon sits ~18px lower */
+  transition: transform var(--dur-fast) var(--ease), box-shadow var(--dur-fast) var(--ease);
+}
+
+.dash-primary-icon svg {
+  width: 1.25rem;
+  height: 1.25rem;
+}
+
+@media (max-width: 480px) {
+  .dash-primary-icon {
+    width: 3rem;
+    height: 3rem;
+  }
+
+  .dash-primary-icon svg {
+    width: 1.125rem;
+    height: 1.125rem;
+  }
 }
 
 .dash-primary-info {
