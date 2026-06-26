@@ -139,7 +139,7 @@
 
         </div>
 
-        <!-- Large chart card -->
+        <!-- Large chart card (hidden on mobile, shown via overlay) -->
         <div class="dash-chart-card">
           <span class="dash-chart-title">Views Over Time</span>
           <canvas id="portal-chart" class="dash-chart-canvas"></canvas>
@@ -177,6 +177,26 @@
             </div>
           </div>
         </div>
+
+        <!-- Graph button — mobile only -->
+        <button type="button" class="graph-btn" id="graph-btn" aria-label="View graph">
+          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+          </svg>
+          Graph
+        </button>
+      </div>
+
+      <!-- Graph overlay — mobile only -->
+      <div class="graph-overlay" id="graph-overlay" aria-hidden="true">
+        <button type="button" class="graph-overlay-back" id="graph-overlay-back" aria-label="Back to dashboard">
+          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <polyline points="15 18 9 12 15 6"/>
+          </svg>
+          Back
+        </button>
+        <span class="graph-overlay-title">Views Over Time</span>
+        <canvas id="portal-chart-mobile" class="dash-chart-canvas"></canvas>
       </div>
 
     </div>
