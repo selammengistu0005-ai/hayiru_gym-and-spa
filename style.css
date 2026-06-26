@@ -1879,13 +1879,20 @@ body.admin-active #bg-canvas {
     grid-template-columns: repeat(2, 1fr);
   }
 
+  /* Framed graph card for all non-desktop screens */
   .dash-chart-card {
     width: 100%;
+    margin-top: 1.2rem;
     padding: 1.4rem 1.2rem;
+    background: rgba(255, 255, 255, 0.6);
+    border: 1px solid rgba(255, 255, 255, 0.7);
+    border-radius: 1rem;
+    box-shadow: 0 0.5rem 1.5rem rgba(11, 27, 58, 0.1);
   }
 
   .dash-chart-canvas {
-    height: 200px !important;
+    height: 12.5rem !important;
+    width: 100% !important;
   }
 }
 
@@ -1901,6 +1908,10 @@ body.admin-active #bg-canvas {
   .portal-tab {
     font-size: 0.72rem;
     padding: 0.5rem 1.4rem;
+  }
+
+  .dash-chart-canvas {
+    height: 11.25rem !important;
   }
 }
 
