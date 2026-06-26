@@ -1865,34 +1865,146 @@ body.admin-active #bg-canvas {
    PORTAL RESPONSIVE
    ========================================================================== */
 
+/* Graph button — hidden on desktop, shown on mobile */
+.graph-btn {
+  display: none;
+}
+
+/* Graph overlay — hidden by default everywhere */
+.graph-overlay {
+  display: none;
+}
+
 @media (max-width: 900px) {
   .dash-layout {
     grid-template-columns: 1fr;
     padding: 5rem 1.2rem 2rem;
   }
 
+  /* Show dash-right but stack it below */
   .dash-right {
+    display: block;
+    margin-top: 1.5rem;
+  }
+
+  /* Smaller image on tablet/mobile */
+  .dash-right .portal-media img {
+    aspect-ratio: 3 / 2;
+    border-radius: 1rem;
+    object-fit: cover;
+    width: 100%;
+  }
+
+  /* Status card repositioned for smaller screens */
+  .dash-right .portal-stat-card {
+    position: relative;
+    right: auto;
+    bottom: auto;
+    margin-top: 1rem;
+    max-width: 100%;
+    border-radius: 1rem;
+  }
+
+  /* Graph button — glassmorphic, mobile only */
+  .graph-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    margin-top: 1.2rem;
+    width: 100%;
+    padding: 0.85rem 1.5rem;
+    background: rgba(255, 255, 255, 0.25);
+    border: 1px solid rgba(255, 255, 255, 0.5);
+    border-radius: 3rem;
+    backdrop-filter: blur(1rem) saturate(160%);
+    -webkit-backdrop-filter: blur(1rem) saturate(160%);
+    box-shadow: 0 0.5rem 1.5rem rgba(11, 27, 58, 0.12);
+    color: var(--c-ink);
+    font-family: var(--f-body);
+    font-size: 0.9rem;
+    font-weight: 600;
+    letter-spacing: 0.05em;
+    cursor: pointer;
+    transition: background var(--dur-fast) var(--ease), transform var(--dur-fast) var(--ease), box-shadow var(--dur-fast) var(--ease);
+  }
+
+  .graph-btn:hover {
+    background: rgba(255, 255, 255, 0.45);
+    transform: translateY(-0.125rem);
+    box-shadow: 0 0.75rem 2rem rgba(11, 27, 58, 0.16);
+  }
+
+  /* Hide the desktop chart card on mobile */
+  .dash-chart-card {
     display: none;
+  }
+
+  /* Graph overlay — fullscreen glassmorphic */
+  .graph-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 500;
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 1.2rem;
+    padding: 2rem 1.2rem 2rem;
+    background: rgba(11, 27, 58, 0.7);
+    backdrop-filter: blur(1.25rem) saturate(160%);
+    -webkit-backdrop-filter: blur(1.25rem) saturate(160%);
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+    transition: opacity var(--dur-med) var(--ease), visibility var(--dur-med);
+  }
+
+  .graph-overlay.is-active {
+    opacity: 1;
+    visibility: visible;
+    pointer-events: auto;
+  }
+
+  /* Back button */
+  .graph-overlay-back {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    align-self: flex-start;
+    padding: 0.5rem 1.1rem;
+    background: rgba(255, 255, 255, 0.15);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    border-radius: 3rem;
+    color: #fff;
+    font-family: var(--f-body);
+    font-size: 0.85rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background var(--dur-fast) var(--ease);
+  }
+
+  .graph-overlay-back:hover {
+    background: rgba(255, 255, 255, 0.28);
+  }
+
+  /* Overlay title */
+  .graph-overlay-title {
+    font-family: var(--f-display);
+    font-size: 1.4rem;
+    font-weight: 500;
+    color: #fff;
+    text-align: center;
+  }
+
+  /* Canvas inside overlay */
+  .graph-overlay .dash-chart-canvas {
+    height: 60vh !important;
+    width: 100% !important;
+    border-radius: 1rem;
   }
 
   .dash-small-cards {
     grid-template-columns: repeat(2, 1fr);
-  }
-
-  /* Framed graph card for all non-desktop screens */
-  .dash-chart-card {
-    width: 100%;
-    margin-top: 1.2rem;
-    padding: 1.4rem 1.2rem;
-    background: rgba(255, 255, 255, 0.6);
-    border: 1px solid rgba(255, 255, 255, 0.7);
-    border-radius: 1rem;
-    box-shadow: 0 0.5rem 1.5rem rgba(11, 27, 58, 0.1);
-  }
-
-  .dash-chart-canvas {
-    height: 12.5rem !important;
-    width: 100% !important;
   }
 }
 
@@ -1910,8 +2022,8 @@ body.admin-active #bg-canvas {
     padding: 0.5rem 1.4rem;
   }
 
-  .dash-chart-canvas {
-    height: 11.25rem !important;
+  .graph-overlay .dash-chart-canvas {
+    height: 55vh !important;
   }
 }
 
