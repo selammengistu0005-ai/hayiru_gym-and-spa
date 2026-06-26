@@ -838,9 +838,11 @@ function initBackgroundScene() {
   window.addEventListener("resize", handleResize);
 
   // Animation loop
+  // Animation loop
   const clock = new THREE.Clock();
   function animate() {
     requestAnimationFrame(animate);
+    if (document.body.classList.contains("admin-active")) return;
     const t = clock.getElapsedTime();
     stars.rotation.y = t * 0.002;
     const dustPosAttr = dust.geometry.attributes.position;
