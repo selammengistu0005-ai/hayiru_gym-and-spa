@@ -5,6 +5,22 @@
 
 import * as THREE from "three";
 
+import { initializeApp } from "firebase/app";
+import { getFirestore, collection, addDoc, serverTimestamp, doc, getDoc } from "firebase/firestore";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyD73Uyrrl8JDP5X_yxT2Zp1fV9oIpAvpXA",
+  authDomain: "lumi-75592.firebaseapp.com",
+  projectId: "lumi-75592",
+  storageBucket: "lumi-75592.firebasestorage.app",
+  messagingSenderId: "419726897354",
+  appId: "1:419726897354:web:3b27219dd60b26dbb84433",
+  measurementId: "G-23937MS0LH"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+
 /* ==========================================================================
    0. SHARED STATE
    ========================================================================== */
@@ -72,12 +88,12 @@ function initMobileMenu() {
     isOpen ? closeMenu() : openMenu();
   });
 
-  // Close when a link inside the mobile menu is tapped
+  // Close when a nav link inside the mobile menu is tapped
   mobileMenu.querySelectorAll("a").forEach((link) => {
     link.addEventListener("click", closeMenu);
   });
 
-  // Close on outside tap (tapping the overlay background itself)
+  // Close on outside tap
   mobileMenu.addEventListener("click", (e) => {
     if (e.target === mobileMenu) closeMenu();
   });
@@ -86,6 +102,9 @@ function initMobileMenu() {
   window.addEventListener("keydown", (e) => {
     if (e.key === "Escape") closeMenu();
   });
+
+  // Expose closeMenu so initBookingQuiz can call it
+  window._closeMobileMenu = closeMenu;
 }
 
 /* ==========================================================================
@@ -118,7 +137,7 @@ function initActiveSection() {
 }
 
 /* ==========================================================================
-   5. CONTACT FORM (placeholder handling — no backend yet)
+   5. CONTACT FORM
    ========================================================================== */
 
 function initContactForm() {
@@ -142,21 +161,221 @@ function initContactForm() {
 }
 
 /* ==========================================================================
+   5c. ADMIN OVERLAY TOGGLE
+   FIX 1: Added #admin-close button listener (visible close button in HTML)
+   FIX 2: Backdrop click and Escape key both close cleanly
+   FIX 3: Wrong password triggers shake animation (CSS keyframe added in style.css)
+   FIX 4: overlay.setAttribute("aria-hidden") kept in sync on open/close
+   ========================================================================== */
+
+function initAdminToggle() {
+  const adminBtn      = document.getElementById("admin-btn");
+  const overlay       = document.getElementById("admin-overlay");
+  const closeBtn      = document.getElementById("admin-close");
+  const loginView     = document.getElementById("admin-login-view");
+  const portalView    = document.getElementById("admin-portal-view");
+  const passwordInput = document.getElementById("admin-password");
+  const eyeToggle     = document.getElementById("admin-eye-toggle");
+  const donutFill      = document.getElementById("portal-donut-fill");
+  const donutValue     = document.getElementById("portal-donut-value");
+  if (!adminBtn || !overlay) return;
+
+  function openAdmin() {
+    overlay.classList.add("is-active");
+    overlay.setAttribute("aria-hidden", "false");
+    document.body.classList.add("admin-active");
+    document.body.style.overflow = "hidden";
+    setTimeout(() => passwordInput?.focus(), 300);
+  }
+
+  function closeAdmin() {
+    overlay.classList.remove("is-active");
+    overlay.setAttribute("aria-hidden", "true");
+    document.body.classList.remove("admin-active");
+    document.body.style.overflow = "";
+    if (passwordInput) passwordInput.value = "";
+    // Reset back to login view for next time
+    portalView?.classList.remove("is-active");
+    loginView?.classList.remove("is-hidden");
+  }
+
+  function showPortal() {
+    loginView?.classList.add("is-hidden");
+    portalView?.classList.add("is-active");
+    // Placeholder stat — wire up real data later
+    const placeholderPercent = 68;
+    if (donutFill) {
+      const offset = 97.4 - (97.4 * placeholderPercent) / 100;
+      requestAnimationFrame(() => {
+        donutFill.style.strokeDashoffset = offset;
+      });
+    }
+    if (donutValue) donutValue.textContent = `${placeholderPercent}%`;
+  }
+
+  async function checkAccessKey(value) {
+    try {
+      const ref = doc(db, "agents", "hiruy_gym");
+      const snap = await getDoc(ref);
+      if (!snap.exists()) return false;
+      const data = snap.data();
+      return value === data.accessKey;
+    } catch (err) {
+      console.error("Access key check failed:", err);
+      return false;
+    }
+  }
+
+  // Open
+  adminBtn.addEventListener("click", openAdmin);
+
+  // FIX: Visible close button wired up
+  if (closeBtn) {
+    closeBtn.addEventListener("click", closeAdmin);
+  }
+
+  // Close on backdrop click
+  overlay.addEventListener("click", (e) => {
+    if (e.target === overlay) closeAdmin();
+  });
+
+  // Close on Escape
+  window.addEventListener("keydown", (e) => {
+    if (e.key === "Escape" && overlay.classList.contains("is-active")) closeAdmin();
+  });
+
+  // FIX: Enter key submits password with visual shake on wrong input
+  if (passwordInput) {
+    passwordInput.addEventListener("keydown", async (e) => {
+      if (e.key === "Enter") {
+        const isCorrect = await checkAccessKey(passwordInput.value);
+        if (isCorrect) {
+          showPortal();
+        } else {
+          passwordInput.classList.remove("shake"); // reset so re-trigger works
+          void passwordInput.offsetWidth;           // force reflow
+          passwordInput.classList.add("shake");
+          setTimeout(() => passwordInput.classList.remove("shake"), 500);
+        }
+      }
+    });
+  }
+
+  // Eye toggle
+  if (eyeToggle && passwordInput) {
+    eyeToggle.addEventListener("click", () => {
+      const isPassword = passwordInput.type === "password";
+      passwordInput.type = isPassword ? "text" : "password";
+      eyeToggle.setAttribute(
+        "aria-label",
+        isPassword ? "Hide password" : "Show password"
+      );
+    });
+  }
+}
+
+/* ==========================================================================
+   5d. AURORA BACKGROUND (canvas, for admin overlay)
+   ========================================================================== */
+
+function initAuroraBackground() {
+  const canvas = document.getElementById("aurora-canvas");
+  if (!canvas) return;
+
+  const ctx = canvas.getContext("2d");
+  let width, height;
+
+  function resize() {
+    width = canvas.width = canvas.offsetWidth;
+    height = canvas.height = canvas.offsetHeight;
+  }
+  window.addEventListener("resize", resize);
+  resize();
+
+  const colors = ["#5227ff", "#ff9ffc", "#b497cf"];
+  let frame = 0;
+
+  function draw() {
+    frame += 0.6;
+    ctx.clearRect(0, 0, width, height);
+    ctx.globalCompositeOperation = "lighter";
+
+    colors.forEach((color, i) => {
+      const x = width / 2 + Math.sin((frame + i * 120) * 0.01) * width * 0.35;
+      const y = height * 0.3 + Math.cos((frame + i * 90) * 0.008) * height * 0.25;
+      const radius = Math.max(width, height) * 0.5;
+
+      const gradient = ctx.createRadialGradient(x, y, 0, x, y, radius);
+      gradient.addColorStop(0, color + "55");
+      gradient.addColorStop(1, "transparent");
+
+      ctx.fillStyle = gradient;
+      ctx.fillRect(0, 0, width, height);
+    });
+
+    requestAnimationFrame(draw);
+  }
+
+  draw();
+}
+
+/* ==========================================================================
+   5b. CONTACT — blur-in text reveal (heading, lead, details)
+   ========================================================================== */
+
+function initBlurContact() {
+  const targets = document.querySelectorAll(
+    ".contact-copy h2, .contact-copy .section-lead, .contact-details p"
+  );
+  if (!targets.length) return;
+
+  targets.forEach((el) => {
+    const words = el.textContent.trim().split(/\s+/);
+    el.innerHTML = "";
+    el.style.display = "flex";
+    el.style.flexWrap = "wrap";
+
+    words.forEach((word, i) => {
+      const span = document.createElement("span");
+      span.textContent = word + (i < words.length - 1 ? "\u00A0" : "");
+      span.style.display = "inline-block";
+      span.style.filter = "blur(10px)";
+      span.style.opacity = "0";
+      span.style.transform = "translateY(20px)";
+      span.style.transition = `filter 0.5s ease, opacity 0.5s ease, transform 0.5s ease`;
+      span.style.transitionDelay = `${i * 0.05}s`;
+      el.appendChild(span);
+    });
+  });
+
+  const observer = new IntersectionObserver(
+    (entries, obs) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting) {
+          entry.target.querySelectorAll("span").forEach((span) => {
+            span.style.filter = "blur(0px)";
+            span.style.opacity = "1";
+            span.style.transform = "translateY(0)";
+          });
+          obs.unobserve(entry.target);
+        }
+      });
+    },
+    { threshold: 0.2 }
+  );
+
+  targets.forEach((el) => observer.observe(el));
+}
+
+/* ==========================================================================
    6. THREE.JS BACKGROUND SCENE
-   Layers (back to front):
-     - Far:  starfield + rare red shooting stars
-     - Mid:  faint drifting dust particles
-     - Near: 5–8 soft glowing translucent orbs, gentle bob/float
    ========================================================================== */
 
 function initBackgroundScene() {
   const canvas = document.getElementById("bg-canvas");
   if (!canvas) return;
 
-  // If reduced motion is preferred, keep the CSS gradient fallback only.
   if (prefersReducedMotion) return;
-
-  /* ---- renderer / scene / camera ---- */
 
   const renderer = new THREE.WebGLRenderer({
     canvas,
@@ -176,8 +395,6 @@ function initBackgroundScene() {
   );
   camera.position.z = 18;
 
-  /* ---- lighting (shared, soft, top-left implied source) ---- */
-
   const ambient = new THREE.AmbientLight(0xffffff, 0.6);
   scene.add(ambient);
 
@@ -185,22 +402,13 @@ function initBackgroundScene() {
   keyLight.position.set(-6, 8, 10);
   scene.add(keyLight);
 
-  /* ---- helper: soft circular sprite texture (for stars / dust / glow) ---- */
-
   function makeGlowTexture(color = "255,255,255") {
     const size = 128;
     const c = document.createElement("canvas");
     c.width = size;
     c.height = size;
     const ctx = c.getContext("2d");
-    const gradient = ctx.createRadialGradient(
-      size / 2,
-      size / 2,
-      0,
-      size / 2,
-      size / 2,
-      size / 2
-    );
+    const gradient = ctx.createRadialGradient(size/2, size/2, 0, size/2, size/2, size/2);
     gradient.addColorStop(0, `rgba(${color}, 1)`);
     gradient.addColorStop(0.4, `rgba(${color}, 0.5)`);
     gradient.addColorStop(1, `rgba(${color}, 0)`);
@@ -210,82 +418,47 @@ function initBackgroundScene() {
   }
 
   const whiteGlow = makeGlowTexture("255,255,255");
-  const blueGlow = makeGlowTexture("190,210,255");
-  const redGlow = makeGlowTexture("230,57,70");
+  const blueGlow  = makeGlowTexture("190,210,255");
+  const redGlow   = makeGlowTexture("230,57,70");
 
-  /* ---- LAYER 1: starfield (far) ---- */
-
+  // Starfield
   const STAR_COUNT = 220;
   const starGeometry = new THREE.BufferGeometry();
   const starPositions = new Float32Array(STAR_COUNT * 3);
-
   for (let i = 0; i < STAR_COUNT; i++) {
-    starPositions[i * 3] = (Math.random() - 0.5) * 70;
+    starPositions[i * 3]     = (Math.random() - 0.5) * 70;
     starPositions[i * 3 + 1] = (Math.random() - 0.5) * 50;
     starPositions[i * 3 + 2] = -20 - Math.random() * 30;
   }
-
-  starGeometry.setAttribute(
-    "position",
-    new THREE.BufferAttribute(starPositions, 3)
-  );
-
+  starGeometry.setAttribute("position", new THREE.BufferAttribute(starPositions, 3));
   const starMaterial = new THREE.PointsMaterial({
-    size: 0.5,
-    map: whiteGlow,
-    transparent: true,
-    opacity: 0.55,
-    depthWrite: false,
-    blending: THREE.AdditiveBlending,
+    size: 0.5, map: whiteGlow, transparent: true,
+    opacity: 0.55, depthWrite: false, blending: THREE.AdditiveBlending,
   });
-
   const stars = new THREE.Points(starGeometry, starMaterial);
   scene.add(stars);
 
-  /* ---- LAYER 1b: shooting stars (rare red streaks) ---- */
-
+  // Shooting stars
   const MAX_SHOOTING_STARS = 3;
   const shootingStars = [];
 
   function spawnShootingStar() {
     if (shootingStars.length >= MAX_SHOOTING_STARS) return;
-
     const geometry = new THREE.BufferGeometry();
     const length = 6 + Math.random() * 4;
     const positions = new Float32Array([0, 0, 0, -length, length * 0.35, 0]);
     geometry.setAttribute("position", new THREE.BufferAttribute(positions, 3));
-
     const material = new THREE.LineBasicMaterial({
-      color: 0xe63946,
-      transparent: true,
-      opacity: 0,
-      blending: THREE.AdditiveBlending,
+      color: 0xe63946, transparent: true, opacity: 0, blending: THREE.AdditiveBlending,
     });
-
     const line = new THREE.Line(geometry, material);
-
-    const startX = 20 + Math.random() * 10;
-    const startY = (Math.random() - 0.5) * 20 + 8;
-    const startZ = -15 - Math.random() * 15;
-    line.position.set(startX, startY, startZ);
-
+    line.position.set(20 + Math.random() * 10, (Math.random() - 0.5) * 20 + 8, -15 - Math.random() * 15);
     scene.add(line);
-
-    shootingStars.push({
-      mesh: line,
-      material,
-      velocity: 0.35 + Math.random() * 0.25,
-      life: 0,
-      maxLife: 60 + Math.random() * 20,
-    });
+    shootingStars.push({ mesh: line, material, velocity: 0.35 + Math.random() * 0.25, life: 0, maxLife: 60 + Math.random() * 20 });
   }
 
   function scheduleNextShootingStar() {
-    const delay = 9000 + Math.random() * 8000; // rare: ~9–17s
-    setTimeout(() => {
-      spawnShootingStar();
-      scheduleNextShootingStar();
-    }, delay);
+    setTimeout(() => { spawnShootingStar(); scheduleNextShootingStar(); }, 9000 + Math.random() * 8000);
   }
   scheduleNextShootingStar();
 
@@ -295,14 +468,8 @@ function initBackgroundScene() {
       s.life++;
       s.mesh.position.x -= s.velocity;
       s.mesh.position.y -= s.velocity * 0.35;
-
       const progress = s.life / s.maxLife;
-      // fade in quickly, fade out toward the end
-      s.material.opacity =
-        progress < 0.15
-          ? progress / 0.15
-          : Math.max(0, 1 - (progress - 0.15) / 0.85);
-
+      s.material.opacity = progress < 0.15 ? progress / 0.15 : Math.max(0, 1 - (progress - 0.15) / 0.85);
       if (s.life >= s.maxLife) {
         scene.remove(s.mesh);
         s.mesh.geometry.dispose();
@@ -312,120 +479,73 @@ function initBackgroundScene() {
     }
   }
 
-  /* ---- LAYER 2: dust particles (mid) ---- */
-
+  // Dust
   const DUST_COUNT = 220;
   const dustGeometry = new THREE.BufferGeometry();
   const dustPositions = new Float32Array(DUST_COUNT * 3);
-  const dustSeeds = new Float32Array(DUST_COUNT); // for per-particle sway
-
+  const dustSeeds = new Float32Array(DUST_COUNT);
   for (let i = 0; i < DUST_COUNT; i++) {
-    dustPositions[i * 3] = (Math.random() - 0.5) * 40;
+    dustPositions[i * 3]     = (Math.random() - 0.5) * 40;
     dustPositions[i * 3 + 1] = (Math.random() - 0.5) * 30;
     dustPositions[i * 3 + 2] = -2 - Math.random() * 14;
     dustSeeds[i] = Math.random() * Math.PI * 2;
   }
-
-  dustGeometry.setAttribute(
-    "position",
-    new THREE.BufferAttribute(dustPositions, 3)
-  );
-
+  dustGeometry.setAttribute("position", new THREE.BufferAttribute(dustPositions, 3));
   const dustMaterial = new THREE.PointsMaterial({
-    size: 0.18,
-    map: whiteGlow,
-    transparent: true,
-    opacity: 0.18,
-    depthWrite: false,
-    blending: THREE.AdditiveBlending,
+    size: 0.18, map: whiteGlow, transparent: true,
+    opacity: 0.18, depthWrite: false, blending: THREE.AdditiveBlending,
   });
-
   const dust = new THREE.Points(dustGeometry, dustMaterial);
   scene.add(dust);
 
-  /* ---- LAYER 3: gentle glowing orbs (near, behind content) ---- */
-
+  // Orbs
   const ORB_COUNT = 7;
   const orbs = [];
-  const orbGlowMap = [blueGlow, blueGlow, blueGlow, blueGlow, blueGlow, blueGlow, redGlow];
-
   for (let i = 0; i < ORB_COUNT; i++) {
     const radius = 0.5 + Math.random() * 0.9;
     const geometry = new THREE.SphereGeometry(radius, 32, 32);
-
-    const isRareRed = i === ORB_COUNT - 1; // exactly one orb gets a faint red rim
+    const isRareRed = i === ORB_COUNT - 1;
     const material = new THREE.MeshPhysicalMaterial({
       color: isRareRed ? 0x2a3a66 : 0x274583,
-      transparent: true,
-      opacity: 0.22,
-      roughness: 0.15,
-      transmission: 0.85,
-      thickness: 1.2,
-      clearcoat: 1,
+      transparent: true, opacity: 0.22, roughness: 0.15,
+      transmission: 0.85, thickness: 1.2, clearcoat: 1,
       emissive: isRareRed ? 0xe63946 : 0x3d5aa6,
       emissiveIntensity: isRareRed ? 0.12 : 0.08,
     });
-
     const orb = new THREE.Mesh(geometry, material);
-
-    orb.position.set(
-      (Math.random() - 0.5) * 16,
-      (Math.random() - 0.5) * 9,
-      4 + Math.random() * 4
-    );
-
+    orb.position.set((Math.random() - 0.5) * 16, (Math.random() - 0.5) * 9, 4 + Math.random() * 4);
     scene.add(orb);
-
     orbs.push({
-      mesh: orb,
-      baseY: orb.position.y,
-      baseX: orb.position.x,
-      bobSpeed: 0.25 + Math.random() * 0.25,
-      bobAmount: 0.4 + Math.random() * 0.4,
-      driftSpeed: 0.08 + Math.random() * 0.1,
-      driftAmount: 0.5 + Math.random() * 0.5,
-      rotSpeed: (Math.random() - 0.5) * 0.05,
-      seed: Math.random() * Math.PI * 2,
+      mesh: orb, baseY: orb.position.y, baseX: orb.position.x,
+      bobSpeed: 0.25 + Math.random() * 0.25, bobAmount: 0.4 + Math.random() * 0.4,
+      driftSpeed: 0.08 + Math.random() * 0.1, driftAmount: 0.5 + Math.random() * 0.5,
+      rotSpeed: (Math.random() - 0.5) * 0.05, seed: Math.random() * Math.PI * 2,
     });
   }
 
-  /* ---- scroll-driven canvas opacity (dim behind dense content) ---- */
-
-  let targetOpacity = 1;
-
+  // Scroll opacity
   function updateScrollOpacity() {
     const scrollY = window.scrollY;
     const vh = window.innerHeight;
-    // Fully visible through hero, gently dims as content sections begin
-    targetOpacity = Math.max(0.45, 1 - scrollY / (vh * 1.6));
-    canvas.style.opacity = targetOpacity.toFixed(2);
+    canvas.style.opacity = Math.max(0.45, 1 - scrollY / (vh * 1.6)).toFixed(2);
   }
-
   window.addEventListener("scroll", updateScrollOpacity, { passive: true });
   updateScrollOpacity();
 
-  /* ---- resize handling ---- */
-
+  // Resize
   function handleResize() {
-    const { innerWidth, innerHeight } = window;
-    renderer.setSize(innerWidth, innerHeight);
-    camera.aspect = innerWidth / innerHeight;
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    camera.aspect = window.innerWidth / window.innerHeight;
     camera.updateProjectionMatrix();
   }
   window.addEventListener("resize", handleResize);
 
-  /* ---- animation loop ---- */
-
+  // Animation loop
   const clock = new THREE.Clock();
-
   function animate() {
     requestAnimationFrame(animate);
     const t = clock.getElapsedTime();
-
-    // far stars: imperceptible drift
     stars.rotation.y = t * 0.002;
-
-    // dust: slow upward drift with gentle sideways sway, looping
     const dustPosAttr = dust.geometry.attributes.position;
     for (let i = 0; i < DUST_COUNT; i++) {
       const idx = i * 3;
@@ -435,29 +555,17 @@ function initBackgroundScene() {
       dustPosAttr.array[idx] += Math.sin(t * 0.3 + dustSeeds[i]) * 0.0015;
     }
     dustPosAttr.needsUpdate = true;
-
-    // shooting stars
     updateShootingStars();
-
-    // orbs: gentle bob + drift + slow rotation
     orbs.forEach((o) => {
-      o.mesh.position.y =
-        o.baseY + Math.sin(t * o.bobSpeed + o.seed) * o.bobAmount;
-      o.mesh.position.x =
-        o.baseX + Math.sin(t * o.driftSpeed + o.seed) * o.driftAmount;
+      o.mesh.position.y = o.baseY + Math.sin(t * o.bobSpeed + o.seed) * o.bobAmount;
+      o.mesh.position.x = o.baseX + Math.sin(t * o.driftSpeed + o.seed) * o.driftAmount;
       o.mesh.rotation.y += o.rotSpeed * 0.01;
       o.mesh.rotation.x += o.rotSpeed * 0.006;
     });
-
     renderer.render(scene, camera);
   }
-
   animate();
 }
-
-/* ==========================================================================
-   INIT
-   ========================================================================== */
 
 /* ==========================================================================
    7. GALLERY ACCORDION
@@ -470,48 +578,229 @@ function initGalleryAccordion() {
   const cards = Array.from(grid.querySelectorAll(".gallery-card"));
 
   const collapseAll = () => {
-    cards.forEach((card) => {
-      card.classList.remove("is-expanded", "is-shrunk");
-    });
+    cards.forEach((card) => card.classList.remove("is-expanded", "is-shrunk"));
   };
 
-  // Track whether the interaction started inside the grid
-  // so the outside-click collapse doesn't fire on the same tap
   let interactingWithGrid = false;
 
   cards.forEach((card) => {
-    // Use pointerdown so it works on both touch and mouse
-    card.addEventListener("pointerdown", () => {
-      interactingWithGrid = true;
-    });
-
+    card.addEventListener("pointerdown", () => { interactingWithGrid = true; });
     card.addEventListener("click", (e) => {
       e.stopPropagation();
       const alreadyExpanded = card.classList.contains("is-expanded");
-
       collapseAll();
-
       if (!alreadyExpanded) {
         card.classList.add("is-expanded");
-        cards.forEach((other) => {
-          if (other !== card) other.classList.add("is-shrunk");
-        });
+        cards.forEach((other) => { if (other !== card) other.classList.add("is-shrunk"); });
       }
     });
   });
 
-  // Collapse when tapping/clicking outside the grid
   document.addEventListener("pointerdown", (e) => {
-    if (!grid.contains(e.target)) {
-      interactingWithGrid = false;
-    }
+    if (!grid.contains(e.target)) interactingWithGrid = false;
   });
 
   document.addEventListener("click", (e) => {
-    if (!interactingWithGrid && !grid.contains(e.target)) {
-      collapseAll();
-    }
+    if (!interactingWithGrid && !grid.contains(e.target)) collapseAll();
     interactingWithGrid = false;
+  });
+}
+
+/* ==========================================================================
+   8. PHONE CLICK TRACKING
+   ========================================================================== */
+
+function initPhoneTracking() {
+  const phoneLink = document.querySelector(".contact-phone-number");
+  if (!phoneLink) return;
+
+  phoneLink.addEventListener("click", async () => {
+    try {
+      await addDoc(collection(db, "agents", "hiruy_gym", "logs"), {
+        timestamp: serverTimestamp(),
+        action: "phone_click",
+        page: "contact"
+      });
+    } catch (err) {
+      console.error("Phone click log failed:", err);
+    }
+  });
+}
+
+/* ==========================================================================
+   9. BOOKING QUIZ
+   FIX 1: Mobile menu is closed before quiz opens — no more scroll-lock conflict
+   FIX 2: openQuiz resets nextBtn display and dotsEl display on re-open
+           (previously if you reopened after submit, Next btn was still hidden)
+   FIX 3: All book triggers use consistent selector
+   ========================================================================== */
+
+function initBookingQuiz() {
+  const overlay    = document.getElementById("quiz-overlay");
+  const closeBtn   = document.getElementById("quiz-close");
+  const nextBtn    = document.getElementById("quiz-next");
+  const dotsEl     = document.getElementById("quiz-dots");
+  const questionEl = document.getElementById("quiz-question");
+  const choicesEl  = document.getElementById("quiz-choices");
+  if (!overlay) return;
+
+  const questions = [
+    {
+      q: "What's your fitness experience?",
+      choices: [
+        { icon: "🌱", label: "Complete Beginner" },
+        { icon: "🏃", label: "Some Experience"   },
+        { icon: "💪", label: "Intermediate"       },
+        { icon: "🏆", label: "Advanced Athlete"   },
+      ]
+    },
+    {
+      q: "What's your main goal?",
+      choices: [
+        { icon: "🔥", label: "Lose Weight"   },
+        { icon: "💪", label: "Build Muscle"  },
+        { icon: "🧘", label: "Reduce Stress" },
+        { icon: "⚡", label: "Boost Energy"  },
+      ]
+    },
+    {
+      q: "What type of training interests you?",
+      choices: [
+        { icon: "🏋️", label: "Weight Training"  },
+        { icon: "🤸", label: "Group Classes"     },
+        { icon: "🧖", label: "Spa & Recovery"    },
+        { icon: "🔄", label: "Mix of Everything" },
+      ]
+    },
+    {
+      q: "When do you prefer to train?",
+      choices: [
+        { icon: "🌅", label: "Early Morning" },
+        { icon: "☀️", label: "Midday"        },
+        { icon: "🌆", label: "After Work"    },
+        { icon: "🌙", label: "Late Evening"  },
+      ]
+    },
+    {
+      q: "Which plan interests you most?",
+      choices: [
+        { icon: "🏅", label: "Gym Only"     },
+        { icon: "🌿", label: "Spa Only"     },
+        { icon: "⭐", label: "Gym + Spa"    },
+        { icon: "🤔", label: "Not Sure Yet" },
+      ]
+    }
+  ];
+
+  let current = 0;
+  let answers  = [];
+  let selected = null;
+
+  const dots = Array.from(dotsEl.querySelectorAll(".quiz-dot"));
+
+  function openQuiz() {
+    // FIX: Close mobile menu first to avoid scroll-lock conflict
+    if (typeof window._closeMobileMenu === "function") {
+      window._closeMobileMenu();
+    }
+
+    current  = 0;
+    answers  = [];
+    selected = null;
+
+    // FIX: Reset visibility of next/dots in case quiz was previously submitted
+    nextBtn.style.display = "";
+    dotsEl.style.display  = "";
+
+    overlay.classList.add("is-active");
+    overlay.setAttribute("aria-hidden", "false");
+    document.body.style.overflow = "hidden";
+    renderQuestion();
+  }
+
+  function closeQuiz() {
+    overlay.classList.remove("is-active");
+    overlay.setAttribute("aria-hidden", "true");
+    document.body.style.overflow = "";
+  }
+
+  function renderQuestion() {
+    const { q, choices } = questions[current];
+
+    dots.forEach((d, i) => d.classList.toggle("active", i === current));
+    questionEl.textContent = q;
+    choicesEl.innerHTML = "";
+    selected = null;
+    nextBtn.disabled = true;
+
+    choices.forEach(({ icon, label }) => {
+      const btn = document.createElement("button");
+      btn.type = "button";
+      btn.className = "quiz-choice";
+      btn.innerHTML = `<span class="quiz-choice-icon">${icon}</span><span>${label}</span>`;
+      btn.addEventListener("click", () => {
+        choicesEl.querySelectorAll(".quiz-choice").forEach(b => b.classList.remove("is-selected"));
+        btn.classList.add("is-selected");
+        selected = label;
+        nextBtn.disabled = false;
+      });
+      choicesEl.appendChild(btn);
+    });
+
+    nextBtn.textContent = current === questions.length - 1 ? "Submit" : "Next";
+  }
+
+  async function handleNext() {
+    if (!selected) return;
+    answers.push({ question: questions[current].q, answer: selected });
+
+    if (current < questions.length - 1) {
+      current++;
+      renderQuestion();
+    } else {
+      // Save to Firebase
+      try {
+        await addDoc(collection(db, "agents", "hiruy_gym", "logs"), {
+          timestamp: serverTimestamp(),
+          action: "booking_quiz",
+          answers
+        });
+      } catch (err) {
+        console.error("Quiz log failed:", err);
+      }
+
+      // Show thank you
+      questionEl.innerHTML = `<span style="font-size:2rem">🙏</span><br/>Thank you!<br/><span style="font-size:1rem;font-family:var(--f-body);opacity:0.7">We'll be in touch soon.</span>`;
+      choicesEl.innerHTML = "";
+      nextBtn.style.display = "none";
+      dotsEl.style.display  = "none";
+
+      setTimeout(() => {
+        closeQuiz();
+        document.getElementById("contact").scrollIntoView({ behavior: "smooth" });
+      }, 2000);
+    }
+  }
+
+  // Wire up all book triggers
+  document.querySelectorAll(".book-trigger, #book-btn-nav, #book-btn-mobile").forEach(btn => {
+    btn.addEventListener("click", (e) => {
+      e.preventDefault();
+      openQuiz();
+    });
+  });
+
+  closeBtn.addEventListener("click", closeQuiz);
+  nextBtn.addEventListener("click", handleNext);
+
+  // Close on backdrop click
+  overlay.addEventListener("click", (e) => {
+    if (e.target === overlay) closeQuiz();
+  });
+
+  // Close on Escape
+  window.addEventListener("keydown", (e) => {
+    if (e.key === "Escape") closeQuiz();
   });
 }
 
@@ -527,4 +816,8 @@ document.addEventListener("DOMContentLoaded", () => {
   initContactForm();
   initBackgroundScene();
   initGalleryAccordion();
+  initBlurContact();
+  initAdminToggle();
+  initPhoneTracking();
+  initBookingQuiz();
 });
