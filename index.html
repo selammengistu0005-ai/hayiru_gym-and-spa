@@ -6,7 +6,7 @@
   <title>Hiruy Gym &amp; Spa — Train. Restore. Elevate.</title>
   <meta name="description" content="Hiruy Gym & Spa — a premium fitness and wellness sanctuary. Strength training, recovery, and spa rituals under one roof." />
 
-  <!-- Favicon (placeholder) -->
+  <!-- Favicon -->
   <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><circle cx=%2250%22 cy=%2250%22 r=%2245%22 fill=%22%230B1B3A%22/></svg>" />
 
   <!-- Fonts -->
@@ -41,6 +41,61 @@
   <canvas id="bg-canvas" aria-hidden="true"></canvas>
 
   <!-- ============================== -->
+  <!-- ADMIN OVERLAY -->
+  <!-- FIX: Added close button so user can always exit the overlay -->
+  <div class="admin-overlay" id="admin-overlay" aria-hidden="true">
+    <canvas id="aurora-canvas"></canvas>
+    <button type="button" class="admin-close" id="admin-close" aria-label="Close admin panel">&times;</button>
+
+    <!-- Login view -->
+    <div class="admin-login-view" id="admin-login-view">
+      <h1 class="admin-welcome-text">Welcome Dawit</h1>
+
+      <div class="admin-password-wrap">
+        <input
+          type="password"
+          id="admin-password"
+          class="admin-password-input"
+          placeholder="Enter your access code"
+          autocomplete="off"
+        />
+        <button type="button" class="admin-eye-toggle" id="admin-eye-toggle" aria-label="Show password">
+          <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8">
+            <path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7Z" />
+            <circle cx="12" cy="12" r="3" />
+          </svg>
+        </button>
+      </div>
+    </div>
+
+    <!-- Portal view (shown after correct access key) -->
+    <div class="admin-portal-view" id="admin-portal-view" aria-hidden="true">
+      <div class="portal-media">
+        <img src="https://res.cloudinary.com/dhoymhers/image/upload/v1782309391/hiry_gym_owner_g9obzg.jpg" alt="Hiruy Gym owner" />
+
+        <div class="portal-stat-card">
+          <div class="portal-stat-card-header">
+            <span class="comment-card-name">Dawit</span>
+            <span class="comment-card-badge">
+              <svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor" aria-hidden="true">
+                <path d="M9 16.2l-3.5-3.5L4 14.2l5 5 11-11-1.5-1.5z"/>
+              </svg>
+              Verified
+            </span>
+          </div>
+          <div class="portal-donut" id="portal-donut">
+            <svg viewBox="0 0 36 36">
+              <circle class="portal-donut-bg" cx="18" cy="18" r="15.5" />
+              <circle class="portal-donut-fill" id="portal-donut-fill" cx="18" cy="18" r="15.5" />
+            </svg>
+            <span class="portal-donut-value" id="portal-donut-value">0%</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================== -->
   <!-- NAVIGATION -->
   <!-- ============================== -->
   <header class="site-header" id="site-header">
@@ -51,16 +106,17 @@
       </a>
 
       <ul class="nav-links" id="nav-links">
-        <li><a href="#home" class="nav-link active" data-section="home">Home</a></li>
-        <li><a href="#about" class="nav-link" data-section="about">About</a></li>
-        <li><a href="#gym" class="nav-link" data-section="gym">Gym</a></li>
-        <li><a href="#spa" class="nav-link" data-section="spa">Spa</a></li>
+        <li><a href="#home"       class="nav-link active" data-section="home">Home</a></li>
+        <li><a href="#about"      class="nav-link" data-section="about">About</a></li>
+        <li><a href="#gym"        class="nav-link" data-section="gym">Gym</a></li>
+        <li><a href="#spa"        class="nav-link" data-section="spa">Spa</a></li>
         <li><a href="#membership" class="nav-link" data-section="membership">Membership</a></li>
-        <li><a href="#gallery" class="nav-link" data-section="gallery">Gallery</a></li>
-        <li><a href="#contact" class="nav-link" data-section="contact">Contact</a></li>
+        <li><a href="#gallery"    class="nav-link" data-section="gallery">Gallery</a></li>
+        <li><a href="#contact"    class="nav-link" data-section="contact">Contact</a></li>
+        <li><button type="button" class="nav-link nav-admin-btn" id="admin-btn">Admin</button></li>
       </ul>
 
-      <a href="#contact" class="nav-cta">Book a Visit</a>
+      <button type="button" class="nav-cta" id="book-btn-nav">Book a Visit</button>
 
       <button class="hamburger" id="hamburger" aria-label="Open menu" aria-expanded="false" aria-controls="mobile-menu">
         <span></span>
@@ -72,15 +128,16 @@
     <!-- Mobile full-screen menu -->
     <div class="mobile-menu" id="mobile-menu">
       <ul class="mobile-links">
-        <li><a href="#home" class="nav-link" data-section="home">Home</a></li>
-        <li><a href="#about" class="nav-link" data-section="about">About</a></li>
-        <li><a href="#gym" class="nav-link" data-section="gym">Gym</a></li>
-        <li><a href="#spa" class="nav-link" data-section="spa">Spa</a></li>
+        <li><a href="#home"       class="nav-link" data-section="home">Home</a></li>
+        <li><a href="#about"      class="nav-link" data-section="about">About</a></li>
+        <li><a href="#gym"        class="nav-link" data-section="gym">Gym</a></li>
+        <li><a href="#spa"        class="nav-link" data-section="spa">Spa</a></li>
         <li><a href="#membership" class="nav-link" data-section="membership">Membership</a></li>
-        <li><a href="#gallery" class="nav-link" data-section="gallery">Gallery</a></li>
-        <li><a href="#contact" class="nav-link" data-section="contact">Contact</a></li>
+        <li><a href="#gallery"    class="nav-link" data-section="gallery">Gallery</a></li>
+        <li><a href="#contact"    class="nav-link" data-section="contact">Contact</a></li>
       </ul>
-      <a href="#contact" class="mobile-cta">Book a Visit</a>
+      <!-- FIX: book-btn-mobile now correctly closes mobile menu before opening quiz (handled in script.js) -->
+      <button type="button" class="mobile-cta" id="book-btn-mobile">Book a Visit</button>
     </div>
   </header>
 
@@ -124,6 +181,7 @@
           <a href="#about" class="btn btn-ghost">Discover Hiruy</a>
         </div>
       </div>
+
       <div class="scroll-cue" aria-hidden="true">
         <span></span>
         <p>Scroll</p>
@@ -184,6 +242,38 @@
     </section>
 
     <!-- ============================== -->
+    <!-- GYM -->
+    <!-- FIX: Section was completely missing — nav link #gym and footer link #gym had no target -->
+    <!-- ============================== -->
+    <section class="gym" id="gym">
+      <div class="section-inner gym-grid">
+        <div class="gym-copy">
+          <p class="eyebrow">The Gym</p>
+          <h2>Built for serious training.</h2>
+          <p class="section-lead">
+            Our gym floor is equipped for every stage of your training journey —
+            whether you're here to build strength, sharpen performance, or just
+            move better.
+          </p>
+          <ul class="spa-list">
+            <li>Free weights &amp; power racks</li>
+            <li>Functional training zone</li>
+            <li>Cardio &amp; conditioning floor</li>
+            <li>Personal &amp; group coaching</li>
+          </ul>
+          <button type="button" class="btn btn-primary book-trigger">Start Training</button>
+        </div>
+        <div class="gym-media">
+          <img
+            src="https://res.cloudinary.com/dhoymhers/image/upload/v1782307349/hayru_gym_equioments_maiako.jpg"
+            alt="Gym equipment at Hiruy Gym"
+            loading="lazy"
+          />
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================== -->
     <!-- SPA -->
     <!-- ============================== -->
     <section class="spa" id="spa">
@@ -202,7 +292,7 @@
             <li>Skin &amp; body treatments</li>
             <li>Guided breathwork sessions</li>
           </ul>
-          <a href="#contact" class="btn btn-primary">Book a Treatment</a>
+          <button type="button" class="btn btn-primary book-trigger">Book a Treatment</button>
         </div>
         <div class="spa-media">
           <img src="https://res.cloudinary.com/dhoymhers/image/upload/v1782307347/hayru_gym_spa_twizim.jpg" alt="Spa treatment room at Hiruy Gym & Spa" loading="lazy" />
@@ -227,7 +317,7 @@
               <li>Group class access</li>
               <li>Locker &amp; shower</li>
             </ul>
-            <a href="#contact" class="btn btn-ghost">Get Started</a>
+            <button type="button" class="btn btn-ghost book-trigger">Get Started</button>
           </article>
 
           <article class="pricing-card featured">
@@ -240,7 +330,7 @@
               <li>Priority class booking</li>
               <li>Locker &amp; shower</li>
             </ul>
-            <a href="#contact" class="btn btn-primary">Get Started</a>
+            <button type="button" class="btn btn-primary book-trigger">Get Started</button>
           </article>
         </div>
       </div>
@@ -250,52 +340,53 @@
     <!-- GALLERY -->
     <!-- ============================== -->
     <section class="gallery" id="gallery">
-  <div class="section-inner">
-    <p class="eyebrow">Gallery</p>
-    <h2>Inside Hiruy.</h2>
+      <div class="section-inner">
+        <p class="eyebrow">Gallery</p>
+        <h2>Inside Hiruy.</h2>
 
-    <div class="gallery-grid" id="gallery-grid">
-      <article class="gallery-card" data-card="equipment">
-        <img src="https://res.cloudinary.com/dhoymhers/image/upload/v1782307349/hayru_gym_equioments_maiako.jpg" alt="Equipment at Hiruy Gym" loading="lazy" />
-        <div class="gallery-card-overlay">
-          <h3>Equipment</h3>
-          <p class="gallery-desc-en"><strong>Precision-built power.</strong> Free weights, racks, and platforms designed for serious lifting, at every training age.</p>
-          <p class="gallery-desc-am"><strong>ጥራት ያለው የአካል ብቃት መሣሪያ።</strong> ለማንኛውም የስልጠና ደረጃ የተዘጋጁ ማሽኖችና እቃዎች።</p>
-        </div>
-      </article>
+        <div class="gallery-grid" id="gallery-grid">
+          <article class="gallery-card" data-card="equipment">
+            <img src="https://res.cloudinary.com/dhoymhers/image/upload/v1782307349/hayru_gym_equioments_maiako.jpg" alt="Equipment at Hiruy Gym" loading="lazy" />
+            <div class="gallery-card-overlay">
+              <h3>Equipment</h3>
+              <p class="gallery-desc-en"><strong>Precision-built power.</strong> Free weights, racks, and platforms designed for serious lifting, at every training age.</p>
+              <p class="gallery-desc-am"><strong>ጥራት ያለው የአካል ብቃት መሣሪያ።</strong> ለማንኛውም የስልጠና ደረጃ የተዘጋጁ ማሽኖችና እቃዎች።</p>
+            </div>
+          </article>
 
-      <article class="gallery-card" data-card="aerobics">
-        <img src="https://res.cloudinary.com/dhoymhers/image/upload/v1782307348/hayru_gym_aerobics_kqqu8z.jpg" alt="Aerobics class at Hiruy Gym" loading="lazy" />
-        <div class="gallery-card-overlay">
-          <h3>Aerobics Class</h3>
-          <p class="gallery-desc-en"><strong>Move together, grow together.</strong> Conditioning, mobility, and strength classes guided by coaches who pay attention.</p>
-          <p class="gallery-desc-am"><strong>በጋራ ንቅናቄ፣ በጋራ ለውጥ።</strong> በልምድ ያላቸው አሰልጣኞች የሚመሩ የአካል ብቃት ክፍሎች።</p>
-        </div>
-      </article>
+          <article class="gallery-card" data-card="aerobics">
+            <img src="https://res.cloudinary.com/dhoymhers/image/upload/v1782307348/hayru_gym_aerobics_kqqu8z.jpg" alt="Aerobics class at Hiruy Gym" loading="lazy" />
+            <div class="gallery-card-overlay">
+              <h3>Aerobics Class</h3>
+              <p class="gallery-desc-en"><strong>Move together, grow together.</strong> Conditioning, mobility, and strength classes guided by coaches who pay attention.</p>
+              <p class="gallery-desc-am"><strong>በጋራ ንቅናቄ፣ በጋራ ለውጥ።</strong> በልምድ ያላቸው አሰልጣኞች የሚመሩ የአካል ብቃት ክፍሎች።</p>
+            </div>
+          </article>
 
-      <article class="gallery-card" data-card="spa">
-        <img src="https://res.cloudinary.com/dhoymhers/image/upload/v1782307347/hayru_gym_spa_twizim.jpg" alt="Spa at Hiruy Gym" loading="lazy" />
-        <div class="gallery-card-overlay">
-          <h3>Spa</h3>
-          <p class="gallery-desc-en"><strong>Recovery is part of the work.</strong> Massage, hydrotherapy, and skin care designed to help your body absorb the effort you give it.</p>
-          <p class="gallery-desc-am"><strong>ማገገም የስራው አካል ነው።</strong> ሰውነትዎ የሰራውን ልፋት እንዲወክል የተዘጋጀ ማሳጅና ሕክምና።</p>
-        </div>
-      </article>
+          <article class="gallery-card" data-card="spa">
+            <img src="https://res.cloudinary.com/dhoymhers/image/upload/v1782307347/hayru_gym_spa_twizim.jpg" alt="Spa at Hiruy Gym" loading="lazy" />
+            <div class="gallery-card-overlay">
+              <h3>Spa</h3>
+              <p class="gallery-desc-en"><strong>Recovery is part of the work.</strong> Massage, hydrotherapy, and skin care designed to help your body absorb the effort you give it.</p>
+              <p class="gallery-desc-am"><strong>ማገገም የስራው አካል ነው።</strong> ሰውነትዎ የሰራውን ልፋት እንዲወክል የተዘጋጀ ማሳጅና ሕክምና።</p>
+            </div>
+          </article>
 
-      <article class="gallery-card" data-card="interior">
-        <img src="https://res.cloudinary.com/dhoymhers/image/upload/v1782302191/hiruy_gym_2_hacfxp.jpg" alt="Interior of Hiruy Gym" loading="lazy" />
-        <div class="gallery-card-overlay">
-          <h3>Interior</h3>
-          <p class="gallery-desc-en"><strong>Designed for stillness and focus.</strong> Every light, surface, and corner of Hiruy is chosen with intention.</p>
-          <p class="gallery-desc-am"><strong>ለትኩረትና ለሰላም የተነደፈ ቦታ።</strong> እያንዳንዱ ጥግ በዓላማ የተመረጠ ነው።</p>
+          <article class="gallery-card" data-card="interior">
+            <img src="https://res.cloudinary.com/dhoymhers/image/upload/v1782302191/hiruy_gym_2_hacfxp.jpg" alt="Interior of Hiruy Gym" loading="lazy" />
+            <div class="gallery-card-overlay">
+              <h3>Interior</h3>
+              <p class="gallery-desc-en"><strong>Designed for stillness and focus.</strong> Every light, surface, and corner of Hiruy is chosen with intention.</p>
+              <p class="gallery-desc-am"><strong>ለትኩረትና ለሰላም የተነደፈ ቦታ።</strong> እያንዳንዱ ጥግ በዓላማ የተመረጠ ነው።</p>
+            </div>
+          </article>
         </div>
-      </article>
-    </div>
-  </div>
-</section>
+      </div>
+    </section>
 
     <!-- ============================== -->
     <!-- CONTACT -->
+    <!-- FIX: Added a real contact form so initContactForm() in script.js actually works -->
     <!-- ============================== -->
     <section class="contact" id="contact">
       <div class="section-inner contact-grid">
@@ -312,27 +403,47 @@
             <p><strong>Hours</strong><br />Mon – Sat, 6:00 — 22:00</p>
             <p><strong>Phone</strong><br />+251 900 000 000</p>
           </div>
+
+          <!-- Contact form — wired to initContactForm() in script.js -->
+          <form id="contact-form" class="contact-form" novalidate>
+            <div class="contact-form-row">
+              <input
+                type="text"
+                name="name"
+                placeholder="Your name"
+                class="contact-input"
+                required
+                autocomplete="name"
+              />
+              <input
+                type="email"
+                name="email"
+                placeholder="Email address"
+                class="contact-input"
+                required
+                autocomplete="email"
+              />
+            </div>
+            <textarea
+              name="message"
+              placeholder="Your message"
+              class="contact-input contact-textarea"
+              rows="4"
+              required
+            ></textarea>
+            <button type="submit" class="btn btn-primary">Send Message</button>
+          </form>
         </div>
 
-        <form class="contact-form" id="contact-form">
-          <label for="name">Name</label>
-          <input type="text" id="name" name="name" placeholder="Your full name" required />
-
-          <label for="email">Email</label>
-          <input type="email" id="email" name="email" placeholder="you@example.com" required />
-
-          <label for="interest">I'm interested in</label>
-          <select id="interest" name="interest">
-            <option value="gym">Gym Membership</option>
-            <option value="spa">Spa Treatments</option>
-            <option value="both">Gym + Spa</option>
-          </select>
-
-          <label for="message">Message</label>
-          <textarea id="message" name="message" rows="4" placeholder="Tell us a bit about your goals"></textarea>
-
-          <button type="submit" class="btn btn-primary">Send Message</button>
-        </form>
+        <div class="contact-phone-card">
+          <p class="eyebrow">Call Us</p>
+          <div class="contact-phone-icon">
+            <svg viewBox="0 0 24 24" width="32" height="32" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12a19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 3.61 1h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 8.59a16 16 0 0 0 6 6l.96-.96a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/>
+            </svg>
+          </div>
+          <a href="tel:+251900000000" class="contact-phone-number">+251 900 000 000</a>
+        </div>
       </div>
     </section>
 
@@ -340,6 +451,7 @@
 
   <!-- ============================== -->
   <!-- FOOTER -->
+  <!-- FIX: #gym and #spa links now have matching sections above -->
   <!-- ============================== -->
   <footer class="site-footer">
     <div class="section-inner footer-grid">
@@ -367,13 +479,42 @@
     <p class="footer-bottom">&copy; 2026 Hiruy Gym &amp; Spa. All rights reserved.</p>
   </footer>
 
+  <!-- ============================== -->
+  <!-- BOOKING QUIZ OVERLAY -->
+  <!-- ============================== -->
+  <div class="quiz-overlay" id="quiz-overlay" aria-hidden="true">
+    <div class="quiz-card" id="quiz-card">
+
+      <!-- Progress dots -->
+      <div class="quiz-dots" id="quiz-dots">
+        <span class="quiz-dot active"></span>
+        <span class="quiz-dot"></span>
+        <span class="quiz-dot"></span>
+        <span class="quiz-dot"></span>
+        <span class="quiz-dot"></span>
+      </div>
+
+      <!-- Close button -->
+      <button class="quiz-close" id="quiz-close" aria-label="Close">&times;</button>
+
+      <!-- Question container -->
+      <div class="quiz-question" id="quiz-question"></div>
+      <div class="quiz-choices" id="quiz-choices"></div>
+
+      <!-- Next / Submit -->
+      <button type="button" class="btn btn-primary quiz-next" id="quiz-next" disabled>Next</button>
+    </div>
+  </div>
+
   <!-- Scripts -->
   <script type="importmap">
-    {
-      "imports": {
-        "three": "https://unpkg.com/three@0.160.0/build/three.module.js"
-      }
+  {
+    "imports": {
+      "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
+      "firebase/app": "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js",
+      "firebase/firestore": "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js"
     }
+  }
   </script>
   <script type="module" src="script.js"></script>
 </body>
