@@ -181,8 +181,10 @@ function initAdminToggle() {
   let unsubscribeViewed = null;
   if (!adminBtn || !overlay) return;
 
-  function openAdmin() {
+function openAdmin() {
   window._closeMobileMenu?.();
+  window._closeQuiz?.();
+  window._closeTool?.();
   overlay.classList.add("is-active");
   overlay.setAttribute("aria-hidden", "false");
   document.body.classList.add("admin-active");
@@ -204,6 +206,8 @@ function initAdminToggle() {
   // Reset tabs back to overview
   switchTab("overview");
 }
+
+  window._closeAdmin = closeAdmin;
 
   function showPortal() {
   loginView?.classList.add("is-hidden");
@@ -1136,6 +1140,8 @@ function initBookingQuiz() {
     if (typeof window._closeMobileMenu === "function") {
       window._closeMobileMenu();
     }
+    window._closeAdmin?.();
+    window._closeTool?.();
 
     current  = 0;
     answers  = [];
@@ -1156,6 +1162,8 @@ function initBookingQuiz() {
     overlay.setAttribute("aria-hidden", "true");
     document.body.style.overflow = "";
   }
+
+  window._closeQuiz = closeQuiz;
 
   function renderQuestion() {
     const { q, choices } = questions[current];
@@ -1238,6 +1246,68 @@ function initBookingQuiz() {
 }
 
 /* ==========================================================================
+   10. QUICK ACCESS PILL NAV — BMI / Nutrition / Motivation / How-To modals
+   ========================================================================== */
+
+function initQuickNav() {
+  const nav        = document.getElementById("quick-nav");
+  const overlay    = document.getElementById("tool-modal-overlay");
+  const modal      = document.getElementById("tool-modal");
+  const closeBtn   = document.getElementById("tool-modal-close");
+  const titleEl    = document.getElementById("tool-modal-title");
+  const bodyEl     = document.getElementById("tool-modal-body");
+  if (!nav || !overlay) return;
+
+  const tools = {
+    bmi:        { title: "BMI Calculator", body: "This tool is coming soon." },
+    nutrition:  { title: "Nutrition Tips", body: "This tool is coming soon." },
+    motivation: { title: "Motivation",     body: "This tool is coming soon." },
+    howto:      { title: "How To",         body: "This tool is coming soon." },
+  };
+
+  function openTool(key) {
+    const tool = tools[key];
+    if (!tool) return;
+
+    window._closeMobileMenu?.();
+    window._closeAdmin?.();
+    window._closeQuiz?.();
+
+    titleEl.textContent = tool.title;
+    bodyEl.textContent  = tool.body;
+
+    overlay.classList.add("is-active");
+    overlay.setAttribute("aria-hidden", "false");
+    document.body.style.overflow = "hidden";
+  }
+
+  function closeTool() {
+    overlay.classList.remove("is-active");
+    overlay.setAttribute("aria-hidden", "true");
+    document.body.style.overflow = "";
+  }
+
+  window._closeTool = closeTool;
+
+  // Wire up the 4 canvas buttons (TikTok link needs no JS — it's a plain <a>)
+  nav.querySelectorAll(".quick-nav-item[data-tool]").forEach((btn) => {
+    btn.addEventListener("click", () => openTool(btn.dataset.tool));
+  });
+
+  closeBtn?.addEventListener("click", closeTool);
+
+  // Close on backdrop click
+  overlay.addEventListener("click", (e) => {
+    if (e.target === overlay) closeTool();
+  });
+
+  // Close on Escape
+  window.addEventListener("keydown", (e) => {
+    if (e.key === "Escape") closeTool();
+  });
+}
+
+/* ==========================================================================
    INIT
    ========================================================================== */
 
@@ -1253,4 +1323,5 @@ document.addEventListener("DOMContentLoaded", () => {
   initAdminToggle();
   initPhoneTracking();
   initBookingQuiz();
+  initQuickNav();
 });
