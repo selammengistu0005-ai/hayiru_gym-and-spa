@@ -1043,6 +1043,56 @@ function initGalleryAccordion() {
   });
 }
 
+function initGalleryFullPage() {
+  const viewAllCard = document.getElementById("gallery-view-all-card");
+  const galleryPage = document.getElementById("gallery-page");
+  const closeBtn = document.getElementById("gallery-page-close");
+  const lightbox = document.getElementById("gallery-lightbox");
+  const lightboxImg = document.getElementById("gallery-lightbox-img");
+  const pageCards = document.querySelectorAll(".gallery-page-card");
+  if (!viewAllCard || !galleryPage) return;
+
+  const openGalleryPage = () => {
+    document.body.classList.add("gallery-page-active");
+    galleryPage.setAttribute("aria-hidden", "false");
+    window.scrollTo(0, 0);
+  };
+
+  const closeGalleryPage = () => {
+    document.body.classList.remove("gallery-page-active");
+    galleryPage.setAttribute("aria-hidden", "true");
+  };
+
+  viewAllCard.addEventListener("click", openGalleryPage);
+  if (closeBtn) closeBtn.addEventListener("click", closeGalleryPage);
+
+  const pageTriggers = document.querySelectorAll(".gallery-page-trigger");
+  pageTriggers.forEach((trigger) => {
+    trigger.addEventListener("click", (e) => {
+      e.preventDefault();
+      openGalleryPage();
+    });
+  });
+
+  pageCards.forEach((card) => {
+    card.addEventListener("click", () => {
+      const img = card.querySelector("img");
+      if (!img || !lightbox || !lightboxImg) return;
+      lightboxImg.src = img.src;
+      lightboxImg.alt = img.alt;
+      lightbox.classList.add("is-active");
+      lightbox.setAttribute("aria-hidden", "false");
+    });
+  });
+
+  if (lightbox) {
+    lightbox.addEventListener("click", () => {
+      lightbox.classList.remove("is-active");
+      lightbox.setAttribute("aria-hidden", "true");
+    });
+  }
+}
+
 /* ==========================================================================
    8. PHONE CLICK TRACKING
    ========================================================================== */
@@ -1317,6 +1367,11 @@ function initQuickNav() {
    INIT
    ========================================================================== */
 
+   if ("scrollRestoration" in history) {
+  history.scrollRestoration = "manual";
+}
+window.scrollTo(0, 0);
+
 document.addEventListener("DOMContentLoaded", () => {
   initLoader();
   initHeaderScroll();
@@ -1325,6 +1380,7 @@ document.addEventListener("DOMContentLoaded", () => {
   initContactForm();
   initBackgroundScene();
   initGalleryAccordion();
+  initGalleryFullPage();
   initBlurContact();
   initAdminToggle();
   initPhoneTracking();
