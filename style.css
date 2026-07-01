@@ -411,19 +411,19 @@ section {
   transform: translateY(-7px) rotate(-45deg);
 }
 
-/* Mobile full-screen menu */
+
 .mobile-menu {
   position: fixed;
   inset: 0;
   z-index: 105;
-  background: rgba(246, 249, 253, 0.92);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
+  background: var(--c-white);
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 2.5rem;
+  gap: 1.6rem;
+  padding: 2rem 0;
+  overflow-y: auto;
   opacity: 0;
   visibility: hidden;
   transform: translateY(-12px);
@@ -440,12 +440,12 @@ section {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 1.6rem;
+  gap: 1.1rem;
 }
 
 .mobile-links .nav-link {
   font-family: var(--f-display);
-  font-size: 1.8rem;
+  font-size: 1.5rem;
   opacity: 0;
   transform: translateY(10px);
   transition: opacity var(--dur-med) var(--ease), transform var(--dur-med) var(--ease);
@@ -473,15 +473,13 @@ section {
   font-weight: 600;
 }
 
-/* Slim quick-tools row — pinned near the bottom of the fullscreen mobile menu */
+
+/* Quick-tools row — sits directly beneath the nav links, as part of the same centered block */
 .mobile-quick-row {
-  position: absolute;
-  left: 50%;
-  bottom: 2.2rem;
-  transform: translateX(-50%);
   display: flex;
   align-items: center;
   gap: 0.75rem;
+  margin-top: 0.4rem;
   padding: 0.55rem 0.7rem;
   background: var(--c-glass-strong);
   backdrop-filter: blur(20px) saturate(160%);
@@ -490,14 +488,14 @@ section {
   border-radius: 999px;
   box-shadow: 0 10px 28px rgba(11, 27, 58, 0.12);
   opacity: 0;
-  transform: translateX(-50%) translateY(10px);
+  transform: translateY(10px);
   transition: opacity var(--dur-med) var(--ease), transform var(--dur-med) var(--ease);
   transition-delay: 0.3s;
 }
 
 .mobile-menu.is-open .mobile-quick-row {
   opacity: 1;
-  transform: translateX(-50%) translateY(0);
+  transform: translateY(0);
 }
 
 .mobile-quick-item {
