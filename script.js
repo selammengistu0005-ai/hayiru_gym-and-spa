@@ -1294,6 +1294,12 @@ function initQuickNav() {
     btn.addEventListener("click", () => openTool(btn.dataset.tool));
   });
 
+  // Wire up the matching row inside the fullscreen mobile menu
+  const mobileRow = document.getElementById("mobile-quick-row");
+  mobileRow?.querySelectorAll(".mobile-quick-item[data-tool]").forEach((btn) => {
+    btn.addEventListener("click", () => openTool(btn.dataset.tool));
+  });
+
   closeBtn?.addEventListener("click", closeTool);
 
   // Close on backdrop click
