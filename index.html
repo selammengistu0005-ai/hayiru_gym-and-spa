@@ -221,7 +221,7 @@
         <li><a href="#gym"        class="nav-link" data-section="gym">Gym</a></li>
         <li><a href="#spa"        class="nav-link" data-section="spa">Spa</a></li>
         <li><a href="#membership" class="nav-link" data-section="membership">Membership</a></li>
-        <li><a href="#gallery"    class="nav-link" data-section="gallery">Gallery</a></li>
+        <li><a href="#gallery"    class="nav-link gallery-page-trigger" data-section="gallery">Gallery</a></li>
         <li><a href="#contact"    class="nav-link" data-section="contact">Contact</a></li>
         <li><button type="button" class="nav-link nav-admin-btn" id="admin-btn">Admin</button></li>
       </ul>
@@ -242,7 +242,7 @@
         <li><a href="#gym"        class="nav-link" data-section="gym">Gym</a></li>
         <li><a href="#spa"        class="nav-link" data-section="spa">Spa</a></li>
         <li><a href="#membership" class="nav-link" data-section="membership">Membership</a></li>
-        <li><a href="#gallery"    class="nav-link" data-section="gallery">Gallery</a></li>
+        <li><a href="#gallery"    class="nav-link gallery-page-trigger" data-section="gallery">Gallery</a></li>
         <li><a href="#contact"    class="nav-link" data-section="contact">Contact</a></li>
         <li><button type="button" class="nav-link nav-admin-btn" id="admin-btn-mobile">Admin</button></li>
       </ul>
@@ -552,7 +552,7 @@
         <h2>Inside Hiruy.</h2>
 
         <div class="gallery-grid" id="gallery-grid">
-          <article class="gallery-card" data-card="equipment">
+          <article class="gallery-card gallery-popup-trigger" data-card="equipment">
             <img src="https://res.cloudinary.com/dhoymhers/image/upload/v1782307349/hayru_gym_equioments_maiako.jpg" alt="Equipment at Hiruy Gym" loading="lazy" />
             <div class="gallery-card-overlay">
               <h3>Equipment</h3>
@@ -561,7 +561,7 @@
             </div>
           </article>
 
-          <article class="gallery-card" data-card="aerobics">
+          <article class="gallery-card gallery-popup-trigger" data-card="aerobics">
             <img src="https://res.cloudinary.com/dhoymhers/image/upload/v1782307348/hayru_gym_aerobics_kqqu8z.jpg" alt="Aerobics class at Hiruy Gym" loading="lazy" />
             <div class="gallery-card-overlay">
               <h3>Aerobics Class</h3>
@@ -570,7 +570,7 @@
             </div>
           </article>
 
-          <article class="gallery-card" data-card="spa">
+          <article class="gallery-card gallery-popup-trigger" data-card="spa">
             <img src="https://res.cloudinary.com/dhoymhers/image/upload/v1782307347/hayru_gym_spa_twizim.jpg" alt="Spa at Hiruy Gym" loading="lazy" />
             <div class="gallery-card-overlay">
               <h3>Spa</h3>
@@ -579,7 +579,7 @@
             </div>
           </article>
 
-          <article class="gallery-card" data-card="interior">
+          <article class="gallery-card gallery-popup-trigger" data-card="interior">
             <img src="https://res.cloudinary.com/dhoymhers/image/upload/v1782302191/hiruy_gym_2_hacfxp.jpg" alt="Interior of Hiruy Gym" loading="lazy" />
             <div class="gallery-card-overlay">
               <h3>Interior</h3>
@@ -587,9 +587,82 @@
               <p class="gallery-desc-am"><strong>ለትኩረትና ለሰላም የተነደፈ ቦታ።</strong> እያንዳንዱ ጥግ በዓላማ የተመረጠ ነው።</p>
             </div>
           </article>
+
+          <article class="gallery-card gallery-popup-trigger" data-card="training">
+            <img src="https://res.cloudinary.com/dhoymhers/image/upload/v1782307349/hayru_gym_equioments_maiako.jpg" alt="Training area at Hiruy Gym" loading="lazy" />
+            <div class="gallery-card-overlay">
+              <h3>Built for Serious Training</h3>
+              <p class="gallery-desc-en"><strong>Every rep, every set, with purpose.</strong> Space and equipment shaped around real training, not just aesthetics.</p>
+              <p class="gallery-desc-am"><strong>እያንዳንዱ ልምምድ በዓላማ።</strong> ለእውነተኛ ስልጠና የተዘጋጀ ቦታና እቃዎች።</p>
+            </div>
+          </article>
+
+          <article class="gallery-card gallery-view-all" id="gallery-view-all-card">
+            <img src="https://res.cloudinary.com/dhoymhers/image/upload/v1782307349/hayru_gym_equioments_maiako.jpg" alt="View full Hiruy Gym gallery" loading="lazy" />
+            <div class="gallery-card-overlay gallery-view-all-overlay">
+              <button type="button" class="gallery-view-all-btn gallery-pill" id="gallery-view-all-btn">
+                <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <circle cx="12" cy="12" r="9"/>
+                  <path d="M9 8l6 4-6 4V8z"/>
+                </svg>
+                View Gallery
+              </button>
+            </div>
+          </article>
         </div>
       </div>
     </section>
+
+    <!-- ============================== -->
+<!-- GALLERY FULL PAGE (opens on Gallery nav/card click) -->
+<!-- ============================== -->
+<section class="gallery-page" id="gallery-page" aria-hidden="true">
+  <div class="gallery-page-inner">
+    <button type="button" class="gallery-page-close" id="gallery-page-close" aria-label="Back to home">
+      <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <line x1="18" y1="6" x2="6" y2="18"/>
+        <line x1="6" y1="6" x2="18" y2="18"/>
+      </svg>
+      Back
+    </button>
+
+    <div class="gallery-page-grid" id="gallery-page-grid">
+      <button type="button" class="gallery-page-card"><img src="https://res.cloudinary.com/dhoymhers/image/upload/v1782307349/hayru_gym_equioments_maiako.jpg" alt="Hiruy Gym gallery" loading="lazy" /></button>
+      <button type="button" class="gallery-page-card"><img src="https://res.cloudinary.com/dhoymhers/image/upload/v1782307348/hayru_gym_aerobics_kqqu8z.jpg" alt="Hiruy Gym gallery" loading="lazy" /></button>
+      <button type="button" class="gallery-page-card"><img src="https://res.cloudinary.com/dhoymhers/image/upload/v1782307347/hayru_gym_spa_twizim.jpg" alt="Hiruy Gym gallery" loading="lazy" /></button>
+      <button type="button" class="gallery-page-card"><img src="https://res.cloudinary.com/dhoymhers/image/upload/v1782302191/hiruy_gym_2_hacfxp.jpg" alt="Hiruy Gym gallery" loading="lazy" /></button>
+      <button type="button" class="gallery-page-card"><img src="https://res.cloudinary.com/dhoymhers/image/upload/v1782307349/hayru_gym_equioments_maiako.jpg" alt="Hiruy Gym gallery" loading="lazy" /></button>
+      <button type="button" class="gallery-page-card"><img src="https://res.cloudinary.com/dhoymhers/image/upload/v1782307348/hayru_gym_aerobics_kqqu8z.jpg" alt="Hiruy Gym gallery" loading="lazy" /></button>
+      <button type="button" class="gallery-page-card"><img src="https://res.cloudinary.com/dhoymhers/image/upload/v1782307347/hayru_gym_spa_twizim.jpg" alt="Hiruy Gym gallery" loading="lazy" /></button>
+      <button type="button" class="gallery-page-card"><img src="https://res.cloudinary.com/dhoymhers/image/upload/v1782302191/hiruy_gym_2_hacfxp.jpg" alt="Hiruy Gym gallery" loading="lazy" /></button>
+      <button type="button" class="gallery-page-card"><img src="https://res.cloudinary.com/dhoymhers/image/upload/v1782307349/hayru_gym_equioments_maiako.jpg" alt="Hiruy Gym gallery" loading="lazy" /></button>
+      <button type="button" class="gallery-page-card"><img src="https://res.cloudinary.com/dhoymhers/image/upload/v1782307348/hayru_gym_aerobics_kqqu8z.jpg" alt="Hiruy Gym gallery" loading="lazy" /></button>
+      <button type="button" class="gallery-page-card"><img src="https://res.cloudinary.com/dhoymhers/image/upload/v1782307347/hayru_gym_spa_twizim.jpg" alt="Hiruy Gym gallery" loading="lazy" /></button>
+      <button type="button" class="gallery-page-card"><img src="https://res.cloudinary.com/dhoymhers/image/upload/v1782302191/hiruy_gym_2_hacfxp.jpg" alt="Hiruy Gym gallery" loading="lazy" /></button>
+      <button type="button" class="gallery-page-card"><img src="https://res.cloudinary.com/dhoymhers/image/upload/v1782307349/hayru_gym_equioments_maiako.jpg" alt="Hiruy Gym gallery" loading="lazy" /></button>
+      <button type="button" class="gallery-page-card"><img src="https://res.cloudinary.com/dhoymhers/image/upload/v1782307348/hayru_gym_aerobics_kqqu8z.jpg" alt="Hiruy Gym gallery" loading="lazy" /></button>
+      <button type="button" class="gallery-page-card"><img src="https://res.cloudinary.com/dhoymhers/image/upload/v1782307347/hayru_gym_spa_twizim.jpg" alt="Hiruy Gym gallery" loading="lazy" /></button>
+      <button type="button" class="gallery-page-card"><img src="https://res.cloudinary.com/dhoymhers/image/upload/v1782302191/hiruy_gym_2_hacfxp.jpg" alt="Hiruy Gym gallery" loading="lazy" /></button>
+      <button type="button" class="gallery-page-card"><img src="https://res.cloudinary.com/dhoymhers/image/upload/v1782307349/hayru_gym_equioments_maiako.jpg" alt="Hiruy Gym gallery" loading="lazy" /></button>
+      <button type="button" class="gallery-page-card"><img src="https://res.cloudinary.com/dhoymhers/image/upload/v1782307348/hayru_gym_aerobics_kqqu8z.jpg" alt="Hiruy Gym gallery" loading="lazy" /></button>
+      <button type="button" class="gallery-page-card"><img src="https://res.cloudinary.com/dhoymhers/image/upload/v1782307347/hayru_gym_spa_twizim.jpg" alt="Hiruy Gym gallery" loading="lazy" /></button>
+      <button type="button" class="gallery-page-card"><img src="https://res.cloudinary.com/dhoymhers/image/upload/v1782302191/hiruy_gym_2_hacfxp.jpg" alt="Hiruy Gym gallery" loading="lazy" /></button>
+      <button type="button" class="gallery-page-card"><img src="https://res.cloudinary.com/dhoymhers/image/upload/v1782307349/hayru_gym_equioments_maiako.jpg" alt="Hiruy Gym gallery" loading="lazy" /></button>
+      <button type="button" class="gallery-page-card"><img src="https://res.cloudinary.com/dhoymhers/image/upload/v1782307348/hayru_gym_aerobics_kqqu8z.jpg" alt="Hiruy Gym gallery" loading="lazy" /></button>
+      <button type="button" class="gallery-page-card"><img src="https://res.cloudinary.com/dhoymhers/image/upload/v1782307347/hayru_gym_spa_twizim.jpg" alt="Hiruy Gym gallery" loading="lazy" /></button>
+      <button type="button" class="gallery-page-card"><img src="https://res.cloudinary.com/dhoymhers/image/upload/v1782302191/hiruy_gym_2_hacfxp.jpg" alt="Hiruy Gym gallery" loading="lazy" /></button>
+      <button type="button" class="gallery-page-card"><img src="https://res.cloudinary.com/dhoymhers/image/upload/v1782307349/hayru_gym_equioments_maiako.jpg" alt="Hiruy Gym gallery" loading="lazy" /></button>
+    </div>
+  </div>
+</section>
+
+<!-- Lightbox (shared: used by gallery cards 1-5 popup AND full gallery page cards) -->
+<div class="gallery-lightbox" id="gallery-lightbox" aria-hidden="true">
+  <div class="gallery-lightbox-frame">
+    <button type="button" class="gallery-lightbox-close" id="gallery-lightbox-close" aria-label="Close">&times;</button>
+    <img class="gallery-lightbox-img" id="gallery-lightbox-img" src="" alt="" />
+  </div>
+</div>
 
     <!-- ============================== -->
     <!-- CONTACT -->
