@@ -2226,6 +2226,172 @@ body.admin-active #bg-canvas {
 }
 
 /* ==========================================================================
+   QUICK ACCESS PILL NAV
+   ========================================================================== */
+
+.quick-nav {
+  position: fixed;
+  top: 50%;
+  right: 1.75rem;
+  transform: translateY(-50%);
+  z-index: 500;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.9rem 0.55rem;
+  background: var(--c-glass-strong);
+  backdrop-filter: blur(20px) saturate(160%);
+  -webkit-backdrop-filter: blur(20px) saturate(160%);
+  border: 1px solid var(--c-glass-border);
+  border-radius: 999px;
+  box-shadow: 0 12px 32px rgba(11, 27, 58, 0.14);
+}
+
+.quick-nav-item {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  color: var(--c-blue-mid);
+  background: transparent;
+  transition: background var(--dur-fast) var(--ease),
+              color var(--dur-fast) var(--ease),
+              transform var(--dur-fast) var(--ease);
+}
+
+.quick-nav-item:hover,
+.quick-nav-item:focus-visible {
+  background: var(--c-blue-deep);
+  color: var(--c-white);
+  transform: scale(1.08);
+}
+
+.quick-nav-item.is-active {
+  background: var(--c-blue-mid);
+  color: var(--c-white);
+}
+
+.quick-nav-tiktok {
+  color: var(--c-ink);
+}
+
+.quick-nav-tooltip {
+  position: absolute;
+  right: calc(100% + 0.7rem);
+  top: 50%;
+  transform: translateY(-50%) translateX(6px);
+  white-space: nowrap;
+  font-family: var(--f-body);
+  font-size: 0.78rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  color: var(--c-white);
+  background: var(--c-blue-deep);
+  padding: 0.4rem 0.8rem;
+  border-radius: var(--radius-sm);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity var(--dur-fast) var(--ease), transform var(--dur-fast) var(--ease);
+}
+
+.quick-nav-item:hover .quick-nav-tooltip,
+.quick-nav-item:focus-visible .quick-nav-tooltip {
+  opacity: 1;
+  transform: translateY(-50%) translateX(0);
+}
+
+@media (max-width: 1024px) {
+  .quick-nav { display: none; }
+}
+
+/* ==========================================================================
+   QUICK TOOL MODAL
+   ========================================================================== */
+
+.tool-modal-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 9998;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--c-navy-glass);
+  backdrop-filter: blur(18px) saturate(140%);
+  -webkit-backdrop-filter: blur(18px) saturate(140%);
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transition: opacity var(--dur-med) var(--ease), visibility var(--dur-med);
+}
+
+.tool-modal-overlay.is-active {
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+}
+
+.tool-modal {
+  position: relative;
+  background: var(--c-glass-strong);
+  backdrop-filter: blur(20px) saturate(160%);
+  -webkit-backdrop-filter: blur(20px) saturate(160%);
+  border: 1px solid var(--c-glass-border);
+  border-radius: var(--radius-lg);
+  box-shadow: 0 24px 64px rgba(11, 27, 58, 0.18);
+  padding: 3rem 2.5rem 2.5rem;
+  width: min(480px, 92vw);
+  min-height: 260px;
+  display: flex;
+  flex-direction: column;
+  gap: 1.2rem;
+  transform: scale(0.92);
+  transition: transform var(--dur-med) var(--ease);
+}
+
+.tool-modal-overlay.is-active .tool-modal {
+  transform: scale(1);
+}
+
+.tool-modal-close {
+  position: absolute;
+  top: 1.2rem;
+  right: 1.4rem;
+  font-size: 1.4rem;
+  color: var(--c-blue-mid);
+  opacity: 0.6;
+  transition: opacity var(--dur-fast) var(--ease);
+  line-height: 1;
+}
+
+.tool-modal-close:hover { opacity: 1; }
+
+.tool-modal-title {
+  font-family: var(--f-display);
+  font-size: clamp(1.4rem, 3vw, 1.8rem);
+  font-weight: 500;
+  color: var(--c-ink);
+}
+
+.tool-modal-body {
+  font-family: var(--f-body);
+  font-size: 0.95rem;
+  color: var(--c-blue-deep);
+  flex: 1;
+}
+
+@media (max-width: 480px) {
+  .tool-modal { padding: 2.5rem 1.5rem 2rem; }
+}
+
+/* ==========================================================================
+   RESPONSIVE
+   ========================================================================== */
+
+/* ==========================================================================
    RESPONSIVE
    ========================================================================== */
 
