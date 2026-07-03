@@ -103,13 +103,16 @@ button {
   background: none;
 }
 
+html {
+  overflow-x: hidden;
+}
+
 body {
   font-family: var(--f-body);
   color: var(--c-ink);
   background: var(--c-blue-mist);
   line-height: 1.6;
   -webkit-font-smoothing: antialiased;
-  overflow-x: hidden;
 }
 
 ::selection {
