@@ -1372,6 +1372,90 @@ function initQuickNav() {
 }
 window.scrollTo(0, 0);
 
+
+/* ============================== */
+/* SITE-WIDE IMAGE FALLBACK SYSTEM */
+/* Wraps every <img> in the site with a fallback container that shows */
+/* a type-specific icon + message if the image fails to load. */
+/* Works for images already in the DOM and images added later */
+/* (lightbox, admin portal, gallery popups) via MutationObserver. */
+/* ============================== */
+
+function getFallbackType(img) {
+  const card = img.closest(".gallery-card[data-card]");
+  if (card) {
+    const map = {
+      equipment: "gym",
+      training: "gym",
+      aerobics: "aerobics",
+      spa: "spa",
+      interior: "interior",
+    };
+    return map[card.dataset.card] || "gallery";
+  }
+  if (img.closest(".gallery-page-card")) return "gallery";
+  if (img.closest(".about-media") || img.closest(".portal-media")) return "portrait";
+  if (img.closest(".gym-media")) return "gym";
+  if (img.closest(".spa-media")) return "spa";
+  if (img.closest(".hero-media")) return "interior";
+  if (img.closest("#gallery-lightbox")) return "gallery";
+  return "default";
+}
+
+function applyImageFallback(img) {
+  if (!img || img.dataset.fallbackApplied === "true") return;
+  if (img.closest("[data-img-fallback]")) return;
+
+  img.dataset.fallbackApplied = "true";
+
+  const wrapper = document.createElement("span");
+  wrapper.setAttribute("data-img-fallback", "");
+  wrapper.setAttribute("data-type", getFallbackType(img));
+  wrapper.style.display = "block";
+  wrapper.style.width = "100%";
+  wrapper.style.height = "100%";
+
+  img.parentNode.insertBefore(wrapper, img);
+  wrapper.appendChild(img);
+
+  const content = document.createElement("span");
+  content.className = "img-fallback-content";
+  content.innerHTML = `
+    <span class="img-fallback-icon" data-type="${wrapper.dataset.type}"></span>
+    <span class="img-fallback-text">Image couldn't be loaded</span>
+  `;
+  wrapper.appendChild(content);
+
+  const markBroken = () => wrapper.classList.add("is-broken");
+
+  img.addEventListener("error", markBroken);
+
+  // Catch images that are already broken (e.g. cached failures) before listener attached
+  if (img.complete && img.naturalWidth === 0) {
+    markBroken();
+  }
+}
+
+function initImageFallbacks() {
+  document.querySelectorAll("img").forEach(applyImageFallback);
+
+  // Watch for images added later (lightbox src swaps, admin portal, dynamic gallery cards)
+  const observer = new MutationObserver((mutations) => {
+    mutations.forEach((mutation) => {
+      mutation.addedNodes.forEach((node) => {
+        if (node.nodeType !== 1) return;
+        if (node.tagName === "IMG") {
+          applyImageFallback(node);
+        } else {
+          node.querySelectorAll?.("img").forEach(applyImageFallback);
+        }
+      });
+    });
+  });
+
+  observer.observe(document.body, { childList: true, subtree: true });
+}
+
 document.addEventListener("DOMContentLoaded", () => {
   initLoader();
   initHeaderScroll();
@@ -1386,4 +1470,5 @@ document.addEventListener("DOMContentLoaded", () => {
   initPhoneTracking();
   initBookingQuiz();
   initQuickNav();
+  initImageFallbacks();
 });
