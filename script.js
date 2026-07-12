@@ -1307,12 +1307,72 @@ function initQuickNav() {
   const closeBtn   = document.getElementById("tool-modal-close");
   const titleEl    = document.getElementById("tool-modal-title");
   const bodyEl     = document.getElementById("tool-modal-body");
+  const navEl      = document.getElementById("tool-modal-nav");
+  const prevBtn    = document.getElementById("tool-modal-prev");
+  const nextBtn    = document.getElementById("tool-modal-next");
   if (!nav || !overlay) return;
+
+  const motivationQuotes = [
+    "Pain is temporary.\nQuitting lasts forever.",
+    "Discipline will take you where motivation never can.\nChoose discipline.",
+    "Nobody is coming to save you.\nSave yourself.",
+    "Every excuse makes you weaker.\nEvery action makes you stronger.",
+    "The hard road builds the strongest people.\nTake the hard road.",
+    "Stop talking.\nStart working.",
+    "Your comfort is your biggest enemy.\nLeave it behind.",
+    "Winners train when losers sleep.\nBe the winner.",
+    "Earn your results.\nNobody owes you anything.",
+    "If it hurts, keep going.\nThat is where growth begins.",
+    "Weak habits create weak lives.\nStrong habits create strong lives.",
+    "Every day you skip, someone else gets ahead.",
+    "Respect is earned through action, not words.",
+    "Your future depends on what you do today.\nNot tomorrow.",
+    "Work until your excuses have no voice.\nKeep pushing.",
+    "Stay focused.\nStay dangerous.",
+    "The mirror never lies.\nThe work always shows.",
+    "Push harder than you did yesterday.\nNever slow down.",
+    "Success belongs to people who never stop fighting.\nKeep fighting.",
+    "Comfort feels good today, but destroys tomorrow.",
+    "Make your actions louder than your promises.\nResults matter.",
+    "Every battle you win starts in your mind.",
+    "Be so disciplined that failure gets tired of chasing you.",
+    "Your limits are only excuses wearing a mask.",
+    "Outwork everyone.\nLet the results speak.",
+    "Every drop of sweat is proof that you refused to quit.",
+    "Do the work even when nobody is watching.",
+    "Stay hungry.\nStay relentless.",
+    "The strongest people are built by the hardest days.",
+    "You either control your mind or your mind controls you.",
+  ];
+
+  let quoteBag = [];
+  const quoteHistory = [];
+  let historyPos = -1;
+
+  function refillBag() {
+    quoteBag = motivationQuotes.map((_, i) => i);
+    for (let i = quoteBag.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [quoteBag[i], quoteBag[j]] = [quoteBag[j], quoteBag[i]];
+    }
+  }
+
+  function drawNextQuote() {
+    if (quoteBag.length === 0) refillBag();
+    const i = quoteBag.pop();
+    quoteHistory.push(i);
+    historyPos = quoteHistory.length - 1;
+    return motivationQuotes[i];
+  }
+
+  function renderQuoteNav() {
+    prevBtn.disabled = historyPos <= 0;
+  }
 
   const tools = {
     bmi:        { title: "BMI Calculator", body: "This tool is coming soon." },
     nutrition:  { title: "Nutrition Tips", body: "This tool is coming soon." },
-    motivation: { title: "Motivation",     body: "This tool is coming soon." },
+    motivation: { title: "Motivation",     body: "", isQuote: true },
     howto:      { title: "How To",         body: "This tool is coming soon." },
   };
 
@@ -1325,7 +1385,17 @@ function initQuickNav() {
     window._closeQuiz?.();
 
     titleEl.textContent = tool.title;
-    bodyEl.textContent  = tool.body;
+
+    if (tool.isQuote) {
+      quoteHistory.length = 0;
+      historyPos = -1;
+      bodyEl.textContent = drawNextQuote();
+      navEl.hidden = false;
+      renderQuoteNav();
+    } else {
+      bodyEl.textContent = tool.body;
+      navEl.hidden = true;
+    }
 
     overlay.classList.add("is-active");
     overlay.setAttribute("aria-hidden", "false");
@@ -1352,6 +1422,18 @@ function initQuickNav() {
   });
 
   closeBtn?.addEventListener("click", closeTool);
+
+  nextBtn?.addEventListener("click", () => {
+    bodyEl.textContent = drawNextQuote();
+    renderQuoteNav();
+  });
+
+  prevBtn?.addEventListener("click", () => {
+    if (historyPos <= 0) return;
+    historyPos -= 1;
+    bodyEl.textContent = motivationQuotes[quoteHistory[historyPos]];
+    renderQuoteNav();
+  });
 
   // Close on backdrop click
   overlay.addEventListener("click", (e) => {
