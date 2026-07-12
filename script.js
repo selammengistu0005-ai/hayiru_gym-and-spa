@@ -1456,6 +1456,46 @@ function initImageFallbacks() {
   observer.observe(document.body, { childList: true, subtree: true });
 }
 
+function initPaymentCopy() {
+  const items = document.querySelectorAll(".payment-copy-item");
+
+  items.forEach((item) => {
+    item.addEventListener("click", async () => {
+      const value = item.dataset.copy;
+      if (!value) return;
+
+      try {
+        await navigator.clipboard.writeText(value);
+      } catch (err) {
+        // fallback for older browsers / no clipboard permission
+        const temp = document.createElement("textarea");
+        temp.value = value;
+        temp.style.position = "fixed";
+        temp.style.opacity = "0";
+        document.body.appendChild(temp);
+        temp.select();
+        document.execCommand("copy");
+        document.body.removeChild(temp);
+      }
+
+      const numberEl = item.querySelector(".payment-number");
+      const iconEl = item.querySelector(".copy-icon");
+      const originalNumber = numberEl.textContent;
+      const originalIcon = iconEl.textContent;
+
+      item.classList.add("copied");
+      numberEl.textContent = "Copied";
+      iconEl.textContent = "✓";
+
+      setTimeout(() => {
+        item.classList.remove("copied");
+        numberEl.textContent = originalNumber;
+        iconEl.textContent = originalIcon;
+      }, 3000);
+    });
+  });
+}
+
 document.addEventListener("DOMContentLoaded", () => {
   initLoader();
   initHeaderScroll();
@@ -1471,4 +1511,5 @@ document.addEventListener("DOMContentLoaded", () => {
   initBookingQuiz();
   initQuickNav();
   initImageFallbacks();
+  initPaymentCopy();
 });
