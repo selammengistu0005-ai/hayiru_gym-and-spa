@@ -2881,7 +2881,7 @@ body.admin-active #bg-canvas {
   .card-grid { grid-template-columns: repeat(2, 1fr); }
   .pricing-grid { grid-template-columns: 1fr; max-width: var(--pricing-max-w); margin: 0 auto; }
   .pricing-card.featured { transform: none; }
-  .about-grid, .spa-grid, .contact-grid { grid-template-columns: 1fr; gap: 2.5rem; }
+  .about-grid, .spa-grid, .gym-grid, .contact-grid { grid-template-columns: 1fr; gap: 2.5rem; }
   .spa-media, .about-media { order: -1; }
   .footer-grid { grid-template-columns: 1fr 1fr; }
 }
