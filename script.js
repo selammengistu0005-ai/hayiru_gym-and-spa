@@ -38,6 +38,7 @@ function initLoader() {
   if (!loader) return;
 
   window.addEventListener("load", () => {
+    window.scrollTo(0, 0);
     setTimeout(() => {
       loader.classList.add("is-hidden");
     }, 600);
