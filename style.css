@@ -2865,6 +2865,40 @@ body.admin-active #bg-canvas {
   flex: 1;
 }
 
+.tool-modal-nav {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 1.25rem;
+}
+
+.tool-modal-arrow {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: 50%;
+  border: 1px solid var(--c-blue-deep);
+  background: transparent;
+  color: var(--c-blue-deep);
+  font-size: 1.1rem;
+  cursor: pointer;
+  transition: background 0.2s ease, color 0.2s ease, opacity 0.2s ease;
+}
+
+.tool-modal-arrow:hover {
+  background: var(--c-blue-deep);
+  color: #fff;
+}
+
+.tool-modal-arrow:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+  background: transparent;
+  color: var(--c-blue-deep);
+}
+
 @media (max-width: 480px) {
   .tool-modal { padding: 2.5rem 1.5rem 2rem; }
 }
