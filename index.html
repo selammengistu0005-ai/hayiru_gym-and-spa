@@ -6,18 +6,14 @@
   <title>Hiruy Gym &amp; Spa — Train. Restore. Elevate.</title>
   <meta name="description" content="Hiruy Gym & Spa — a premium fitness and wellness sanctuary. Strength training, recovery, and spa rituals under one roof." />
 
-  <!-- Favicon -->
   <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><circle cx=%2250%22 cy=%2250%22 r=%2245%22 fill=%22%230B1B3A%22/></svg>" />
 
-  <!-- Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600&family=Manrope:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
 
-  <!-- Stylesheet -->
   <link rel="stylesheet" href="style.css" />
 
-  <!-- Preload hero image for fastest possible paint -->
   <link
     rel="preload"
     as="image"
@@ -27,27 +23,17 @@
 </head>
 <body>
 
-  <!-- ============================== -->
-  <!-- LOADER -->
-  <!-- ============================== -->
   <div id="loader" aria-hidden="true">
     <div class="loader-mark">HIRUY</div>
     <div class="loader-bar"><span></span></div>
   </div>
 
-  <!-- ============================== -->
-  <!-- 3D BACKGROUND CANVAS (persistent) -->
-  <!-- ============================== -->
   <canvas id="bg-canvas" aria-hidden="true"></canvas>
 
-  <!-- ============================== -->
-  <!-- ADMIN OVERLAY -->
-  <!-- FIX: Added close button so user can always exit the overlay -->
   <div class="admin-overlay" id="admin-overlay" aria-hidden="true">
     <canvas id="aurora-canvas"></canvas>
     <button type="button" class="admin-close" id="admin-close" aria-label="Close admin panel">&times;</button>
 
-    <!-- Login view -->
     <div class="admin-login-view" id="admin-login-view">
       <h1 class="admin-welcome-text">Welcome Dawit</h1>
 
@@ -68,22 +54,17 @@
       </div>
     </div>
 
-    
     <div class="admin-portal-view" id="admin-portal-view" aria-hidden="true">
 
-  <!-- Single Overview pill -->
   <div class="portal-tabs" id="portal-tabs">
     <button type="button" class="portal-tab active" data-tab="overview">Overview</button>
   </div>
 
-  <!-- OVERVIEW PANEL -->
   <div class="portal-tab-panel" id="portal-panel-overview">
     <div class="dash-layout">
 
-      <!-- LEFT: Analytics -->
       <div class="dash-left">
 
-        <!-- Primary metric card -->
         <div class="dash-primary-card">
           <div class="dash-primary-icon">
             <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
@@ -97,10 +78,8 @@
           </div>
         </div>
 
-        <!-- Three small metric cards -->
         <div class="dash-small-cards">
 
-          <!-- Card 1: Profile Views (live) -->
           <div class="dash-small-card">
             <div class="dash-small-card-top">
               <span class="dash-small-label">Profile Views</span>
@@ -109,7 +88,6 @@
             <canvas class="dash-mini-graph" id="dash-mini-graph" aria-hidden="true"></canvas>
           </div>
 
-          <!-- Card 2: Engagement Rate (hardcoded) -->
           <div class="dash-small-card">
             <div class="dash-small-card-top">
               <span class="dash-small-label">Engagement Rate</span>
@@ -124,7 +102,6 @@
             </div>
           </div>
 
-          <!-- Card 3: Verification Status (hardcoded) -->
           <div class="dash-small-card">
             <div class="dash-small-card-top">
               <span class="dash-small-label">Verification Status</span>
@@ -139,13 +116,11 @@
 
         </div>
 
-        <!-- Large chart card (hidden on mobile, shown via overlay) -->
         <div class="dash-chart-card">
           <span class="dash-chart-title">Views Over Time</span>
           <canvas id="portal-chart" class="dash-chart-canvas"></canvas>
         </div>
 
-        <!-- Daily views table -->
         <div class="dash-table-card">
           <span class="dash-chart-title">Daily Breakdown</span>
           <div id="portal-table" class="portal-table"></div>
@@ -153,7 +128,6 @@
 
       </div>
 
-      <!-- RIGHT: Profile showcase -->
       <div class="dash-right">
         <div class="portal-media">
           <img src="https://res.cloudinary.com/dhoymhers/image/upload/f_auto,q_auto,w_800/v1782309391/hiry_gym_owner_g9obzg.jpg" alt="Hiruy Gym owner" />
@@ -178,7 +152,6 @@
           </div>
         </div>
 
-        <!-- Graph button — mobile only -->
         <button type="button" class="graph-btn" id="graph-btn" aria-label="View graph">
           <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
             <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
@@ -187,7 +160,6 @@
         </button>
       </div>
 
-      <!-- Graph overlay — mobile only -->
       <div class="graph-overlay" id="graph-overlay" aria-hidden="true">
         <button type="button" class="graph-overlay-back" id="graph-overlay-back" aria-label="Back to dashboard">
           <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
@@ -205,9 +177,6 @@
 </div>
   </div>
 
-  <!-- ============================== -->
-  <!-- NAVIGATION -->
-  <!-- ============================== -->
   <header class="site-header" id="site-header">
     <nav class="nav" aria-label="Primary">
       <a href="#home" class="logo">
@@ -216,17 +185,30 @@
       </a>
 
       <ul class="nav-links" id="nav-links">
-        <li><a href="#home"       class="nav-link active" data-section="home">Home</a></li>
-        <li><a href="#about"      class="nav-link" data-section="about">About</a></li>
-        <li><a href="#gym"        class="nav-link" data-section="gym">Gym</a></li>
-        <li><a href="#spa"        class="nav-link" data-section="spa">Spa</a></li>
-        <li><a href="#membership" class="nav-link" data-section="membership">Membership</a></li>
-        <li><a href="#gallery"    class="nav-link gallery-page-trigger" data-section="gallery">Gallery</a></li>
-        <li><a href="#contact"    class="nav-link" data-section="contact">Contact</a></li>
-        <li><button type="button" class="nav-link nav-admin-btn" id="admin-btn">Admin</button></li>
+        <li><a href="#home"       class="nav-link active" data-section="home" data-am="መነሻ">Home</a></li>
+        <li><a href="#about"      class="nav-link" data-section="about" data-am="ስለ እኛ">About</a></li>
+        <li><a href="#gym"        class="nav-link" data-section="gym" data-am="ጂም">Gym</a></li>
+        <li><a href="#spa"        class="nav-link" data-section="spa" data-am="ስፓ">Spa</a></li>
+        <li><a href="#membership" class="nav-link" data-section="membership" data-am="አባልነት">Membership</a></li>
+        <li><a href="#gallery"    class="nav-link gallery-page-trigger" data-section="gallery" data-am="ማዕከለ-ስዕላት">Gallery</a></li>
+        <li><a href="#contact"    class="nav-link" data-section="contact" data-am="አግኙን">Contact</a></li>
+        <li><button type="button" class="nav-link nav-admin-btn" id="admin-btn" data-am="አስተዳዳሪ">Admin</button></li>
       </ul>
 
-      <button type="button" class="nav-cta" id="book-btn-nav">Book a Visit</button>
+      <button type="button" class="nav-cta" id="book-btn-nav" data-am="ጉብኝት ይያዙ">Book a Visit</button>
+
+      <div class="lang-switch" id="lang-switch">
+        <button type="button" class="lang-switch-btn" id="lang-switch-btn" aria-haspopup="listbox" aria-expanded="false">
+          <span id="lang-switch-label">English</span>
+          <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <polyline points="6 9 12 15 18 9"/>
+          </svg>
+        </button>
+        <ul class="lang-switch-menu" id="lang-switch-menu" role="listbox" aria-hidden="true">
+          <li><button type="button" class="lang-switch-option active" data-lang="en" role="option" aria-selected="true">English</button></li>
+          <li><button type="button" class="lang-switch-option" data-lang="am" role="option" aria-selected="false">አማርኛ</button></li>
+        </ul>
+      </div>
 
       <button class="hamburger" id="hamburger" aria-label="Open menu" aria-expanded="false" aria-controls="mobile-menu">
         <span></span>
@@ -237,22 +219,18 @@
   </header>
   <div class="mobile-menu" id="mobile-menu">
       <ul class="mobile-links">
-        <li><a href="#home"       class="nav-link" data-section="home">Home</a></li>
-        <li><a href="#about"      class="nav-link" data-section="about">About</a></li>
-        <li><a href="#gym"        class="nav-link" data-section="gym">Gym</a></li>
-        <li><a href="#spa"        class="nav-link" data-section="spa">Spa</a></li>
-        <li><a href="#membership" class="nav-link" data-section="membership">Membership</a></li>
-        <li><a href="#gallery"    class="nav-link gallery-page-trigger" data-section="gallery">Gallery</a></li>
-        <li><a href="#contact"    class="nav-link" data-section="contact">Contact</a></li>
-        <li><button type="button" class="nav-link nav-admin-btn" id="admin-btn-mobile">Admin</button></li>
+        <li><a href="#home"       class="nav-link" data-section="home" data-am="መነሻ">Home</a></li>
+        <li><a href="#about"      class="nav-link" data-section="about" data-am="ስለ እኛ">About</a></li>
+        <li><a href="#gym"        class="nav-link" data-section="gym" data-am="ጂም">Gym</a></li>
+        <li><a href="#spa"        class="nav-link" data-section="spa" data-am="ስፓ">Spa</a></li>
+        <li><a href="#membership" class="nav-link" data-section="membership" data-am="አባልነት">Membership</a></li>
+        <li><a href="#gallery"    class="nav-link gallery-page-trigger" data-section="gallery" data-am="ማዕከለ-ስዕላት">Gallery</a></li>
+        <li><a href="#contact"    class="nav-link" data-section="contact" data-am="አግኙን">Contact</a></li>
+        <li><button type="button" class="nav-link nav-admin-btn" id="admin-btn-mobile" data-am="አስተዳዳሪ">Admin</button></li>
       </ul>
-      <!-- FIX: book-btn-mobile now correctly closes mobile menu before opening quiz (handled in script.js) -->
-      <!-- FIX: book-btn-mobile now correctly closes mobile menu before opening quiz (handled in script.js) -->
-      <button type="button" class="mobile-cta" id="book-btn-mobile">Book a Visit</button>
 
-      <!-- ============================== -->
-      <!-- MOBILE QUICK TOOLS ROW -->
-      <!-- ============================== -->
+      <button type="button" class="mobile-cta" id="book-btn-mobile" data-am="ቀጠሮ ይያዙ">Book a Visit</button>
+
       <div class="mobile-quick-row" id="mobile-quick-row" aria-label="Quick tools">
         <button type="button" class="mobile-quick-item" data-tool="bmi" aria-label="BMI Calculator">
           <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
@@ -289,9 +267,6 @@
       </div>
     </div>
 
-  <!-- ============================== -->
-  <!-- QUICK ACCESS PILL NAV -->
-  <!-- ============================== -->
   <aside class="quick-nav" id="quick-nav" aria-label="Quick tools">
     <button type="button" class="quick-nav-item" data-tool="bmi" aria-label="BMI Calculator">
       <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
@@ -333,9 +308,6 @@
   
   <main>
 
-    <!-- ============================== -->
-    <!-- HERO -->
-    <!-- ============================== -->
     <section class="hero" id="home">
       <div class="hero-media">
         <img
@@ -356,31 +328,28 @@
       </div>
 
       <div class="hero-content">
-        <p class="eyebrow">Addis Ababa &middot; Premium Fitness &amp; Wellness</p>
-        <h1 class="hero-title">
+        <p class="eyebrow" data-am="አዲስ አበባ · የላቀ ፊትነስ እና ጤና">Addis Ababa &middot; Premium Fitness &amp; Wellness</p>
+        <h1 class="hero-title" id="hero-title" data-am='ጥንካሬ <span class="accent">ጥንካሬ</span>'>
           Where <span class="accent">strength</span><br />
           meets <span class="accent">stillness</span>.
         </h1>
-        <p class="hero-sub">
+        <p class="hero-sub" data-am="ሂሩይ ጂም እና ስፓ ደረጃውን የጠበቀ ስልጠናን እና ስፓን በአንድ ጣሪያ ስር ያመጣ — ሰውነታቸውን እንደ ግባቸው ለሚያስቡ ሰዎች የተዘጋጀ።">
           Hiruy Gym &amp; Spa brings world-class training and restorative spa
           rituals together under one roof — built for people who take their
           body as seriously as their ambition.
         </p>
         <div class="hero-actions">
-          <a href="#membership" class="btn btn-primary">Explore Membership</a>
-          <a href="#about" class="btn btn-ghost">Discover Hiruy</a>
+          <a href="#membership" class="btn btn-primary" data-am="አባልነት">Explore Membership</a>
+          <a href="#about" class="btn btn-ghost" data-am="ስለ ሂሩይ">Discover Hiruy</a>
         </div>
       </div>
 
       <div class="scroll-cue" aria-hidden="true">
         <span></span>
-        <p>Scroll</p>
+        <p data-am="ወደ ታች">Scroll</p>
       </div>
     </section>
 
-    <!-- ============================== -->
-    <!-- ABOUT -->
-    <!-- ============================== -->
     <section class="about" id="about">
       <div class="section-inner about-grid">
         <div class="about-media">
@@ -395,20 +364,20 @@
                 Verified
               </span>
             </div>
-            <p class="comment-card-role">Owner, Hiruy Gym &amp; Spa</p>
+            <p class="comment-card-role" data-am="ባለቤት፣ ሂሩይ ጂም እና ስፓ">Owner, Hiruy Gym &amp; Spa</p>
             <p class="comment-card-text">"ጥንካሬ የሚገነባው በትግስት ነው፤ እያንዳንዱ ቀን አንድ እርምጃ ወደ ግባችሁ ነው።"</p>
           </div>
         </div>
         <div class="about-copy">
-          <p class="eyebrow">About Hiruy</p>
-          <h2>Two disciplines. One philosophy.</h2>
-          <p>
+          <p class="eyebrow" data-am="ስለ ሂሩይ">About Hiruy</p>
+          <h2 data-am="ፍልስፍናችን">Our philosophy.</h2>
+          <p data-am="ሂሩይን የገነባነው በቀላል እምነት ላይ ነው፦ እውነተኛ ጥንካሬ ጥረትንም እረፍትንም ይፈልጋል የእኛ ጂም ለጠንካራ ስልጠና ታስቦ የተሰራ ነው — ስፓችን ሰውነትዎ እንዲያገግም ይረዳል። ሁለቱም ያለ አንዳቸው አይሰሩም።">
             We built Hiruy on a simple belief: real wellbeing needs both
             effort and rest. Our gym floor is designed for serious training —
             our spa exists to help your body recover from it. Neither half
             works without the other.
           </p>
-          <p>
+          <p data-am="ከመብራታችን እስከ መሣሪያዎቻችን ድረስ እያንዳንዱ ዝርዝር ከእኛ ጋር የሚያሳልፉት ሰዓት የታሰበበት እንጂ የተጣደፈ እንዳይመስል ተደርጎ የተመረጠ ነው።">
             Every detail, from our lighting to our equipment to our
             treatment rooms, is chosen to make the hour you spend with us
             feel considered, not rushed.
@@ -416,42 +385,38 @@
           <div class="about-stats">
             <div class="stat">
               <span class="stat-num">12+</span>
-              <span class="stat-label">Years in Addis</span>
+              <span class="stat-label" data-am="በአዲስ አበባ ዓመታት">Years in Addis</span>
             </div>
             <div class="stat">
               <span class="stat-num">30+</span>
-              <span class="stat-label">Trainers &amp; Therapists</span>
+              <span class="stat-label" data-am="አሰልጣኞች እና ቴራፒስቶች">Trainers &amp; Therapists</span>
             </div>
             <div class="stat">
               <span class="stat-num">5</span>
-              <span class="stat-label">Treatment Suites</span>
+              <span class="stat-label" data-am="የሕክምና ክፍሎች">Treatment Suites</span>
             </div>
           </div>
         </div>
       </div>
     </section>
 
-    <!-- ============================== -->
-    <!-- GYM -->
-    <!-- FIX: Section was completely missing — nav link #gym and footer link #gym had no target -->
-    <!-- ============================== -->
     <section class="gym" id="gym">
       <div class="section-inner gym-grid">
         <div class="gym-copy">
-          <p class="eyebrow">The Gym</p>
-          <h2>Built for serious training.</h2>
-          <p class="section-lead">
+          <p class="eyebrow" data-am="ጂሙ">The Gym</p>
+          <h2 data-am="ለጠንካራ ስልጠና የተገነባ።">Built for serious training.</h2>
+          <p class="section-lead" data-am="የእኛ ጂም ለስፖርት ስልጠናዎ የተዘጋጀ ነው — ጥንካሬ ለመገንባት፣ ቅልጥፍናን ለማሻሻል ወይም በተሻለ ሁኔታ ለመንቀሳቀስ ታስቦ የተሰራ ነው።">
             Our gym floor is equipped for every stage of your training journey —
             whether you're here to build strength, sharpen performance, or just
             move better.
           </p>
           <ul class="spa-list">
-            <li>Free weights &amp; power racks</li>
-            <li>Functional training zone</li>
-            <li>Cardio &amp; conditioning floor</li>
-            <li>Personal &amp; group coaching</li>
+            <li data-am="ክብደቶች">Free weights &amp; power racks</li>
+            <li data-am="የተግባር ስልጠና">Functional training zone</li>
+            <li data-am="የካርዲዮ እና የአካል ብቃት እንቅስቃሴ">Cardio &amp; conditioning floor</li>
+            <li data-am="የግል እና የቡድን ስልጠና">Personal &amp; group coaching</li>
           </ul>
-          <button type="button" class="btn btn-primary book-trigger">Start Training</button>
+          <button type="button" class="btn btn-primary book-trigger" data-am="ስልጠና ይጀምሩ">Start Training</button>
         </div>
         <div class="gym-media">
           <img
@@ -463,26 +428,21 @@
       </div>
     </section>
 
-    <!-- ============================== -->
-    <!-- SPA -->
-    <!-- ============================== -->
     <section class="spa" id="spa">
       <div class="section-inner spa-grid">
         <div class="spa-copy">
-          <p class="eyebrow">The Spa</p>
-          <h2>Recovery is part of the work.</h2>
-          <p class="section-lead">
-            Our treatment rooms are designed for quiet. Massage, hydrotherapy,
-            and skin care chosen to help your body absorb the work you put
-            into it.
+          <p class="eyebrow" data-am="ስፓ">The Spa</p>
+          <h2 data-am="ማገገም የስራው አካል ነው።">Recovery is part of the work.</h2>
+          <p class="section-lead" data-am="የማገገሚያ ክፍሎቻችን ለጸጥታ የተሰሩ ናቸው።">
+            Our treatment rooms are designed for quiet. Massage, hydrotherapy
           </p>
           <ul class="spa-list">
-            <li>Deep tissue &amp; sports massage</li>
-            <li>Hydrotherapy &amp; sauna circuit</li>
-            <li>Skin &amp; body treatments</li>
-            <li>Guided breathwork sessions</li>
+            <li data-am="ጥልቅ እና የስፖርት ማሳጅ">Deep tissue &amp; sports massage</li>
+            <li data-am="ሃይድሮቴራፒ እና ሳውና">Hydrotherapy &amp; sauna circuit</li>
+            <li data-am="የቆዳ እና የሰውነት ሕክምናዎች">Skin &amp; body treatments</li>
+            <li data-am="የታገዘ የመተንፈሻ ስልጠና">Guided breathwork sessions</li>
           </ul>
-          <button type="button" class="btn btn-primary book-trigger">Book a Treatment</button>
+          <button type="button" class="btn btn-primary book-trigger" data-am="ሕክምና ይያዙ">Book a Treatment</button>
         </div>
         <div class="spa-media">
           <img src="https://res.cloudinary.com/dhoymhers/image/upload/f_auto,q_auto,w_800/v1782307347/hayru_gym_spa_twizim.jpg" alt="Spa treatment room at Hiruy Gym & Spa" loading="lazy" />
@@ -490,22 +450,19 @@
       </div>
     </section>
 
-    <!-- ============================== -->
-    <!-- MEMBERSHIP -->
-    <!-- ============================== -->
     <section class="membership" id="membership">
       <div class="section-inner">
-        <p class="eyebrow">Membership</p>
-        <h2>Choose how you train.</h2>
+        <p class="eyebrow" data-am="አባልነት">Membership</p>
+        <h2 data-am="እንዴት እንደሚሰለጥኑ ይምረጡ።">Choose how you train.</h2>
 
         <div class="pricing-grid">
           <article class="pricing-card">
-            <h3>Gym Access</h3>
+            <h3 data-am="የጂም መዳረሻ">Gym Access</h3>
             <p class="price">ETB 2,000<span>/mo</span></p>
             <ul>
-              <li>Full gym floor access</li>
-              <li>Group class access</li>
-              <li>Locker &amp; shower</li>
+              <li data-am="ሙሉ የጂም አገልግሎት">Full gym floor access</li>
+              <li data-am="የቡድን ክፍል አገልግሎት">Group class access</li>
+              <li data-am="ሎከር እና ሻወር">Locker &amp; shower</li>
               </ul>
             <div class="payment-info">
               <button type="button" class="payment-copy-item" data-copy="1000397343018">
@@ -524,19 +481,18 @@
                 <span class="copy-icon" aria-hidden="true">⧉</span>
               </button>
             </div>
-            <button type="button" class="btn btn-ghost book-trigger">Get Started</button>
+            <button type="button" class="btn btn-ghost book-trigger" data-am="ይጀምሩ">Get Started</button>
           </article>
-          
 
           <article class="pricing-card featured">
-            <p class="badge">Most Popular</p>
-            <h3>Gym + Spa</h3>
+            <p class="badge" data-am="በጣም ተወዳጅ">Most Popular</p>
+            <h3 data-am="ጂም + ስፓ">Gym + Spa</h3>
             <p class="price">ETB 3,000<span>/mo</span></p>
             <ul>
-              <li>Full gym floor access</li>
-              <li>Spa treatments</li>
-              <li>Priority class booking</li>
-              <li>Locker &amp; shower</li>
+              <li data-am="ሙሉ የጂም አገልግሎት">Full gym floor access</li>
+              <li data-am="የስፓ አገልግሎት">Spa treatments</li>
+              <li data-am="ቅድሚያ የክፍል ማስያዝ">Priority class booking</li>
+              <li data-am="ሎከር እና ሻወር">Locker &amp; shower</li>
               </ul>
             <div class="payment-info">
               <button type="button" class="payment-copy-item" data-copy="1000397343018">
@@ -555,15 +511,12 @@
                 <span class="copy-icon" aria-hidden="true">⧉</span>
               </button>
             </div>
-            <button type="button" class="btn btn-primary book-trigger">Get Started</button>
+            <button type="button" class="btn btn-primary book-trigger" data-am="ይጀምሩ">Get Started</button>
           </article>
         </div>
       </div>
     </section>
 
-    <!-- ============================== -->
-    <!-- GALLERY -->
-    <!-- ============================== -->
     <section class="gallery" id="gallery">
       <div class="section-inner">
         <p class="eyebrow">Gallery</p>
@@ -584,7 +537,7 @@
             <div class="gallery-card-overlay">
               <h3>Aerobics Class</h3>
               <p class="gallery-desc-en"><strong>Move together, grow together.</strong> Conditioning, mobility, and strength classes guided by coaches who pay attention.</p>
-              <p class="gallery-desc-am"><strong>በጋራ ንቅናቄ፣ በጋራ ለውጥ።</strong> በልምድ ያላቸው አሰልጣኞች የሚመሩ የአካል ብቃት ክፍሎች።</p>
+              <p class="gallery-desc-am"><strong>በጋራ እንቅስቃሴ፣ በጋራ ለውጥ።</strong> በልምድ ያላቸው አሰልጣኞች የሚመሩ የአካል ብቃት ክፍሎች።</p>
             </div>
           </article>
 
@@ -631,9 +584,6 @@
       </div>
     </section>
 
-    <!-- ============================== -->
-<!-- GALLERY FULL PAGE (opens on Gallery nav/card click) -->
-<!-- ============================== -->
 <section class="gallery-page" id="gallery-page" aria-hidden="true">
   <div class="gallery-page-inner">
     <button type="button" class="gallery-page-close" id="gallery-page-close" aria-label="Back to home">
@@ -663,7 +613,6 @@
   </div>
 </section>
 
-<!-- Lightbox (shared: used by gallery cards 1-5 popup AND full gallery page cards) -->
 <div class="gallery-lightbox" id="gallery-lightbox" aria-hidden="true">
   <div class="gallery-lightbox-frame">
     <button type="button" class="gallery-lightbox-close" id="gallery-lightbox-close" aria-label="Close">&times;</button>
@@ -671,27 +620,22 @@
   </div>
 </div>
 
-    <!-- ============================== -->
-    <!-- CONTACT -->
-    <!-- FIX: Added a real contact form so initContactForm() in script.js actually works -->
-    <!-- ============================== -->
     <section class="contact" id="contact">
       <div class="section-inner contact-grid">
         <div class="contact-copy">
-          <p class="eyebrow">Visit Us</p>
-          <h2>Let's get you started.</h2>
-          <p class="section-lead">
+          <p class="eyebrow" data-am="ይጎብኙን">Visit Us</p>
+          <h2 data-am="እንጀምር።">Let's get you started.</h2>
+          <p class="section-lead" data-am="መልዕክት ይላኩልን፤ ቡድናችን በአንድ የስራ ቀን ውስጥ ይመልስልዎታል።">
             Drop us a message and our team will get back to you within one
             business day.
           </p>
 
           <div class="contact-details">
-            <p><strong>Address</strong><br />Bole Road, Addis Ababa, Ethiopia</p>
-            <p><strong>Hours</strong><br />Mon – Sat, 6:00 — 22:00</p>
-            <p><strong>Phone</strong><br />+251 900 000 000</p>
+            <p data-am="<strong>አድራሻ</strong><br /> ቦሌ መንገድ፣ አዲስ አበባ፣ ኢትዮጵያ"><strong>Address</strong><br />Bole Road, Addis Ababa, Ethiopia</p>
+            <p data-am="<strong>ሰዓታት</strong><br />ሰኞ – ቅዳሜ፣ 6:00 – 22:00"><strong>Hours</strong><br />Mon – Sat, 6:00 — 22:00</p>
+            <p data-am="<strong>ስልክ</strong><br />+251 900 000 000"><strong>Phone</strong><br />+251 900 000 000</p>
           </div>
 
-          <!-- Contact form — wired to initContactForm() in script.js -->
           <form id="contact-form" class="contact-form" novalidate>
             <div class="contact-form-row">
               <input
@@ -718,12 +662,12 @@
               rows="4"
               required
             ></textarea>
-            <button type="submit" class="btn btn-primary">Send Message</button>
+            <button type="submit" class="btn btn-primary" data-am="መልዕክት ላክ">Send Message</button>
           </form>
         </div>
 
         <div class="contact-phone-card">
-          <p class="eyebrow">Call Us</p>
+          <p class="eyebrow" data-am="ይደውሉልን">Call Us</p>
           <div class="contact-phone-icon">
             <svg viewBox="0 0 24 24" width="32" height="32" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
               <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12a19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 3.61 1h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 8.59a16 16 0 0 0 6 6l.96-.96a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/>
@@ -736,10 +680,6 @@
 
   </main>
 
-  <!-- ============================== -->
-  <!-- FOOTER -->
-  <!-- FIX: #gym and #spa links now have matching sections above -->
-  <!-- ============================== -->
   <footer class="site-footer">
     <div class="section-inner footer-grid">
       <div class="footer-brand">
@@ -766,13 +706,9 @@
     <p class="footer-bottom">&copy; 2026 Hiruy Gym &amp; Spa. All rights reserved.</p>
   </footer>
 
-  <!-- ============================== -->
-  <!-- BOOKING QUIZ OVERLAY -->
-  <!-- ============================== -->
   <div class="quiz-overlay" id="quiz-overlay" aria-hidden="true">
     <div class="quiz-card" id="quiz-card">
 
-      <!-- Progress dots -->
       <div class="quiz-dots" id="quiz-dots">
         <span class="quiz-dot active"></span>
         <span class="quiz-dot"></span>
@@ -781,21 +717,15 @@
         <span class="quiz-dot"></span>
       </div>
 
-      <!-- Close button -->
       <button class="quiz-close" id="quiz-close" aria-label="Close">&times;</button>
 
-      <!-- Question container -->
       <div class="quiz-question" id="quiz-question"></div>
       <div class="quiz-choices" id="quiz-choices"></div>
 
-      <!-- Next / Submit -->
       <button type="button" class="btn btn-primary quiz-next" id="quiz-next" disabled>Next</button>
     </div>
   </div>
 
-  <!-- ============================== -->
-  <!-- QUICK TOOL MODAL (shared canvas for BMI / Nutrition / Motivation / How-To) -->
-  <!-- ============================== -->
   <div class="tool-modal-overlay" id="tool-modal-overlay" aria-hidden="true">
     <div class="tool-modal" id="tool-modal" role="dialog" aria-modal="true" aria-labelledby="tool-modal-title">
       <button type="button" class="tool-modal-close" id="tool-modal-close" aria-label="Close">&times;</button>
@@ -808,7 +738,6 @@
     </div>
   </div>
 
-  <!-- Scripts -->
   <script type="importmap">
   {
     "imports": {
