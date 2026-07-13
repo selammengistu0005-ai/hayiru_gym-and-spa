@@ -1,8 +1,3 @@
-/* ==========================================================================
-   HIRUY GYM & SPA — script.js
-   Combines: UI/nav logic + three.js ambient background scene
-   ========================================================================== */
-
 import * as THREE from "three";
 
 import { initializeApp } from "firebase/app";
@@ -21,17 +16,9 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
-/* ==========================================================================
-   0. SHARED STATE
-   ========================================================================== */
-
 const prefersReducedMotion = window.matchMedia(
   "(prefers-reduced-motion: reduce)"
 ).matches;
-
-/* ==========================================================================
-   1. LOADER
-   ========================================================================== */
 
 function initLoader() {
   const loader = document.getElementById("loader");
@@ -45,10 +32,6 @@ function initLoader() {
   });
 }
 
-/* ==========================================================================
-   2. HEADER — frosted background on scroll
-   ========================================================================== */
-
 function initHeaderScroll() {
   const header = document.getElementById("site-header");
   if (!header) return;
@@ -60,10 +43,6 @@ function initHeaderScroll() {
   toggle();
   window.addEventListener("scroll", toggle, { passive: true });
 }
-
-/* ==========================================================================
-   3. HAMBURGER / MOBILE MENU
-   ========================================================================== */
 
 function initMobileMenu() {
   const hamburger = document.getElementById("hamburger");
@@ -89,28 +68,20 @@ function initMobileMenu() {
     isOpen ? closeMenu() : openMenu();
   });
 
-  // Close when a nav link inside the mobile menu is tapped
   mobileMenu.querySelectorAll("a").forEach((link) => {
     link.addEventListener("click", closeMenu);
   });
 
-  // Close on outside tap
   mobileMenu.addEventListener("click", (e) => {
     if (e.target === mobileMenu) closeMenu();
   });
 
-  // Close on escape key
   window.addEventListener("keydown", (e) => {
     if (e.key === "Escape") closeMenu();
   });
 
-  // Expose closeMenu so initBookingQuiz can call it
   window._closeMobileMenu = closeMenu;
 }
-
-/* ==========================================================================
-   4. ACTIVE-SECTION NAV HIGHLIGHT
-   ========================================================================== */
 
 function initActiveSection() {
   const sections = document.querySelectorAll("main section[id]");
@@ -137,10 +108,6 @@ function initActiveSection() {
   sections.forEach((section) => observer.observe(section));
 }
 
-/* ==========================================================================
-   5. CONTACT FORM
-   ========================================================================== */
-
 function initContactForm() {
   const form = document.getElementById("contact-form");
   if (!form) return;
@@ -161,13 +128,70 @@ function initContactForm() {
   });
 }
 
-/* ==========================================================================
-   5c. ADMIN OVERLAY TOGGLE
-   FIX 1: Added #admin-close button listener (visible close button in HTML)
-   FIX 2: Backdrop click and Escape key both close cleanly
-   FIX 3: Wrong password triggers shake animation (CSS keyframe added in style.css)
-   FIX 4: overlay.setAttribute("aria-hidden") kept in sync on open/close
-   ========================================================================== */
+function initLanguageSwitch() {
+  const wrap  = document.getElementById("lang-switch");
+  const btn   = document.getElementById("lang-switch-btn");
+  const label = document.getElementById("lang-switch-label");
+  const menu  = document.getElementById("lang-switch-menu");
+  if (!wrap || !btn || !menu) return;
+
+  const options = menu.querySelectorAll(".lang-switch-option");
+  const translatable = document.querySelectorAll("[data-am]");
+
+  translatable.forEach((el) => {
+    if (!el.dataset.en) el.dataset.en = el.innerHTML;
+  });
+
+  const closeMenu = () => {
+    wrap.classList.remove("is-open");
+    btn.setAttribute("aria-expanded", "false");
+    menu.setAttribute("aria-hidden", "true");
+  };
+
+  const openMenu = () => {
+    wrap.classList.add("is-open");
+    btn.setAttribute("aria-expanded", "true");
+    menu.setAttribute("aria-hidden", "false");
+  };
+
+  function applyLanguage(lang) {
+    translatable.forEach((el) => {
+      el.innerHTML = lang === "am" ? el.dataset.am : el.dataset.en;
+    });
+
+    options.forEach((opt) => {
+      const isActive = opt.dataset.lang === lang;
+      opt.classList.toggle("active", isActive);
+      opt.setAttribute("aria-selected", isActive ? "true" : "false");
+    });
+
+    label.textContent = lang === "am" ? "አማርኛ" : "English";
+    document.documentElement.lang = lang;
+    localStorage.setItem("hiruy-lang", lang);
+  }
+
+  btn.addEventListener("click", () => {
+    wrap.classList.contains("is-open") ? closeMenu() : openMenu();
+  });
+
+  options.forEach((opt) => {
+    opt.addEventListener("click", () => {
+      applyLanguage(opt.dataset.lang);
+      closeMenu();
+    });
+  });
+
+  document.addEventListener("click", (e) => {
+    if (!wrap.contains(e.target)) closeMenu();
+  });
+
+  window.addEventListener("keydown", (e) => {
+    if (e.key === "Escape") closeMenu();
+  });
+
+  const saved = localStorage.getItem("hiruy-lang");
+  if (saved === "am") applyLanguage("am");
+}
 
 function initAdminToggle() {
   const adminBtn      = document.getElementById("admin-btn");
@@ -199,12 +223,9 @@ function openAdmin() {
   document.body.classList.remove("admin-active");
   document.body.style.overflow = "";
   if (passwordInput) passwordInput.value = "";
-  // Clean up Firestore listener
   if (unsubscribeViewed) { unsubscribeViewed(); unsubscribeViewed = null; }
-  // Reset back to login view for next time
   portalView?.classList.remove("is-active");
   loginView?.classList.remove("is-hidden");
-  // Reset tabs back to overview
   switchTab("overview");
 }
 
@@ -213,7 +234,6 @@ function openAdmin() {
   function showPortal() {
   loginView?.classList.add("is-hidden");
   portalView?.classList.add("is-active");
-  // Placeholder stat
   const placeholderPercent = 68;
   if (donutFill) {
     const offset = 97.4 - (97.4 * placeholderPercent) / 100;
@@ -223,20 +243,16 @@ function openAdmin() {
   }
   if (donutValue) donutValue.textContent = `${placeholderPercent}%`;
 
-  // Real-time viewed count
   initViewedCard();
 
-  // Tab switching
   initPortalTabs();
 
-  // Analytics (chart + table)
   initAnalytics();
 }
 
 function initPortalTabs() {
   const tabs = document.querySelectorAll(".portal-tab");
   tabs.forEach(tab => {
-    // Remove old listeners by replacing node
     const clone = tab.cloneNode(true);
     tab.parentNode.replaceChild(clone, tab);
   });
@@ -258,7 +274,6 @@ function initViewedCard() {
   const numberEl = document.getElementById("portal-viewed-number");
   if (!numberEl) return;
 
-  // Unsubscribe any previous listener
   if (unsubscribeViewed) { unsubscribeViewed(); unsubscribeViewed = null; }
 
   const q = query(
@@ -282,13 +297,12 @@ function initAnalytics() {
 
   onSnapshot(q, (snap) => {
     setTimeout(() => {
-    // Build a map of date -> count for last 14 days
     const today = new Date();
     const days = [];
     for (let i = 13; i >= 0; i--) {
       const d = new Date(today);
       d.setDate(today.getDate() - i);
-      days.push(d.toISOString().slice(0, 10)); // "YYYY-MM-DD"
+      days.push(d.toISOString().slice(0, 10));
     }
 
     const counts = {};
@@ -301,12 +315,10 @@ function initAnalytics() {
       if (counts[key] !== undefined) counts[key]++;
     });
 
-    // Desktop chart (hidden on mobile via CSS)
     drawChart(days, counts);
     drawMiniGraph(days, counts);
     drawTable(days, counts);
 
-    // Wire up mobile graph overlay button
     initGraphOverlay(days, counts);
     }, 350);
   }, (err) => {
@@ -321,7 +333,6 @@ function initGraphOverlay(days, counts) {
   const mobileCanvas = document.getElementById("portal-chart-mobile");
   if (!graphBtn || !overlay || !backBtn || !mobileCanvas) return;
 
-  // Replace button to avoid stacking listeners on re-renders
   const freshBtn = graphBtn.cloneNode(true);
   graphBtn.parentNode.replaceChild(freshBtn, graphBtn);
 
@@ -329,7 +340,6 @@ function initGraphOverlay(days, counts) {
     overlay.classList.add("is-active");
     overlay.setAttribute("aria-hidden", "false");
     document.body.style.overflow = "hidden";
-    // Draw chart into the mobile canvas after overlay is visible
     setTimeout(() => drawChartOnCanvas(mobileCanvas, days, counts), 50);
   });
 
@@ -451,13 +461,11 @@ function drawChart(days, counts) {
 
   const dpr = window.devicePixelRatio || 1;
 
-  // Measure the real available space inside the card, accounting for its padding
   const cardStyles = getComputedStyle(canvas.parentElement);
   const paddingLeft = parseFloat(cardStyles.paddingLeft) || 0;
   const paddingRight = parseFloat(cardStyles.paddingRight) || 0;
   const W = canvas.parentElement.clientWidth - paddingLeft - paddingRight || 300;
 
-  // Ask the actual screen what height the canvas is allowed to be right now
   const H = window.innerWidth <= 900 ? 200 : 220;
 
   canvas.width  = W * dpr;
@@ -475,19 +483,16 @@ function drawChart(days, counts) {
   const maxVal = Math.max(...values, 1);
   const xStep  = chartW / (days.length - 1);
 
-  // Y axis: nice round ticks
   const yTickCount = 4;
   const yTickStep  = Math.ceil(maxVal / yTickCount) || 1;
   const yMax       = yTickStep * yTickCount;
 
-  // Point coordinates (use yMax so scale matches ticks)
   const pts = values.map((v, i) => ({
     x: pad.left + i * xStep,
     y: pad.top + chartH - (v / yMax) * chartH,
     v,
   }));
 
-  // Smooth bezier path builder
   function buildCurve() {
     ctx.beginPath();
     ctx.moveTo(pts[0].x, pts[0].y);
@@ -497,14 +502,12 @@ function drawChart(days, counts) {
     }
   }
 
-  // Y axis ticks + horizontal grid lines
   ctx.font = "10px Manrope, sans-serif";
   ctx.textAlign = "right";
   for (let i = 0; i <= yTickCount; i++) {
     const val = yTickStep * i;
     const y   = pad.top + chartH - (val / yMax) * chartH;
 
-    // Grid line
     ctx.strokeStyle = "rgba(255,255,255,0.05)";
     ctx.lineWidth = 1;
     ctx.beginPath();
@@ -512,12 +515,10 @@ function drawChart(days, counts) {
     ctx.lineTo(pad.left + chartW, y);
     ctx.stroke();
 
-    // Y label
     ctx.fillStyle = "rgba(255,255,255,0.28)";
     ctx.fillText(val, pad.left - 8, y + 3.5);
   }
 
-  // X axis tick labels (day numbers 1–14)
   ctx.textAlign = "center";
   ctx.fillStyle = "rgba(255,255,255,0.28)";
   days.forEach((_, i) => {
@@ -526,7 +527,6 @@ function drawChart(days, counts) {
     ctx.fillText(i + 1, x, H - 8);
   });
 
-  // Axis lines
   ctx.strokeStyle = "rgba(255,255,255,0.08)";
   ctx.lineWidth = 1;
   ctx.beginPath();
@@ -535,7 +535,6 @@ function drawChart(days, counts) {
   ctx.lineTo(pad.left + chartW, pad.top + chartH);
   ctx.stroke();
 
-  // Gradient fill under curve
   const grad = ctx.createLinearGradient(0, pad.top, 0, pad.top + chartH);
   grad.addColorStop(0, "rgba(91,127,224,0.35)");
   grad.addColorStop(1, "rgba(91,127,224,0)");
@@ -547,7 +546,6 @@ function drawChart(days, counts) {
   ctx.fillStyle = grad;
   ctx.fill();
 
-  // Smooth blue line
   buildCurve();
   ctx.strokeStyle = "#5b7fe0";
   ctx.lineWidth = 2.5;
@@ -555,7 +553,6 @@ function drawChart(days, counts) {
   ctx.lineCap  = "round";
   ctx.stroke();
 
-  // Dots — glow on non-zero points
   pts.forEach(({ x, y, v }) => {
     const isActive = v > 0;
 
@@ -598,7 +595,6 @@ function drawMiniGraph(days, counts) {
     y: H - pad - (v / maxVal) * (H - pad * 2),
   }));
 
-  // Gradient fill
   const grad = ctx.createLinearGradient(0, 0, 0, H);
   grad.addColorStop(0, "rgba(91,127,224,0.4)");
   grad.addColorStop(1, "rgba(91,127,224,0)");
@@ -615,7 +611,6 @@ function drawMiniGraph(days, counts) {
   ctx.fillStyle = grad;
   ctx.fill();
 
-  // Line
   ctx.beginPath();
   ctx.moveTo(pts[0].x, pts[0].y);
   for (let i = 1; i < pts.length; i++) {
@@ -634,7 +629,7 @@ function drawTable(days, counts) {
   if (!tableEl) return;
   tableEl.innerHTML = "";
 
-  const labels = [...days].reverse(); // today first
+  const labels = [...days].reverse();
   labels.forEach((d, i) => {
     const row = document.createElement("div");
     row.className = "portal-table-row";
@@ -660,27 +655,22 @@ function drawTable(days, counts) {
     }
   }
 
-  // Open
   adminBtn.addEventListener("click", openAdmin);
 const adminBtnMobile = document.getElementById("admin-btn-mobile");
 if (adminBtnMobile) adminBtnMobile.addEventListener("click", () => { window._closeMobileMenu?.(); openAdmin(); });
 
-  // FIX: Visible close button wired up
   if (closeBtn) {
     closeBtn.addEventListener("click", closeAdmin);
   }
 
-  // Close on backdrop click
   overlay.addEventListener("click", (e) => {
     if (e.target === overlay) closeAdmin();
   });
 
-  // Close on Escape
   window.addEventListener("keydown", (e) => {
     if (e.key === "Escape" && overlay.classList.contains("is-active")) closeAdmin();
   });
 
-  // FIX: Enter key submits password with visual shake on wrong input
   if (passwordInput) {
     passwordInput.addEventListener("keydown", async (e) => {
       if (e.key === "Enter") {
@@ -688,8 +678,8 @@ if (adminBtnMobile) adminBtnMobile.addEventListener("click", () => { window._clo
         if (isCorrect) {
           showPortal();
         } else {
-          passwordInput.classList.remove("shake"); // reset so re-trigger works
-          void passwordInput.offsetWidth;           // force reflow
+          passwordInput.classList.remove("shake");
+          void passwordInput.offsetWidth;
           passwordInput.classList.add("shake");
           setTimeout(() => passwordInput.classList.remove("shake"), 500);
         }
@@ -697,7 +687,6 @@ if (adminBtnMobile) adminBtnMobile.addEventListener("click", () => { window._clo
     });
   }
 
-  // Eye toggle
   if (eyeToggle && passwordInput) {
     eyeToggle.addEventListener("click", () => {
       const isPassword = passwordInput.type === "password";
@@ -709,10 +698,6 @@ if (adminBtnMobile) adminBtnMobile.addEventListener("click", () => { window._clo
     });
   }
 }
-
-/* ==========================================================================
-   5d. AURORA BACKGROUND (canvas, for admin overlay)
-   ========================================================================== */
 
 function initAuroraBackground() {
   const canvas = document.getElementById("aurora-canvas");
@@ -754,10 +739,6 @@ function initAuroraBackground() {
 
   draw();
 }
-
-/* ==========================================================================
-   5b. CONTACT — blur-in text reveal (heading, lead, details)
-   ========================================================================== */
 
 function initBlurContact() {
   const targets = document.querySelectorAll(
@@ -802,10 +783,6 @@ function initBlurContact() {
 
   targets.forEach((el) => observer.observe(el));
 }
-
-/* ==========================================================================
-   6. THREE.JS BACKGROUND SCENE
-   ========================================================================== */
 
 function initBackgroundScene() {
   const canvas = document.getElementById("bg-canvas");
@@ -857,7 +834,6 @@ function initBackgroundScene() {
   const blueGlow  = makeGlowTexture("190,210,255");
   const redGlow   = makeGlowTexture("230,57,70");
 
-  // Starfield
   const STAR_COUNT = 220;
   const starGeometry = new THREE.BufferGeometry();
   const starPositions = new Float32Array(STAR_COUNT * 3);
@@ -874,7 +850,6 @@ function initBackgroundScene() {
   const stars = new THREE.Points(starGeometry, starMaterial);
   scene.add(stars);
 
-  // Shooting stars
   const MAX_SHOOTING_STARS = 3;
   const shootingStars = [];
 
@@ -915,7 +890,6 @@ function initBackgroundScene() {
     }
   }
 
-  // Dust
   const DUST_COUNT = 220;
   const dustGeometry = new THREE.BufferGeometry();
   const dustPositions = new Float32Array(DUST_COUNT * 3);
@@ -934,7 +908,6 @@ function initBackgroundScene() {
   const dust = new THREE.Points(dustGeometry, dustMaterial);
   scene.add(dust);
 
-  // Orbs
   const ORB_COUNT = 7;
   const orbs = [];
   for (let i = 0; i < ORB_COUNT; i++) {
@@ -959,7 +932,6 @@ function initBackgroundScene() {
     });
   }
 
-  // Scroll opacity
   function updateScrollOpacity() {
     const scrollY = window.scrollY;
     const vh = window.innerHeight;
@@ -968,7 +940,6 @@ function initBackgroundScene() {
   window.addEventListener("scroll", updateScrollOpacity, { passive: true });
   updateScrollOpacity();
 
-  // Resize
   function handleResize() {
     renderer.setSize(window.innerWidth, window.innerHeight);
     camera.aspect = window.innerWidth / window.innerHeight;
@@ -976,8 +947,6 @@ function initBackgroundScene() {
   }
   window.addEventListener("resize", handleResize);
 
-  // Animation loop
-  // Animation loop
   const clock = new THREE.Clock();
   function animate() {
     requestAnimationFrame(animate);
@@ -1004,10 +973,6 @@ function initBackgroundScene() {
   }
   animate();
 }
-
-/* ==========================================================================
-   7. GALLERY ACCORDION
-   ========================================================================== */
 
 function initGalleryAccordion() {
   const grid = document.getElementById("gallery-grid");
@@ -1094,10 +1059,6 @@ function initGalleryFullPage() {
   }
 }
 
-/* ==========================================================================
-   8. PHONE CLICK TRACKING
-   ========================================================================== */
-
 function initPhoneTracking() {
   const phoneLink = document.querySelector(".contact-phone-number");
   if (!phoneLink) return;
@@ -1114,14 +1075,6 @@ function initPhoneTracking() {
     }
   });
 }
-
-/* ==========================================================================
-   9. BOOKING QUIZ
-   FIX 1: Mobile menu is closed before quiz opens — no more scroll-lock conflict
-   FIX 2: openQuiz resets nextBtn display and dotsEl display on re-open
-           (previously if you reopened after submit, Next btn was still hidden)
-   FIX 3: All book triggers use consistent selector
-   ========================================================================== */
 
 function initBookingQuiz() {
   const overlay    = document.getElementById("quiz-overlay");
@@ -1187,7 +1140,6 @@ function initBookingQuiz() {
   const dots = Array.from(dotsEl.querySelectorAll(".quiz-dot"));
 
   function openQuiz() {
-    // FIX: Close mobile menu first to avoid scroll-lock conflict
     if (typeof window._closeMobileMenu === "function") {
       window._closeMobileMenu();
     }
@@ -1198,7 +1150,6 @@ function initBookingQuiz() {
     answers  = [];
     selected = null;
 
-    // FIX: Reset visibility of next/dots in case quiz was previously submitted
     nextBtn.style.display = "";
     dotsEl.style.display  = "";
 
@@ -1250,7 +1201,6 @@ function initBookingQuiz() {
       current++;
       renderQuestion();
     } else {
-      // Save to Firebase
       try {
         await addDoc(collection(db, "agents", "hiruy_gym", "logs"), {
           timestamp: serverTimestamp(),
@@ -1261,7 +1211,6 @@ function initBookingQuiz() {
         console.error("Quiz log failed:", err);
       }
 
-      // Show thank you
       questionEl.innerHTML = `<span style="font-size:2rem">🙏</span><br/>Thank you!<br/><span style="font-size:1rem;font-family:var(--f-body);opacity:0.7">We'll be in touch soon.</span>`;
       choicesEl.innerHTML = "";
       nextBtn.style.display = "none";
@@ -1274,7 +1223,6 @@ function initBookingQuiz() {
     }
   }
 
-  // Wire up all book triggers
   document.querySelectorAll(".book-trigger, #book-btn-nav, #book-btn-mobile").forEach(btn => {
     btn.addEventListener("click", (e) => {
       e.preventDefault();
@@ -1285,20 +1233,14 @@ function initBookingQuiz() {
   closeBtn.addEventListener("click", closeQuiz);
   nextBtn.addEventListener("click", handleNext);
 
-  // Close on backdrop click
   overlay.addEventListener("click", (e) => {
     if (e.target === overlay) closeQuiz();
   });
 
-  // Close on Escape
   window.addEventListener("keydown", (e) => {
     if (e.key === "Escape") closeQuiz();
   });
 }
-
-/* ==========================================================================
-   10. QUICK ACCESS PILL NAV — BMI / Nutrition / Motivation / How-To modals
-   ========================================================================== */
 
 function initQuickNav() {
   const nav        = document.getElementById("quick-nav");
@@ -1521,12 +1463,10 @@ function openTool(key) {
 
   window._closeTool = closeTool;
 
-  // Wire up the 4 canvas buttons (TikTok link needs no JS — it's a plain <a>)
   nav.querySelectorAll(".quick-nav-item[data-tool]").forEach((btn) => {
     btn.addEventListener("click", () => openTool(btn.dataset.tool));
   });
 
-  // Wire up the matching row inside the fullscreen mobile menu
   const mobileRow = document.getElementById("mobile-quick-row");
   mobileRow?.querySelectorAll(".mobile-quick-item[data-tool]").forEach((btn) => {
     btn.addEventListener("click", () => openTool(btn.dataset.tool));
@@ -1556,34 +1496,19 @@ function openTool(key) {
     }
   });
 
-  // Close on backdrop click
   overlay.addEventListener("click", (e) => {
     if (e.target === overlay) closeTool();
   });
 
-  // Close on Escape
   window.addEventListener("keydown", (e) => {
     if (e.key === "Escape") closeTool();
   });
 }
 
-/* ==========================================================================
-   INIT
-   ========================================================================== */
-
    if ("scrollRestoration" in history) {
   history.scrollRestoration = "manual";
 }
 window.scrollTo(0, 0);
-
-
-/* ============================== */
-/* SITE-WIDE IMAGE FALLBACK SYSTEM */
-/* Wraps every <img> in the site with a fallback container that shows */
-/* a type-specific icon + message if the image fails to load. */
-/* Works for images already in the DOM and images added later */
-/* (lightbox, admin portal, gallery popups) via MutationObserver. */
-/* ============================== */
 
 function getFallbackType(img) {
   const card = img.closest(".gallery-card[data-card]");
@@ -1634,7 +1559,6 @@ function applyImageFallback(img) {
 
   img.addEventListener("error", markBroken);
 
-  // Catch images that are already broken (e.g. cached failures) before listener attached
   if (img.complete && img.naturalWidth === 0) {
     markBroken();
   }
@@ -1643,7 +1567,6 @@ function applyImageFallback(img) {
 function initImageFallbacks() {
   document.querySelectorAll("img").forEach(applyImageFallback);
 
-  // Watch for images added later (lightbox src swaps, admin portal, dynamic gallery cards)
   const observer = new MutationObserver((mutations) => {
     mutations.forEach((mutation) => {
       mutation.addedNodes.forEach((node) => {
@@ -1671,7 +1594,6 @@ function initPaymentCopy() {
       try {
         await navigator.clipboard.writeText(value);
       } catch (err) {
-        // fallback for older browsers / no clipboard permission
         const temp = document.createElement("textarea");
         temp.value = value;
         temp.style.position = "fixed";
@@ -1706,6 +1628,7 @@ document.addEventListener("DOMContentLoaded", () => {
   initMobileMenu();
   initActiveSection();
   initContactForm();
+  initLanguageSwitch();
   initBackgroundScene();
   initGalleryAccordion();
   initGalleryFullPage();
