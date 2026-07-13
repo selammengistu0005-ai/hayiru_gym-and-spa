@@ -1369,14 +1369,115 @@ function initQuickNav() {
     prevBtn.disabled = historyPos <= 0;
   }
 
-  const tools = {
-    bmi:        { title: "BMI Calculator", body: "This tool is coming soon." },
-    nutrition:  { title: "Nutrition Tips", body: "This tool is coming soon." },
+const tools = {
+    bmi:        { title: "",               isBmi: true },
+    nutrition:  { title: "Nutrition Tips", isNutrition: true },
     motivation: { title: "Motivation",     body: "", isQuote: true },
-    howto:      { title: "How To",         body: "This tool is coming soon." },
   };
 
-  function openTool(key) {
+  const bmiTips = {
+    underweight: [
+      "Eat healthy meals every day.",
+      "Add more fruits, vegetables, and protein to your meals.",
+      "Drink enough water.",
+      "Exercise to build strong muscles.",
+      "Get enough sleep every night.",
+    ],
+    normal: [
+      "Exercise for at least 60 minutes most days.",
+      "Drink plenty of water.",
+      "Get enough sleep.",
+      "Limit sugary drinks and junk food.",
+    ],
+    overweight: [
+      "Eat smaller portions.",
+      "Choose more fruits and vegetables.",
+      "Exercise every day.",
+      "Drink water instead of sugary drinks.",
+      "Eat less fast food and junk food.",
+      "Get enough sleep each night.",
+    ],
+  };
+
+  const bmiCategoryLabel = {
+    underweight: "Underweight",
+    normal:      "Normal weight",
+    overweight:  "Overweight",
+  };
+
+  function getBmiCategory(bmi) {
+    if (bmi < 18.5) return "underweight";
+    if (bmi < 25)   return "normal";
+    return "overweight";
+  }
+
+  function renderBmiForm() {
+    bodyEl.innerHTML = `
+      <form class="bmi-form" id="bmi-form">
+        <div class="bmi-field">
+          <label for="bmi-weight">Weight (kg)</label>
+          <input type="number" id="bmi-weight" step="0.1" min="1" required>
+        </div>
+        <div class="bmi-field">
+          <label for="bmi-height">Height (m)</label>
+          <input type="number" id="bmi-height" step="0.01" min="0.5" required>
+        </div>
+        <button type="submit" class="bmi-submit">Calculate</button>
+      </form>
+    `;
+
+    bodyEl.querySelector("#bmi-form").addEventListener("submit", (e) => {
+      e.preventDefault();
+      const weight = parseFloat(bodyEl.querySelector("#bmi-weight").value);
+      const height = parseFloat(bodyEl.querySelector("#bmi-height").value);
+      if (!weight || !height) return;
+
+      const bmi      = weight / (height * height);
+      const category = getBmiCategory(bmi);
+      renderBmiResult(bmi, category);
+    });
+  }
+
+  function renderBmiResult(bmi, category) {
+    const tips = bmiTips[category];
+    bodyEl.innerHTML = `
+      <div class="bmi-result">
+        <p class="bmi-score">Your BMI is ${bmi.toFixed(1)} — <strong class="bmi-category">${bmiCategoryLabel[category]}</strong></p>
+        <ol class="bmi-tips">
+          ${tips.map((tip) => `<li>${tip}</li>`).join("")}
+        </ol>
+        <button type="button" class="bmi-back" id="bmi-back">&larr; Recalculate</button>
+      </div>
+    `;
+
+    bodyEl.querySelector("#bmi-back").addEventListener("click", renderBmiForm);
+  }
+
+  const nutritionItems = [
+    { image: "https://visbody.com/wp-content/uploads/2023/05/FOOD-2.webp", label: "Muscle Growth (Hypertrophy)" },
+    { image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQuOl0VdtNXojuhnrrnwy-WdfzYTSrIUoVnwGssXd9yw9BEOk-hQRZQU_OD&s=10", label: "Strength" },
+    { image: "https://lh3.googleusercontent.com/IMRMrRQ0QR1OO3nhhCbmcWdkpeWJScfFc-HknppblOM4v5rhIs39zqCDjxsuv4avube6koeciT0YdY0zwqfcGHg", label: "Endurance" },
+    { image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRXu9dg4Fi8_RsYlJRCd1HZsUcxevimtFAZEivWNRCgMcpE0KXGMZiUtHU&s=10", label: "Weight Loss (Fat Loss)" },
+    { image: "https://healthandwellnesschiropractic.com/wp-content/uploads/2025/05/veggies-and-fruits-1024x621.webp", label: "Flexibility" },
+    { image: "https://cdn.mos.cms.futurecdn.net/zQee9UCQr9hHA64xXPUZxf-1000-80.jpg", label: "Power" },
+  ];
+
+  let nutritionIndex = 0;
+
+  function renderNutritionCard() {
+    const item = nutritionItems[nutritionIndex];
+    bodyEl.innerHTML = `
+      <div class="nutrition-card">
+        <div class="nutrition-card-image">
+          <img src="${item.image}" alt="${item.label}">
+        </div>
+        <p class="nutrition-card-label">${item.label}</p>
+      </div>
+    `;
+  }
+let activeTool = null;
+
+function openTool(key) {
     const tool = tools[key];
     if (!tool) return;
 
@@ -1384,7 +1485,9 @@ function initQuickNav() {
     window._closeAdmin?.();
     window._closeQuiz?.();
 
+    activeTool = key;
     titleEl.textContent = tool.title;
+    titleEl.style.display = tool.title ? "" : "none";
 
     if (tool.isQuote) {
       quoteHistory.length = 0;
@@ -1392,6 +1495,14 @@ function initQuickNav() {
       bodyEl.textContent = drawNextQuote();
       navEl.hidden = false;
       renderQuoteNav();
+    } else if (tool.isBmi) {
+      renderBmiForm();
+      navEl.hidden = true;
+    } else if (tool.isNutrition) {
+      nutritionIndex = 0;
+      renderNutritionCard();
+      prevBtn.disabled = false;
+      navEl.hidden = false;
     } else {
       bodyEl.textContent = tool.body;
       navEl.hidden = true;
@@ -1424,15 +1535,25 @@ function initQuickNav() {
   closeBtn?.addEventListener("click", closeTool);
 
   nextBtn?.addEventListener("click", () => {
-    bodyEl.textContent = drawNextQuote();
-    renderQuoteNav();
+    if (activeTool === "nutrition") {
+      nutritionIndex = (nutritionIndex + 1) % nutritionItems.length;
+      renderNutritionCard();
+    } else {
+      bodyEl.textContent = drawNextQuote();
+      renderQuoteNav();
+    }
   });
 
   prevBtn?.addEventListener("click", () => {
-    if (historyPos <= 0) return;
-    historyPos -= 1;
-    bodyEl.textContent = motivationQuotes[quoteHistory[historyPos]];
-    renderQuoteNav();
+    if (activeTool === "nutrition") {
+      nutritionIndex = (nutritionIndex - 1 + nutritionItems.length) % nutritionItems.length;
+      renderNutritionCard();
+    } else {
+      if (historyPos <= 0) return;
+      historyPos -= 1;
+      bodyEl.textContent = motivationQuotes[quoteHistory[historyPos]];
+      renderQuoteNav();
+    }
   });
 
   // Close on backdrop click
