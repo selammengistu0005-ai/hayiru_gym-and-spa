@@ -679,47 +679,6 @@ if (adminBtnMobile) adminBtnMobile.addEventListener("click", () => { window._clo
   }
 }
 
-function initAuroraBackground() {
-  const canvas = document.getElementById("aurora-canvas");
-  if (!canvas) return;
-
-  const ctx = canvas.getContext("2d");
-  let width, height;
-
-  function resize() {
-    width = canvas.width = canvas.offsetWidth;
-    height = canvas.height = canvas.offsetHeight;
-  }
-  window.addEventListener("resize", resize);
-  resize();
-
-  const colors = ["#5227ff", "#ff9ffc", "#b497cf"];
-  let frame = 0;
-
-  function draw() {
-    frame += 0.6;
-    ctx.clearRect(0, 0, width, height);
-    ctx.globalCompositeOperation = "lighter";
-
-    colors.forEach((color, i) => {
-      const x = width / 2 + Math.sin((frame + i * 120) * 0.01) * width * 0.35;
-      const y = height * 0.3 + Math.cos((frame + i * 90) * 0.008) * height * 0.25;
-      const radius = Math.max(width, height) * 0.5;
-
-      const gradient = ctx.createRadialGradient(x, y, 0, x, y, radius);
-      gradient.addColorStop(0, color + "55");
-      gradient.addColorStop(1, "transparent");
-
-      ctx.fillStyle = gradient;
-      ctx.fillRect(0, 0, width, height);
-    });
-
-    requestAnimationFrame(draw);
-  }
-
-  draw();
-}
-
 function initBlurContact() {
   const targets = document.querySelectorAll(
     ".contact-copy h2, .contact-copy .section-lead, .contact-details p"
