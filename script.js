@@ -1495,8 +1495,10 @@ function applyImageFallback(img) {
   wrapper.appendChild(content);
 
   const markBroken = () => wrapper.classList.add("is-broken");
+  const markFixed = () => wrapper.classList.remove("is-broken");
 
   img.addEventListener("error", markBroken);
+  img.addEventListener("load", markFixed);
 
   if (img.complete && img.naturalWidth === 0) {
     markBroken();
