@@ -108,26 +108,6 @@ function initActiveSection() {
   sections.forEach((section) => observer.observe(section));
 }
 
-function initContactForm() {
-  const form = document.getElementById("contact-form");
-  if (!form) return;
-
-  form.addEventListener("submit", (e) => {
-    e.preventDefault();
-    const button = form.querySelector("button[type='submit']");
-    const originalText = button.textContent;
-
-    button.textContent = "Message Sent ✓";
-    button.disabled = true;
-
-    setTimeout(() => {
-      form.reset();
-      button.textContent = originalText;
-      button.disabled = false;
-    }, 2200);
-  });
-}
-
 function initLanguageSwitch() {
   const wrap  = document.getElementById("lang-switch");
   const btn   = document.getElementById("lang-switch-btn");
@@ -1627,7 +1607,6 @@ document.addEventListener("DOMContentLoaded", () => {
   initHeaderScroll();
   initMobileMenu();
   initActiveSection();
-  initContactForm();
   initLanguageSwitch();
   initBackgroundScene();
   initGalleryAccordion();
