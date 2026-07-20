@@ -1,1622 +1,722 @@
-import * as THREE from "three";
-
-import { initializeApp } from "firebase/app";
-import { getFirestore, collection, addDoc, serverTimestamp, doc, getDoc, onSnapshot, query, where, orderBy } from "firebase/firestore";
-
-const firebaseConfig = {
-  apiKey: "AIzaSyD73Uyrrl8JDP5X_yxT2Zp1fV9oIpAvpXA",
-  authDomain: "lumi-75592.firebaseapp.com",
-  projectId: "lumi-75592",
-  storageBucket: "lumi-75592.firebasestorage.app",
-  messagingSenderId: "419726897354",
-  appId: "1:419726897354:web:3b27219dd60b26dbb84433",
-  measurementId: "G-23937MS0LH"
-};
-
-const app = initializeApp(firebaseConfig);
-const db = getFirestore(app);
-
-const prefersReducedMotion = window.matchMedia(
-  "(prefers-reduced-motion: reduce)"
-).matches;
-
-function initLoader() {
-  const loader = document.getElementById("loader");
-  if (!loader) return;
-
-  window.addEventListener("load", () => {
-    window.scrollTo(0, 0);
-    setTimeout(() => {
-      loader.classList.add("is-hidden");
-    }, 600);
-  });
-}
-
-function initHeaderScroll() {
-  const header = document.getElementById("site-header");
-  if (!header) return;
-
-  const toggle = () => {
-    header.classList.toggle("is-scrolled", window.scrollY > 40);
-  };
-
-  toggle();
-  window.addEventListener("scroll", toggle, { passive: true });
-}
-
-function initMobileMenu() {
-  const hamburger = document.getElementById("hamburger");
-  const mobileMenu = document.getElementById("mobile-menu");
-  if (!hamburger || !mobileMenu) return;
-
-  const closeMenu = () => {
-    hamburger.classList.remove("is-open");
-    mobileMenu.classList.remove("is-open");
-    hamburger.setAttribute("aria-expanded", "false");
-    document.body.style.overflow = "";
-  };
-
-  const openMenu = () => {
-    hamburger.classList.add("is-open");
-    mobileMenu.classList.add("is-open");
-    hamburger.setAttribute("aria-expanded", "true");
-    document.body.style.overflow = "hidden";
-  };
-
-  hamburger.addEventListener("click", () => {
-    const isOpen = hamburger.classList.contains("is-open");
-    isOpen ? closeMenu() : openMenu();
-  });
-
-  mobileMenu.querySelectorAll("a").forEach((link) => {
-    link.addEventListener("click", closeMenu);
-  });
-
-  mobileMenu.addEventListener("click", (e) => {
-    if (e.target === mobileMenu) closeMenu();
-  });
-
-  window.addEventListener("keydown", (e) => {
-    if (e.key === "Escape") closeMenu();
-  });
-
-  window._closeMobileMenu = closeMenu;
-}
-
-function initActiveSection() {
-  const sections = document.querySelectorAll("main section[id]");
-  const navLinks = document.querySelectorAll(".nav-link");
-  if (!sections.length || !navLinks.length) return;
-
-  const setActive = (id) => {
-    navLinks.forEach((link) => {
-      link.classList.toggle("active", link.dataset.section === id);
-    });
-  };
-
-  const observer = new IntersectionObserver(
-    (entries) => {
-      entries.forEach((entry) => {
-        if (entry.isIntersecting) {
-          setActive(entry.target.id);
-        }
-      });
-    },
-    { rootMargin: "-45% 0px -45% 0px", threshold: 0 }
-  );
-
-  sections.forEach((section) => observer.observe(section));
-}
-
-function initLanguageSwitch() {
-  const wrap  = document.getElementById("lang-switch");
-  const btn   = document.getElementById("lang-switch-btn");
-  const label = document.getElementById("lang-switch-label");
-  const menu  = document.getElementById("lang-switch-menu");
-  if (!wrap || !btn || !menu) return;
-
-  const options = menu.querySelectorAll(".lang-switch-option");
-  const translatable = document.querySelectorAll("[data-am]");
-
-  translatable.forEach((el) => {
-    if (!el.dataset.en) el.dataset.en = el.innerHTML;
-  });
-
-  const closeMenu = () => {
-    wrap.classList.remove("is-open");
-    btn.setAttribute("aria-expanded", "false");
-    menu.setAttribute("aria-hidden", "true");
-  };
-
-  const openMenu = () => {
-    wrap.classList.add("is-open");
-    btn.setAttribute("aria-expanded", "true");
-    menu.setAttribute("aria-hidden", "false");
-  };
-
-  function applyLanguage(lang) {
-    translatable.forEach((el) => {
-      el.innerHTML = lang === "am" ? el.dataset.am : el.dataset.en;
-    });
-
-    options.forEach((opt) => {
-      const isActive = opt.dataset.lang === lang;
-      opt.classList.toggle("active", isActive);
-      opt.setAttribute("aria-selected", isActive ? "true" : "false");
-    });
-
-    label.textContent = lang === "am" ? "አማርኛ" : "English";
-    document.documentElement.lang = lang;
-    localStorage.setItem("hiruy-lang", lang);
-  }
-
-  btn.addEventListener("click", () => {
-    wrap.classList.contains("is-open") ? closeMenu() : openMenu();
-  });
-
-  options.forEach((opt) => {
-    opt.addEventListener("click", () => {
-      applyLanguage(opt.dataset.lang);
-      closeMenu();
-    });
-  });
-
-  document.addEventListener("click", (e) => {
-    if (!wrap.contains(e.target)) closeMenu();
-  });
-
-  window.addEventListener("keydown", (e) => {
-    if (e.key === "Escape") closeMenu();
-  });
-
-  const saved = localStorage.getItem("hiruy-lang");
-  if (saved === "am") applyLanguage("am");
-}
-
-function initAdminToggle() {
-  const adminBtn      = document.getElementById("admin-btn");
-  const overlay       = document.getElementById("admin-overlay");
-  const closeBtn      = document.getElementById("admin-close");
-  const loginView     = document.getElementById("admin-login-view");
-  const portalView    = document.getElementById("admin-portal-view");
-  const passwordInput = document.getElementById("admin-password");
-  const eyeToggle     = document.getElementById("admin-eye-toggle");
-  const donutFill      = document.getElementById("portal-donut-fill");
-  const donutValue     = document.getElementById("portal-donut-value");
-  let unsubscribeViewed = null;
-  if (!adminBtn || !overlay) return;
-
-function openAdmin() {
-  window._closeMobileMenu?.();
-  window._closeQuiz?.();
-  window._closeTool?.();
-  overlay.classList.add("is-active");
-  overlay.setAttribute("aria-hidden", "false");
-  document.body.classList.add("admin-active");
-  document.body.style.overflow = "hidden";
-  setTimeout(() => passwordInput?.focus(), 300);
-}
-
-  function closeAdmin() {
-  overlay.classList.remove("is-active");
-  overlay.setAttribute("aria-hidden", "true");
-  document.body.classList.remove("admin-active");
-  document.body.style.overflow = "";
-  if (passwordInput) passwordInput.value = "";
-  if (unsubscribeViewed) { unsubscribeViewed(); unsubscribeViewed = null; }
-  portalView?.classList.remove("is-active");
-  loginView?.classList.remove("is-hidden");
-  switchTab("overview");
-}
-
-  window._closeAdmin = closeAdmin;
-
-  function showPortal() {
-  loginView?.classList.add("is-hidden");
-  portalView?.classList.add("is-active");
-  const placeholderPercent = 68;
-  if (donutFill) {
-    const offset = 97.4 - (97.4 * placeholderPercent) / 100;
-    requestAnimationFrame(() => {
-      donutFill.style.strokeDashoffset = offset;
-    });
-  }
-  if (donutValue) donutValue.textContent = `${placeholderPercent}%`;
-
-  initViewedCard();
-
-  initPortalTabs();
-
-  initAnalytics();
-}
-
-function initPortalTabs() {
-  const tabs = document.querySelectorAll(".portal-tab");
-  tabs.forEach(tab => {
-    const clone = tab.cloneNode(true);
-    tab.parentNode.replaceChild(clone, tab);
-  });
-  document.querySelectorAll(".portal-tab").forEach(tab => {
-    tab.addEventListener("click", () => switchTab(tab.dataset.tab));
-  });
-}
-
-function switchTab(name) {
-  document.querySelectorAll(".portal-tab").forEach(t => {
-    t.classList.toggle("active", t.dataset.tab === name);
-  });
-  document.querySelectorAll(".portal-tab-panel").forEach(p => {
-    p.classList.toggle("is-hidden", p.id !== `portal-panel-${name}`);
-  });
-}
-
-function initViewedCard() {
-  const numberEl = document.getElementById("portal-viewed-number");
-  if (!numberEl) return;
-
-  if (unsubscribeViewed) { unsubscribeViewed(); unsubscribeViewed = null; }
-
-  const q = query(
-    collection(db, "agents", "hiruy_gym", "logs"),
-    where("action", "==", "booking_quiz")
-  );
-
-  unsubscribeViewed = onSnapshot(q, (snap) => {
-    numberEl.textContent = snap.size;
-  }, (err) => {
-    console.error("Viewed count error:", err);
-    numberEl.textContent = "—";
-  });
-}
-
-function initAnalytics() {
-  const q = query(
-    collection(db, "agents", "hiruy_gym", "logs"),
-    where("action", "==", "booking_quiz")
-  );
-
-  onSnapshot(q, (snap) => {
-    setTimeout(() => {
-    const today = new Date();
-    const days = [];
-    for (let i = 13; i >= 0; i--) {
-      const d = new Date(today);
-      d.setDate(today.getDate() - i);
-      days.push(d.toISOString().slice(0, 10));
-    }
-
-    const counts = {};
-    days.forEach(d => counts[d] = 0);
-
-    snap.forEach(docSnap => {
-      const ts = docSnap.data().timestamp?.toDate?.();
-      if (!ts) return;
-      const key = ts.toISOString().slice(0, 10);
-      if (counts[key] !== undefined) counts[key]++;
-    });
-
-    drawChart(days, counts);
-    drawMiniGraph(days, counts);
-    drawTable(days, counts);
-
-    initGraphOverlay(days, counts);
-    }, 350);
-  }, (err) => {
-    console.error("Analytics error:", err);
-  });
-}
-
-function initGraphOverlay(days, counts) {
-  const graphBtn     = document.getElementById("graph-btn");
-  const overlay      = document.getElementById("graph-overlay");
-  const backBtn      = document.getElementById("graph-overlay-back");
-  const mobileCanvas = document.getElementById("portal-chart-mobile");
-  if (!graphBtn || !overlay || !backBtn || !mobileCanvas) return;
-
-  const freshBtn = graphBtn.cloneNode(true);
-  graphBtn.parentNode.replaceChild(freshBtn, graphBtn);
-
-  freshBtn.addEventListener("click", () => {
-    overlay.classList.add("is-active");
-    overlay.setAttribute("aria-hidden", "false");
-    document.body.style.overflow = "hidden";
-    setTimeout(() => drawChartOnCanvas(mobileCanvas, days, counts), 50);
-  });
-
-  backBtn.addEventListener("click", () => {
-    overlay.classList.remove("is-active");
-    overlay.setAttribute("aria-hidden", "true");
-    document.body.style.overflow = "";
-  });
-}
-
-function drawChartOnCanvas(canvas, days, counts) {
-  if (!canvas) return;
-  const ctx = canvas.getContext("2d");
-  const dpr = window.devicePixelRatio || 1;
-  const W   = canvas.parentElement.clientWidth || window.innerWidth;
-  const H   = canvas.offsetHeight || window.innerHeight * 0.55;
-
-  canvas.width  = W * dpr;
-  canvas.height = H * dpr;
-  canvas.style.width  = W + "px";
-  canvas.style.height = H + "px";
-  ctx.scale(dpr, dpr);
-
-  const pad    = { top: 24, right: 24, bottom: 40, left: 44 };
-  const chartW = W - pad.left - pad.right;
-  const chartH = H - pad.top  - pad.bottom;
-
-  ctx.clearRect(0, 0, W, H);
-
-  const values = days.map(d => counts[d]);
-  const maxVal = Math.max(...values, 1);
-  const xStep  = chartW / (days.length - 1);
-
-  const yTickCount = 4;
-  const yTickStep  = Math.ceil(maxVal / yTickCount) || 1;
-  const yMax       = yTickStep * yTickCount;
-
-  const pts = values.map((v, i) => ({
-    x: pad.left + i * xStep,
-    y: pad.top + chartH - (v / yMax) * chartH,
-    v,
-  }));
-
-  function buildCurve() {
-    ctx.beginPath();
-    ctx.moveTo(pts[0].x, pts[0].y);
-    for (let i = 1; i < pts.length; i++) {
-      const cpx = (pts[i - 1].x + pts[i].x) / 2;
-      ctx.bezierCurveTo(cpx, pts[i - 1].y, cpx, pts[i].y, pts[i].x, pts[i].y);
-    }
-  }
-
-  ctx.font = "10px Manrope, sans-serif";
-  ctx.textAlign = "right";
-  for (let i = 0; i <= yTickCount; i++) {
-    const val = yTickStep * i;
-    const y   = pad.top + chartH - (val / yMax) * chartH;
-    ctx.strokeStyle = "rgba(255,255,255,0.05)";
-    ctx.lineWidth = 1;
-    ctx.beginPath();
-    ctx.moveTo(pad.left, y);
-    ctx.lineTo(pad.left + chartW, y);
-    ctx.stroke();
-    ctx.fillStyle = "rgba(255,255,255,0.28)";
-    ctx.fillText(val, pad.left - 8, y + 3.5);
-  }
-
-  ctx.textAlign = "center";
-  ctx.fillStyle = "rgba(255,255,255,0.28)";
-  days.forEach((_, i) => {
-    if (i % 2 !== 0) return;
-    ctx.fillText(i + 1, pad.left + i * xStep, H - 8);
-  });
-
-  ctx.strokeStyle = "rgba(255,255,255,0.08)";
-  ctx.lineWidth = 1;
-  ctx.beginPath();
-  ctx.moveTo(pad.left, pad.top);
-  ctx.lineTo(pad.left, pad.top + chartH);
-  ctx.lineTo(pad.left + chartW, pad.top + chartH);
-  ctx.stroke();
-
-  const grad = ctx.createLinearGradient(0, pad.top, 0, pad.top + chartH);
-  grad.addColorStop(0, "rgba(91,127,224,0.35)");
-  grad.addColorStop(1, "rgba(91,127,224,0)");
-  buildCurve();
-  ctx.lineTo(pts[pts.length - 1].x, pad.top + chartH);
-  ctx.lineTo(pts[0].x, pad.top + chartH);
-  ctx.closePath();
-  ctx.fillStyle = grad;
-  ctx.fill();
-
-  buildCurve();
-  ctx.strokeStyle = "#5b7fe0";
-  ctx.lineWidth = 2.5;
-  ctx.lineJoin = "round";
-  ctx.lineCap  = "round";
-  ctx.stroke();
-
-  pts.forEach(({ x, y, v }) => {
-    const isActive = v > 0;
-    ctx.shadowBlur  = isActive ? 12 : 0;
-    ctx.shadowColor = "rgba(91,127,224,0.7)";
-    ctx.beginPath();
-    ctx.arc(x, y, isActive ? 4.5 : 3, 0, Math.PI * 2);
-    ctx.fillStyle = "#5b7fe0";
-    ctx.fill();
-    ctx.shadowBlur = 0;
-    ctx.strokeStyle = isActive ? "rgba(255,255,255,0.9)" : "rgba(255,255,255,0.3)";
-    ctx.lineWidth = 1.5;
-    ctx.stroke();
-  });
-}
-
-function drawChart(days, counts) {
-  const canvas = document.getElementById("portal-chart");
-  if (!canvas) return;
-  const ctx = canvas.getContext("2d");
-
-  const dpr = window.devicePixelRatio || 1;
-
-  const cardStyles = getComputedStyle(canvas.parentElement);
-  const paddingLeft = parseFloat(cardStyles.paddingLeft) || 0;
-  const paddingRight = parseFloat(cardStyles.paddingRight) || 0;
-  const W = canvas.parentElement.clientWidth - paddingLeft - paddingRight || 300;
-
-  const H = window.innerWidth <= 900 ? 200 : 220;
-
-  canvas.width  = W * dpr;
-  canvas.height = H * dpr;
-  canvas.style.width  = W + "px";
-  canvas.style.height = H + "px";
-  ctx.scale(dpr, dpr);
-  const pad = { top: 24, right: 24, bottom: 40, left: 44 };
-  const chartW = W - pad.left - pad.right;
-  const chartH = H - pad.top  - pad.bottom;
-
-  ctx.clearRect(0, 0, W, H);
-
-  const values = days.map(d => counts[d]);
-  const maxVal = Math.max(...values, 1);
-  const xStep  = chartW / (days.length - 1);
-
-  const yTickCount = 4;
-  const yTickStep  = Math.ceil(maxVal / yTickCount) || 1;
-  const yMax       = yTickStep * yTickCount;
-
-  const pts = values.map((v, i) => ({
-    x: pad.left + i * xStep,
-    y: pad.top + chartH - (v / yMax) * chartH,
-    v,
-  }));
-
-  function buildCurve() {
-    ctx.beginPath();
-    ctx.moveTo(pts[0].x, pts[0].y);
-    for (let i = 1; i < pts.length; i++) {
-      const cpx = (pts[i - 1].x + pts[i].x) / 2;
-      ctx.bezierCurveTo(cpx, pts[i - 1].y, cpx, pts[i].y, pts[i].x, pts[i].y);
-    }
-  }
-
-  ctx.font = "10px Manrope, sans-serif";
-  ctx.textAlign = "right";
-  for (let i = 0; i <= yTickCount; i++) {
-    const val = yTickStep * i;
-    const y   = pad.top + chartH - (val / yMax) * chartH;
-
-    ctx.strokeStyle = "rgba(255,255,255,0.05)";
-    ctx.lineWidth = 1;
-    ctx.beginPath();
-    ctx.moveTo(pad.left, y);
-    ctx.lineTo(pad.left + chartW, y);
-    ctx.stroke();
-
-    ctx.fillStyle = "rgba(255,255,255,0.28)";
-    ctx.fillText(val, pad.left - 8, y + 3.5);
-  }
-
-  ctx.textAlign = "center";
-  ctx.fillStyle = "rgba(255,255,255,0.28)";
-  days.forEach((_, i) => {
-    if (i % 2 !== 0) return;
-    const x = pad.left + i * xStep;
-    ctx.fillText(i + 1, x, H - 8);
-  });
-
-  ctx.strokeStyle = "rgba(255,255,255,0.08)";
-  ctx.lineWidth = 1;
-  ctx.beginPath();
-  ctx.moveTo(pad.left, pad.top);
-  ctx.lineTo(pad.left, pad.top + chartH);
-  ctx.lineTo(pad.left + chartW, pad.top + chartH);
-  ctx.stroke();
-
-  const grad = ctx.createLinearGradient(0, pad.top, 0, pad.top + chartH);
-  grad.addColorStop(0, "rgba(91,127,224,0.35)");
-  grad.addColorStop(1, "rgba(91,127,224,0)");
-
-  buildCurve();
-  ctx.lineTo(pts[pts.length - 1].x, pad.top + chartH);
-  ctx.lineTo(pts[0].x, pad.top + chartH);
-  ctx.closePath();
-  ctx.fillStyle = grad;
-  ctx.fill();
-
-  buildCurve();
-  ctx.strokeStyle = "#5b7fe0";
-  ctx.lineWidth = 2.5;
-  ctx.lineJoin = "round";
-  ctx.lineCap  = "round";
-  ctx.stroke();
-
-  pts.forEach(({ x, y, v }) => {
-    const isActive = v > 0;
-
-    ctx.shadowBlur   = isActive ? 12 : 0;
-    ctx.shadowColor  = "rgba(91,127,224,0.7)";
-
-    ctx.beginPath();
-    ctx.arc(x, y, isActive ? 4.5 : 3, 0, Math.PI * 2);
-    ctx.fillStyle = "#5b7fe0";
-    ctx.fill();
-
-    ctx.shadowBlur = 0;
-    ctx.strokeStyle = isActive ? "rgba(255,255,255,0.9)" : "rgba(255,255,255,0.3)";
-    ctx.lineWidth = 1.5;
-    ctx.stroke();
-  });
-}
-
-function drawMiniGraph(days, counts) {
-  const canvas = document.getElementById("dash-mini-graph");
-  if (!canvas) return;
-  const ctx = canvas.getContext("2d");
-
-  canvas.width  = canvas.offsetWidth  * window.devicePixelRatio;
-  canvas.height = canvas.offsetHeight * window.devicePixelRatio;
-  ctx.scale(window.devicePixelRatio, window.devicePixelRatio);
-
-  const W = canvas.offsetWidth;
-  const H = canvas.offsetHeight;
-  const pad = 4;
-
-  ctx.clearRect(0, 0, W, H);
-
-  const values = days.map(d => counts[d]);
-  const maxVal = Math.max(...values, 1);
-  const xStep  = (W - pad * 2) / (values.length - 1);
-
-  const pts = values.map((v, i) => ({
-    x: pad + i * xStep,
-    y: H - pad - (v / maxVal) * (H - pad * 2),
-  }));
-
-  const grad = ctx.createLinearGradient(0, 0, 0, H);
-  grad.addColorStop(0, "rgba(91,127,224,0.4)");
-  grad.addColorStop(1, "rgba(91,127,224,0)");
-
-  ctx.beginPath();
-  ctx.moveTo(pts[0].x, pts[0].y);
-  for (let i = 1; i < pts.length; i++) {
-    const cpx = (pts[i - 1].x + pts[i].x) / 2;
-    ctx.bezierCurveTo(cpx, pts[i - 1].y, cpx, pts[i].y, pts[i].x, pts[i].y);
-  }
-  ctx.lineTo(pts[pts.length - 1].x, H);
-  ctx.lineTo(pts[0].x, H);
-  ctx.closePath();
-  ctx.fillStyle = grad;
-  ctx.fill();
-
-  ctx.beginPath();
-  ctx.moveTo(pts[0].x, pts[0].y);
-  for (let i = 1; i < pts.length; i++) {
-    const cpx = (pts[i - 1].x + pts[i].x) / 2;
-    ctx.bezierCurveTo(cpx, pts[i - 1].y, cpx, pts[i].y, pts[i].x, pts[i].y);
-  }
-  ctx.strokeStyle = "#5b7fe0";
-  ctx.lineWidth = 1.5;
-  ctx.lineJoin = "round";
-  ctx.lineCap  = "round";
-  ctx.stroke();
-}
-
-function drawTable(days, counts) {
-  const tableEl = document.getElementById("portal-table");
-  if (!tableEl) return;
-  tableEl.innerHTML = "";
-
-  const labels = [...days].reverse();
-  labels.forEach((d, i) => {
-    const row = document.createElement("div");
-    row.className = "portal-table-row";
-    const label = i === 0 ? "Today" : i === 1 ? "Yesterday" : d.slice(5);
-    row.innerHTML = `
-      <span class="portal-table-label">${label}</span>
-      <span class="portal-table-value">${counts[d]}</span>
-    `;
-    tableEl.appendChild(row);
-  });
-}
-
-  async function checkAccessKey(value) {
-    try {
-      const ref = doc(db, "agents", "hiruy_gym");
-      const snap = await getDoc(ref);
-      if (!snap.exists()) return false;
-      const data = snap.data();
-      return value === data.accessKey;
-    } catch (err) {
-      console.error("Access key check failed:", err);
-      return false;
-    }
-  }
-
-  adminBtn.addEventListener("click", openAdmin);
-const adminBtnMobile = document.getElementById("admin-btn-mobile");
-if (adminBtnMobile) adminBtnMobile.addEventListener("click", () => { window._closeMobileMenu?.(); openAdmin(); });
-
-  if (closeBtn) {
-    closeBtn.addEventListener("click", closeAdmin);
-  }
-
-  overlay.addEventListener("click", (e) => {
-    if (e.target === overlay) closeAdmin();
-  });
-
-  window.addEventListener("keydown", (e) => {
-    if (e.key === "Escape" && overlay.classList.contains("is-active")) closeAdmin();
-  });
-
-  if (passwordInput) {
-    passwordInput.addEventListener("keydown", async (e) => {
-      if (e.key === "Enter") {
-        const isCorrect = await checkAccessKey(passwordInput.value);
-        if (isCorrect) {
-          showPortal();
-        } else {
-          passwordInput.classList.remove("shake");
-          void passwordInput.offsetWidth;
-          passwordInput.classList.add("shake");
-          setTimeout(() => passwordInput.classList.remove("shake"), 500);
-        }
-      }
-    });
-  }
-
-  if (eyeToggle && passwordInput) {
-    eyeToggle.addEventListener("click", () => {
-      const isPassword = passwordInput.type === "password";
-      passwordInput.type = isPassword ? "text" : "password";
-      eyeToggle.setAttribute(
-        "aria-label",
-        isPassword ? "Hide password" : "Show password"
-      );
-    });
-  }
-}
-
-function initBlurContact() {
-  const targets = document.querySelectorAll(
-    ".contact-copy h2, .contact-copy .section-lead, .contact-details p"
-  );
-  if (!targets.length) return;
-
-  targets.forEach((el) => {
-    const words = el.textContent.trim().split(/\s+/);
-    el.innerHTML = "";
-    el.style.display = "flex";
-    el.style.flexWrap = "wrap";
-
-    words.forEach((word, i) => {
-      const span = document.createElement("span");
-      span.textContent = word + (i < words.length - 1 ? "\u00A0" : "");
-      span.style.display = "inline-block";
-      span.style.filter = "blur(10px)";
-      span.style.opacity = "0";
-      span.style.transform = "translateY(20px)";
-      span.style.transition = `filter 0.5s ease, opacity 0.5s ease, transform 0.5s ease`;
-      span.style.transitionDelay = `${i * 0.05}s`;
-      el.appendChild(span);
-    });
-  });
-
-  const observer = new IntersectionObserver(
-    (entries, obs) => {
-      entries.forEach((entry) => {
-        if (entry.isIntersecting) {
-          entry.target.querySelectorAll("span").forEach((span) => {
-            span.style.filter = "blur(0px)";
-            span.style.opacity = "1";
-            span.style.transform = "translateY(0)";
-          });
-          obs.unobserve(entry.target);
-        }
-      });
-    },
-    { threshold: 0.2 }
-  );
-
-  targets.forEach((el) => observer.observe(el));
-}
-
-function initBackgroundScene() {
-  const canvas = document.getElementById("bg-canvas");
-  if (!canvas) return;
-
-  if (prefersReducedMotion) return;
-
-  const renderer = new THREE.WebGLRenderer({
-    canvas,
-    antialias: true,
-    alpha: true,
-  });
-  renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-  renderer.setSize(window.innerWidth, window.innerHeight);
-
-  const scene = new THREE.Scene();
-
-  const camera = new THREE.PerspectiveCamera(
-    50,
-    window.innerWidth / window.innerHeight,
-    0.1,
-    100
-  );
-  camera.position.z = 18;
-
-  const ambient = new THREE.AmbientLight(0xffffff, 0.6);
-  scene.add(ambient);
-
-  const keyLight = new THREE.DirectionalLight(0xbfd4ff, 0.9);
-  keyLight.position.set(-6, 8, 10);
-  scene.add(keyLight);
-
-  function makeGlowTexture(color = "255,255,255") {
-    const size = 128;
-    const c = document.createElement("canvas");
-    c.width = size;
-    c.height = size;
-    const ctx = c.getContext("2d");
-    const gradient = ctx.createRadialGradient(size/2, size/2, 0, size/2, size/2, size/2);
-    gradient.addColorStop(0, `rgba(${color}, 1)`);
-    gradient.addColorStop(0.4, `rgba(${color}, 0.5)`);
-    gradient.addColorStop(1, `rgba(${color}, 0)`);
-    ctx.fillStyle = gradient;
-    ctx.fillRect(0, 0, size, size);
-    return new THREE.CanvasTexture(c);
-  }
-
-  const whiteGlow = makeGlowTexture("255,255,255");
-  const blueGlow  = makeGlowTexture("190,210,255");
-  const redGlow   = makeGlowTexture("230,57,70");
-
-  const STAR_COUNT = 220;
-  const starGeometry = new THREE.BufferGeometry();
-  const starPositions = new Float32Array(STAR_COUNT * 3);
-  for (let i = 0; i < STAR_COUNT; i++) {
-    starPositions[i * 3]     = (Math.random() - 0.5) * 70;
-    starPositions[i * 3 + 1] = (Math.random() - 0.5) * 50;
-    starPositions[i * 3 + 2] = -20 - Math.random() * 30;
-  }
-  starGeometry.setAttribute("position", new THREE.BufferAttribute(starPositions, 3));
-  const starMaterial = new THREE.PointsMaterial({
-    size: 0.5, map: whiteGlow, transparent: true,
-    opacity: 0.55, depthWrite: false, blending: THREE.AdditiveBlending,
-  });
-  const stars = new THREE.Points(starGeometry, starMaterial);
-  scene.add(stars);
-
-  const MAX_SHOOTING_STARS = 3;
-  const shootingStars = [];
-
-  function spawnShootingStar() {
-    if (shootingStars.length >= MAX_SHOOTING_STARS) return;
-    const geometry = new THREE.BufferGeometry();
-    const length = 6 + Math.random() * 4;
-    const positions = new Float32Array([0, 0, 0, -length, length * 0.35, 0]);
-    geometry.setAttribute("position", new THREE.BufferAttribute(positions, 3));
-    const material = new THREE.LineBasicMaterial({
-      color: 0xe63946, transparent: true, opacity: 0, blending: THREE.AdditiveBlending,
-    });
-    const line = new THREE.Line(geometry, material);
-    line.position.set(20 + Math.random() * 10, (Math.random() - 0.5) * 20 + 8, -15 - Math.random() * 15);
-    scene.add(line);
-    shootingStars.push({ mesh: line, material, velocity: 0.35 + Math.random() * 0.25, life: 0, maxLife: 60 + Math.random() * 20 });
-  }
-
-  function scheduleNextShootingStar() {
-    setTimeout(() => { spawnShootingStar(); scheduleNextShootingStar(); }, 9000 + Math.random() * 8000);
-  }
-  scheduleNextShootingStar();
-
-  function updateShootingStars() {
-    for (let i = shootingStars.length - 1; i >= 0; i--) {
-      const s = shootingStars[i];
-      s.life++;
-      s.mesh.position.x -= s.velocity;
-      s.mesh.position.y -= s.velocity * 0.35;
-      const progress = s.life / s.maxLife;
-      s.material.opacity = progress < 0.15 ? progress / 0.15 : Math.max(0, 1 - (progress - 0.15) / 0.85);
-      if (s.life >= s.maxLife) {
-        scene.remove(s.mesh);
-        s.mesh.geometry.dispose();
-        s.material.dispose();
-        shootingStars.splice(i, 1);
-      }
-    }
-  }
-
-  const DUST_COUNT = 220;
-  const dustGeometry = new THREE.BufferGeometry();
-  const dustPositions = new Float32Array(DUST_COUNT * 3);
-  const dustSeeds = new Float32Array(DUST_COUNT);
-  for (let i = 0; i < DUST_COUNT; i++) {
-    dustPositions[i * 3]     = (Math.random() - 0.5) * 40;
-    dustPositions[i * 3 + 1] = (Math.random() - 0.5) * 30;
-    dustPositions[i * 3 + 2] = -2 - Math.random() * 14;
-    dustSeeds[i] = Math.random() * Math.PI * 2;
-  }
-  dustGeometry.setAttribute("position", new THREE.BufferAttribute(dustPositions, 3));
-  const dustMaterial = new THREE.PointsMaterial({
-    size: 0.18, map: whiteGlow, transparent: true,
-    opacity: 0.18, depthWrite: false, blending: THREE.AdditiveBlending,
-  });
-  const dust = new THREE.Points(dustGeometry, dustMaterial);
-  scene.add(dust);
-
-  const ORB_COUNT = 7;
-  const orbs = [];
-  for (let i = 0; i < ORB_COUNT; i++) {
-    const radius = 0.5 + Math.random() * 0.9;
-    const geometry = new THREE.SphereGeometry(radius, 32, 32);
-    const isRareRed = i === ORB_COUNT - 1;
-    const material = new THREE.MeshPhysicalMaterial({
-      color: isRareRed ? 0x2a3a66 : 0x274583,
-      transparent: true, opacity: 0.22, roughness: 0.15,
-      transmission: 0.85, thickness: 1.2, clearcoat: 1,
-      emissive: isRareRed ? 0xe63946 : 0x3d5aa6,
-      emissiveIntensity: isRareRed ? 0.12 : 0.08,
-    });
-    const orb = new THREE.Mesh(geometry, material);
-    orb.position.set((Math.random() - 0.5) * 16, (Math.random() - 0.5) * 9, 4 + Math.random() * 4);
-    scene.add(orb);
-    orbs.push({
-      mesh: orb, baseY: orb.position.y, baseX: orb.position.x,
-      bobSpeed: 0.25 + Math.random() * 0.25, bobAmount: 0.4 + Math.random() * 0.4,
-      driftSpeed: 0.08 + Math.random() * 0.1, driftAmount: 0.5 + Math.random() * 0.5,
-      rotSpeed: (Math.random() - 0.5) * 0.05, seed: Math.random() * Math.PI * 2,
-    });
-  }
-
-  function updateScrollOpacity() {
-    const scrollY = window.scrollY;
-    const vh = window.innerHeight;
-    canvas.style.opacity = Math.max(0.45, 1 - scrollY / (vh * 1.6)).toFixed(2);
-  }
-  window.addEventListener("scroll", updateScrollOpacity, { passive: true });
-  updateScrollOpacity();
-
-  function handleResize() {
-    renderer.setSize(window.innerWidth, window.innerHeight);
-    camera.aspect = window.innerWidth / window.innerHeight;
-    camera.updateProjectionMatrix();
-  }
-  window.addEventListener("resize", handleResize);
-
-  const clock = new THREE.Clock();
-  function animate() {
-    requestAnimationFrame(animate);
-    if (document.body.classList.contains("admin-active")) return;
-    const t = clock.getElapsedTime();
-    stars.rotation.y = t * 0.002;
-    const dustPosAttr = dust.geometry.attributes.position;
-    for (let i = 0; i < DUST_COUNT; i++) {
-      const idx = i * 3;
-      let y = dustPosAttr.array[idx + 1] + 0.004;
-      if (y > 15) y = -15;
-      dustPosAttr.array[idx + 1] = y;
-      dustPosAttr.array[idx] += Math.sin(t * 0.3 + dustSeeds[i]) * 0.0015;
-    }
-    dustPosAttr.needsUpdate = true;
-    updateShootingStars();
-    orbs.forEach((o) => {
-      o.mesh.position.y = o.baseY + Math.sin(t * o.bobSpeed + o.seed) * o.bobAmount;
-      o.mesh.position.x = o.baseX + Math.sin(t * o.driftSpeed + o.seed) * o.driftAmount;
-      o.mesh.rotation.y += o.rotSpeed * 0.01;
-      o.mesh.rotation.x += o.rotSpeed * 0.006;
-    });
-    renderer.render(scene, camera);
-  }
-  animate();
-}
-
-function initGalleryAccordion() {
-  const grid = document.getElementById("gallery-grid");
-  if (!grid) return;
-
-  const cards = Array.from(grid.querySelectorAll(".gallery-card"));
-
-  const collapseAll = () => {
-    cards.forEach((card) => card.classList.remove("is-expanded", "is-shrunk"));
-  };
-
-  let interactingWithGrid = false;
-
-  cards.forEach((card) => {
-    card.addEventListener("pointerdown", () => { interactingWithGrid = true; });
-    card.addEventListener("click", (e) => {
-      e.stopPropagation();
-      const alreadyExpanded = card.classList.contains("is-expanded");
-      collapseAll();
-      if (!alreadyExpanded) {
-        card.classList.add("is-expanded");
-        cards.forEach((other) => { if (other !== card) other.classList.add("is-shrunk"); });
-      }
-    });
-  });
-
-  document.addEventListener("pointerdown", (e) => {
-    if (!grid.contains(e.target)) interactingWithGrid = false;
-  });
-
-  document.addEventListener("click", (e) => {
-    if (!interactingWithGrid && !grid.contains(e.target)) collapseAll();
-    interactingWithGrid = false;
-  });
-}
-
-function initGalleryFullPage() {
-  const viewAllCard = document.getElementById("gallery-view-all-card");
-  const galleryPage = document.getElementById("gallery-page");
-  const closeBtn = document.getElementById("gallery-page-close");
-  const lightbox = document.getElementById("gallery-lightbox");
-  const lightboxImg = document.getElementById("gallery-lightbox-img");
-  const pageCards = document.querySelectorAll(".gallery-page-card");
-  if (!viewAllCard || !galleryPage) return;
-
-  const openGalleryPage = () => {
-    document.body.classList.add("gallery-page-active");
-    galleryPage.setAttribute("aria-hidden", "false");
-    window.scrollTo(0, 0);
-  };
-
-  const closeGalleryPage = () => {
-    document.body.classList.remove("gallery-page-active");
-    galleryPage.setAttribute("aria-hidden", "true");
-  };
-
-  viewAllCard.addEventListener("click", openGalleryPage);
-  if (closeBtn) closeBtn.addEventListener("click", closeGalleryPage);
-
-  const pageTriggers = document.querySelectorAll(".gallery-page-trigger");
-  pageTriggers.forEach((trigger) => {
-    trigger.addEventListener("click", (e) => {
-      e.preventDefault();
-      openGalleryPage();
-    });
-  });
-
-  pageCards.forEach((card) => {
-    card.addEventListener("click", () => {
-      const img = card.querySelector("img");
-      if (!img || !lightbox || !lightboxImg) return;
-      lightboxImg.src = img.src;
-      lightboxImg.alt = img.alt;
-      lightbox.classList.add("is-active");
-      lightbox.setAttribute("aria-hidden", "false");
-    });
-  });
-
-  if (lightbox) {
-    lightbox.addEventListener("click", () => {
-      lightbox.classList.remove("is-active");
-      lightbox.setAttribute("aria-hidden", "true");
-    });
-  }
-}
-
-function initPhoneTracking() {
-  const phoneLink = document.querySelector(".contact-phone-number");
-  if (!phoneLink) return;
-
-  phoneLink.addEventListener("click", async () => {
-    try {
-      await addDoc(collection(db, "agents", "hiruy_gym", "logs"), {
-        timestamp: serverTimestamp(),
-        action: "phone_click",
-        page: "contact"
-      });
-    } catch (err) {
-      console.error("Phone click log failed:", err);
-    }
-  });
-}
-
-function initBookingQuiz() {
-  const overlay    = document.getElementById("quiz-overlay");
-  const closeBtn   = document.getElementById("quiz-close");
-  const nextBtn    = document.getElementById("quiz-next");
-  const dotsEl     = document.getElementById("quiz-dots");
-  const questionEl = document.getElementById("quiz-question");
-  const choicesEl  = document.getElementById("quiz-choices");
-  if (!overlay) return;
-
-  const questions = [
-    {
-      q: "What's your fitness experience?",
-      choices: [
-        { icon: "🌱", label: "Complete Beginner" },
-        { icon: "🏃", label: "Some Experience"   },
-        { icon: "💪", label: "Intermediate"       },
-        { icon: "🏆", label: "Advanced Athlete"   },
-      ]
-    },
-    {
-      q: "What's your main goal?",
-      choices: [
-        { icon: "🔥", label: "Lose Weight"   },
-        { icon: "💪", label: "Build Muscle"  },
-        { icon: "🧘", label: "Reduce Stress" },
-        { icon: "⚡", label: "Boost Energy"  },
-      ]
-    },
-    {
-      q: "What type of training interests you?",
-      choices: [
-        { icon: "🏋️", label: "Weight Training"  },
-        { icon: "🤸", label: "Group Classes"     },
-        { icon: "🧖", label: "Spa & Recovery"    },
-        { icon: "🔄", label: "Mix of Everything" },
-      ]
-    },
-    {
-      q: "When do you prefer to train?",
-      choices: [
-        { icon: "🌅", label: "Early Morning" },
-        { icon: "☀️", label: "Midday"        },
-        { icon: "🌆", label: "After Work"    },
-        { icon: "🌙", label: "Late Evening"  },
-      ]
-    },
-    {
-      q: "Which plan interests you most?",
-      choices: [
-        { icon: "🏅", label: "Gym Only"     },
-        { icon: "🌿", label: "Spa Only"     },
-        { icon: "⭐", label: "Gym + Spa"    },
-        { icon: "🤔", label: "Not Sure Yet" },
-      ]
-    }
-  ];
-
-  let current = 0;
-  let answers  = [];
-  let selected = null;
-
-  const dots = Array.from(dotsEl.querySelectorAll(".quiz-dot"));
-
-  function openQuiz() {
-    if (typeof window._closeMobileMenu === "function") {
-      window._closeMobileMenu();
-    }
-    window._closeAdmin?.();
-    window._closeTool?.();
-
-    current  = 0;
-    answers  = [];
-    selected = null;
-
-    nextBtn.style.display = "";
-    dotsEl.style.display  = "";
-
-    overlay.classList.add("is-active");
-    overlay.setAttribute("aria-hidden", "false");
-    document.body.style.overflow = "hidden";
-    renderQuestion();
-  }
-
-  function closeQuiz() {
-    overlay.classList.remove("is-active");
-    overlay.setAttribute("aria-hidden", "true");
-    document.body.style.overflow = "";
-  }
-
-  window._closeQuiz = closeQuiz;
-
-  function renderQuestion() {
-    const { q, choices } = questions[current];
-
-    dots.forEach((d, i) => d.classList.toggle("active", i === current));
-    questionEl.textContent = q;
-    choicesEl.innerHTML = "";
-    selected = null;
-    nextBtn.disabled = true;
-
-    choices.forEach(({ icon, label }) => {
-      const btn = document.createElement("button");
-      btn.type = "button";
-      btn.className = "quiz-choice";
-      btn.innerHTML = `<span class="quiz-choice-icon">${icon}</span><span>${label}</span>`;
-      btn.addEventListener("click", () => {
-        choicesEl.querySelectorAll(".quiz-choice").forEach(b => b.classList.remove("is-selected"));
-        btn.classList.add("is-selected");
-        selected = label;
-        nextBtn.disabled = false;
-      });
-      choicesEl.appendChild(btn);
-    });
-
-    nextBtn.textContent = current === questions.length - 1 ? "Submit" : "Next";
-  }
-
-  async function handleNext() {
-    if (!selected) return;
-    answers.push({ question: questions[current].q, answer: selected });
-
-    if (current < questions.length - 1) {
-      current++;
-      renderQuestion();
-    } else {
-      try {
-        await addDoc(collection(db, "agents", "hiruy_gym", "logs"), {
-          timestamp: serverTimestamp(),
-          action: "booking_quiz",
-          answers
-        });
-      } catch (err) {
-        console.error("Quiz log failed:", err);
-      }
-
-      questionEl.innerHTML = `<span style="font-size:2rem">🙏</span><br/>Thank you!<br/><span style="font-size:1rem;font-family:var(--f-body);opacity:0.7">We'll be in touch soon.</span>`;
-      choicesEl.innerHTML = "";
-      nextBtn.style.display = "none";
-      dotsEl.style.display  = "none";
-
-      setTimeout(() => {
-        closeQuiz();
-        document.getElementById("contact").scrollIntoView({ behavior: "smooth" });
-      }, 2000);
-    }
-  }
-
-  document.querySelectorAll("#gym .book-trigger, #spa .book-trigger, #book-btn-nav, #book-btn-mobile").forEach(btn => {
-    btn.addEventListener("click", (e) => {
-      e.preventDefault();
-      document.getElementById("membership").scrollIntoView({ behavior: "smooth" });
-    });
-  });
-
-  closeBtn.addEventListener("click", closeQuiz);
-  nextBtn.addEventListener("click", handleNext);
-
-  overlay.addEventListener("click", (e) => {
-    if (e.target === overlay) closeQuiz();
-  });
-
-  window.addEventListener("keydown", (e) => {
-    if (e.key === "Escape") closeQuiz();
-  });
-}
-
-function initQuickNav() {
-  const nav        = document.getElementById("quick-nav");
-  const overlay    = document.getElementById("tool-modal-overlay");
-  const modal      = document.getElementById("tool-modal");
-  const closeBtn   = document.getElementById("tool-modal-close");
-  const titleEl    = document.getElementById("tool-modal-title");
-  const bodyEl     = document.getElementById("tool-modal-body");
-  const navEl      = document.getElementById("tool-modal-nav");
-  const prevBtn    = document.getElementById("tool-modal-prev");
-  const nextBtn    = document.getElementById("tool-modal-next");
-  if (!nav || !overlay) return;
-
-  const motivationQuotes = [
-    "Pain is temporary.\nQuitting lasts forever.",
-    "Discipline will take you where motivation never can.\nChoose discipline.",
-    "Nobody is coming to save you.\nSave yourself.",
-    "Every excuse makes you weaker.\nEvery action makes you stronger.",
-    "The hard road builds the strongest people.\nTake the hard road.",
-    "Stop talking.\nStart working.",
-    "Your comfort is your biggest enemy.\nLeave it behind.",
-    "Winners train when losers sleep.\nBe the winner.",
-    "Earn your results.\nNobody owes you anything.",
-    "If it hurts, keep going.\nThat is where growth begins.",
-    "Weak habits create weak lives.\nStrong habits create strong lives.",
-    "Every day you skip, someone else gets ahead.",
-    "Respect is earned through action, not words.",
-    "Your future depends on what you do today.\nNot tomorrow.",
-    "Work until your excuses have no voice.\nKeep pushing.",
-    "Stay focused.\nStay dangerous.",
-    "The mirror never lies.\nThe work always shows.",
-    "Push harder than you did yesterday.\nNever slow down.",
-    "Success belongs to people who never stop fighting.\nKeep fighting.",
-    "Comfort feels good today, but destroys tomorrow.",
-    "Make your actions louder than your promises.\nResults matter.",
-    "Every battle you win starts in your mind.",
-    "Be so disciplined that failure gets tired of chasing you.",
-    "Your limits are only excuses wearing a mask.",
-    "Outwork everyone.\nLet the results speak.",
-    "Every drop of sweat is proof that you refused to quit.",
-    "Do the work even when nobody is watching.",
-    "Stay hungry.\nStay relentless.",
-    "The strongest people are built by the hardest days.",
-    "You either control your mind or your mind controls you.",
-  ];
-
-  let quoteBag = [];
-  const quoteHistory = [];
-  let historyPos = -1;
-
-  function refillBag() {
-    quoteBag = motivationQuotes.map((_, i) => i);
-    for (let i = quoteBag.length - 1; i > 0; i--) {
-      const j = Math.floor(Math.random() * (i + 1));
-      [quoteBag[i], quoteBag[j]] = [quoteBag[j], quoteBag[i]];
-    }
-  }
-
-  function drawNextQuote() {
-    if (quoteBag.length === 0) refillBag();
-    const i = quoteBag.pop();
-    quoteHistory.push(i);
-    historyPos = quoteHistory.length - 1;
-    return motivationQuotes[i];
-  }
-
-  function renderQuoteNav() {
-    prevBtn.disabled = historyPos <= 0;
-  }
-
-const tools = {
-    bmi:        { title: "",               isBmi: true },
-    nutrition:  { title: "Nutrition Tips", isNutrition: true },
-    motivation: { title: "Motivation",     body: "", isQuote: true },
-  };
-
-  const bmiTips = {
-    underweight: [
-      "Eat healthy meals every day.",
-      "Add more fruits, vegetables, and protein to your meals.",
-      "Drink enough water.",
-      "Exercise to build strong muscles.",
-      "Get enough sleep every night.",
-    ],
-    normal: [
-      "Exercise for at least 60 minutes most days.",
-      "Drink plenty of water.",
-      "Get enough sleep.",
-      "Limit sugary drinks and junk food.",
-    ],
-    overweight: [
-      "Eat smaller portions.",
-      "Choose more fruits and vegetables.",
-      "Exercise every day.",
-      "Drink water instead of sugary drinks.",
-      "Eat less fast food and junk food.",
-      "Get enough sleep each night.",
-    ],
-  };
-
-  const bmiCategoryLabel = {
-    underweight: "Underweight",
-    normal:      "Normal weight",
-    overweight:  "Overweight",
-  };
-
-  function getBmiCategory(bmi) {
-    if (bmi < 18.5) return "underweight";
-    if (bmi < 25)   return "normal";
-    return "overweight";
-  }
-
-  function renderBmiForm() {
-    bodyEl.innerHTML = `
-      <form class="bmi-form" id="bmi-form">
-        <div class="bmi-field">
-          <label for="bmi-weight">Weight (kg)</label>
-          <input type="number" id="bmi-weight" step="0.1" min="1" required>
-        </div>
-        <div class="bmi-field">
-          <label for="bmi-height">Height (m)</label>
-          <input type="number" id="bmi-height" step="0.01" min="0.5" required>
-        </div>
-        <button type="submit" class="bmi-submit">Calculate</button>
-      </form>
-    `;
-
-    bodyEl.querySelector("#bmi-form").addEventListener("submit", (e) => {
-      e.preventDefault();
-      const weight = parseFloat(bodyEl.querySelector("#bmi-weight").value);
-      const height = parseFloat(bodyEl.querySelector("#bmi-height").value);
-      if (!weight || !height) return;
-
-      const bmi      = weight / (height * height);
-      const category = getBmiCategory(bmi);
-      renderBmiResult(bmi, category);
-    });
-  }
-
-  function renderBmiResult(bmi, category) {
-    const tips = bmiTips[category];
-    bodyEl.innerHTML = `
-      <div class="bmi-result">
-        <p class="bmi-score">Your BMI is ${bmi.toFixed(1)} — <strong class="bmi-category">${bmiCategoryLabel[category]}</strong></p>
-        <ol class="bmi-tips">
-          ${tips.map((tip) => `<li>${tip}</li>`).join("")}
-        </ol>
-        <button type="button" class="bmi-back" id="bmi-back">&larr; Recalculate</button>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Hiruy Gym &amp; Spa — Train. Restore. Elevate.</title>
+  <meta name="description" content="Hiruy Gym & Spa — a premium fitness and wellness sanctuary. Strength training, recovery, and spa rituals under one roof." />
+
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><circle cx=%2250%22 cy=%2250%22 r=%2245%22 fill=%22%230B1B3A%22/></svg>" />
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600&family=Manrope:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+
+  <link rel="stylesheet" href="style.css" />
+
+  <link
+    rel="preload"
+    as="image"
+    href="https://res.cloudinary.com/dhoymhers/image/upload/f_auto,q_auto,w_1600/v1782302191/hiruy_gym_xtaefk.jpg"
+    fetchpriority="high"
+  />
+</head>
+<body>
+
+  <div id="loader" aria-hidden="true">
+    <div class="loader-mark">HIRUY</div>
+    <div class="loader-bar"><span></span></div>
+  </div>
+
+  <canvas id="bg-canvas" aria-hidden="true"></canvas>
+
+  <div class="admin-overlay" id="admin-overlay" aria-hidden="true">
+    <canvas id="aurora-canvas"></canvas>
+    <button type="button" class="admin-close" id="admin-close" aria-label="Close admin panel">&times;</button>
+
+    <div class="admin-login-view" id="admin-login-view">
+      <h1 class="admin-welcome-text">Welcome Dawit</h1>
+
+      <div class="admin-password-wrap">
+        <input
+          type="password"
+          id="admin-password"
+          class="admin-password-input"
+          placeholder="Enter your access code"
+          autocomplete="off"
+        />
+        <button type="button" class="admin-eye-toggle" id="admin-eye-toggle" aria-label="Show password">
+          <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8">
+            <path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7Z" />
+            <circle cx="12" cy="12" r="3" />
+          </svg>
+        </button>
       </div>
-    `;
+    </div>
 
-    bodyEl.querySelector("#bmi-back").addEventListener("click", renderBmiForm);
-  }
+    <div class="admin-portal-view" id="admin-portal-view" aria-hidden="true">
 
-  const nutritionItems = [
-    { image: "https://visbody.com/wp-content/uploads/2023/05/FOOD-2.webp", label: "Muscle Growth (Hypertrophy)" },
-    { image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQuOl0VdtNXojuhnrrnwy-WdfzYTSrIUoVnwGssXd9yw9BEOk-hQRZQU_OD&s=10", label: "Strength" },
-    { image: "https://lh3.googleusercontent.com/IMRMrRQ0QR1OO3nhhCbmcWdkpeWJScfFc-HknppblOM4v5rhIs39zqCDjxsuv4avube6koeciT0YdY0zwqfcGHg", label: "Endurance" },
-    { image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRXu9dg4Fi8_RsYlJRCd1HZsUcxevimtFAZEivWNRCgMcpE0KXGMZiUtHU&s=10", label: "Weight Loss (Fat Loss)" },
-    { image: "https://healthandwellnesschiropractic.com/wp-content/uploads/2025/05/veggies-and-fruits-1024x621.webp", label: "Flexibility" },
-    { image: "https://cdn.mos.cms.futurecdn.net/zQee9UCQr9hHA64xXPUZxf-1000-80.jpg", label: "Power" },
-  ];
+  <div class="portal-tabs" id="portal-tabs">
+    <button type="button" class="portal-tab active" data-tab="overview">Overview</button>
+  </div>
 
-  let nutritionIndex = 0;
+  <div class="portal-tab-panel" id="portal-panel-overview">
+    <div class="dash-layout">
 
-  function renderNutritionCard() {
-    const item = nutritionItems[nutritionIndex];
-    bodyEl.innerHTML = `
-      <div class="nutrition-card">
-        <div class="nutrition-card-image">
-          <img src="${item.image}" alt="${item.label}">
+      <div class="dash-left">
+
+        <div class="dash-primary-card">
+          <div class="dash-primary-icon">
+            <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7Z" />
+              <circle cx="12" cy="12" r="3" />
+            </svg>
+          </div>
+          <div class="dash-primary-info">
+            <span class="dash-primary-number" id="portal-viewed-number">—</span>
+            <span class="dash-primary-label">Viewed</span>
+          </div>
         </div>
-        <p class="nutrition-card-label">${item.label}</p>
+
+        <div class="dash-small-cards">
+
+          <div class="dash-small-card">
+            <div class="dash-small-card-top">
+              <span class="dash-small-label">Profile Views</span>
+            </div>
+            <span class="dash-small-number" id="dash-profile-views">—</span>
+            <canvas class="dash-mini-graph" id="dash-mini-graph" aria-hidden="true"></canvas>
+          </div>
+
+          <div class="dash-small-card">
+            <div class="dash-small-card-top">
+              <span class="dash-small-label">Engagement Rate</span>
+            </div>
+            <span class="dash-small-number">68%</span>
+            <div class="dash-mini-ring" aria-hidden="true">
+              <svg viewBox="0 0 36 36">
+                <circle class="dash-mini-ring-bg" cx="18" cy="18" r="15.5" />
+                <circle class="dash-mini-ring-fill" cx="18" cy="18" r="15.5" />
+              </svg>
+              <span>68%</span>
+            </div>
+          </div>
+
+          <div class="dash-small-card">
+            <div class="dash-small-card-top">
+              <span class="dash-small-label">Verification Status</span>
+            </div>
+            <span class="dash-small-number dash-verified-text">Verified</span>
+            <div class="dash-shield-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+              </svg>
+            </div>
+          </div>
+
+        </div>
+
+        <div class="dash-chart-card">
+          <span class="dash-chart-title">Views Over Time</span>
+          <canvas id="portal-chart" class="dash-chart-canvas"></canvas>
+        </div>
+
+        <div class="dash-table-card">
+          <span class="dash-chart-title">Daily Breakdown</span>
+          <div id="portal-table" class="portal-table"></div>
+        </div>
+
       </div>
-    `;
-  }
-let activeTool = null;
 
-function openTool(key) {
-    const tool = tools[key];
-    if (!tool) return;
+      <div class="dash-right">
+        <div class="portal-media">
+          <img src="https://res.cloudinary.com/dhoymhers/image/upload/f_auto,q_auto,w_800/v1782309391/hiry_gym_owner_g9obzg.jpg" alt="Hiruy Gym owner" />
+          <div class="portal-stat-card">
+            <div class="portal-stat-card-header">
+              <span class="comment-card-name">Dawit</span>
+              <span class="comment-card-badge">
+                <svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor" aria-hidden="true">
+                  <path d="M9 16.2l-3.5-3.5L4 14.2l5 5 11-11-1.5-1.5z"/>
+                </svg>
+                Verified
+              </span>
+            </div>
+            <p class="comment-card-role">Owner, Hiruy Gym &amp; Spa</p>
+            <div class="portal-donut" id="portal-donut">
+              <svg viewBox="0 0 36 36">
+                <circle class="portal-donut-bg" cx="18" cy="18" r="15.5" />
+                <circle class="portal-donut-fill" id="portal-donut-fill" cx="18" cy="18" r="15.5" />
+              </svg>
+              <span class="portal-donut-value" id="portal-donut-value">0%</span>
+            </div>
+          </div>
+        </div>
 
-    window._closeMobileMenu?.();
-    window._closeAdmin?.();
-    window._closeQuiz?.();
+        <button type="button" class="graph-btn" id="graph-btn" aria-label="View graph">
+          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+          </svg>
+          Graph
+        </button>
+      </div>
 
-    activeTool = key;
-    titleEl.textContent = tool.title;
-    titleEl.style.display = tool.title ? "" : "none";
+      <div class="graph-overlay" id="graph-overlay" aria-hidden="true">
+        <button type="button" class="graph-overlay-back" id="graph-overlay-back" aria-label="Back to dashboard">
+          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <polyline points="15 18 9 12 15 6"/>
+          </svg>
+          Back
+        </button>
+        <span class="graph-overlay-title">Views Over Time</span>
+        <canvas id="portal-chart-mobile" class="dash-chart-canvas"></canvas>
+      </div>
 
-    if (tool.isQuote) {
-      quoteHistory.length = 0;
-      historyPos = -1;
-      bodyEl.textContent = drawNextQuote();
-      navEl.hidden = false;
-      renderQuoteNav();
-    } else if (tool.isBmi) {
-      renderBmiForm();
-      navEl.hidden = true;
-    } else if (tool.isNutrition) {
-      nutritionIndex = 0;
-      renderNutritionCard();
-      prevBtn.disabled = false;
-      navEl.hidden = false;
-    } else {
-      bodyEl.textContent = tool.body;
-      navEl.hidden = true;
+    </div>
+  </div>
+
+</div>
+  </div>
+
+  <header class="site-header" id="site-header">
+    <nav class="nav" aria-label="Primary">
+      <a href="#home" class="logo">
+        <span class="logo-mark">H</span>
+        <span class="logo-text">Hiruy <em>Gym &amp; Spa</em></span>
+      </a>
+
+      <ul class="nav-links" id="nav-links">
+        <li><a href="#home"       class="nav-link active" data-section="home" data-am="መነሻ">Home</a></li>
+        <li><a href="#about"      class="nav-link" data-section="about" data-am="ስለ እኛ">About</a></li>
+        <li><a href="#gym"        class="nav-link" data-section="gym" data-am="ጂም">Gym</a></li>
+        <li><a href="#spa"        class="nav-link" data-section="spa" data-am="ስፓ">Spa</a></li>
+        <li><a href="#membership" class="nav-link" data-section="membership" data-am="አባልነት">Membership</a></li>
+        <li><a href="#gallery"    class="nav-link gallery-page-trigger" data-section="gallery" data-am="ፎቶዎች">Gallery</a></li>
+        <li><a href="#contact"    class="nav-link" data-section="contact" data-am="አግኙን">Contact</a></li>
+        <li><button type="button" class="nav-link nav-admin-btn" id="admin-btn" data-am="አስተዳዳሪ">Admin</button></li>
+      </ul>
+
+      <button type="button" class="nav-cta" id="book-btn-nav" data-am="ይመዝገቡ">Book a Visit</button>
+
+      <div class="lang-switch" id="lang-switch">
+        <button type="button" class="lang-switch-btn" id="lang-switch-btn" aria-haspopup="listbox" aria-expanded="false">
+          <span id="lang-switch-label">English</span>
+          <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <polyline points="6 9 12 15 18 9"/>
+          </svg>
+        </button>
+        <ul class="lang-switch-menu" id="lang-switch-menu" role="listbox" aria-hidden="true">
+          <li><button type="button" class="lang-switch-option active" data-lang="en" role="option" aria-selected="true">English</button></li>
+          <li><button type="button" class="lang-switch-option" data-lang="am" role="option" aria-selected="false">አማርኛ</button></li>
+        </ul>
+      </div>
+
+      <button class="hamburger" id="hamburger" aria-label="Open menu" aria-expanded="false" aria-controls="mobile-menu">
+        <span></span>
+        <span></span>
+        <span></span>
+      </button>
+      </nav>
+  </header>
+  <div class="mobile-menu" id="mobile-menu">
+      <ul class="mobile-links">
+        <li><a href="#home"       class="nav-link" data-section="home" data-am="መነሻ">Home</a></li>
+        <li><a href="#about"      class="nav-link" data-section="about" data-am="ስለ እኛ">About</a></li>
+        <li><a href="#gym"        class="nav-link" data-section="gym" data-am="ጂም">Gym</a></li>
+        <li><a href="#spa"        class="nav-link" data-section="spa" data-am="ስፓ">Spa</a></li>
+        <li><a href="#membership" class="nav-link" data-section="membership" data-am="አባልነት">Membership</a></li>
+        <li><a href="#gallery"    class="nav-link gallery-page-trigger" data-section="gallery" data-am="ፎቶዎች">Gallery</a></li>
+        <li><a href="#contact"    class="nav-link" data-section="contact" data-am="አግኙን">Contact</a></li>
+        <li><button type="button" class="nav-link nav-admin-btn" id="admin-btn-mobile" data-am="አስተዳዳሪ">Admin</button></li>
+      </ul>
+
+      <button type="button" class="mobile-cta" id="book-btn-mobile" data-am="ይመዝገቡ">Book a Visit</button>
+
+      <div class="mobile-quick-row" id="mobile-quick-row" aria-label="Quick tools">
+        <button type="button" class="mobile-quick-item" data-tool="bmi" aria-label="BMI Calculator">
+          <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <rect x="5" y="2" width="14" height="20" rx="2"/>
+            <line x1="8" y1="6" x2="16" y2="6"/>
+            <line x1="8" y1="10" x2="8.01" y2="10"/>
+            <line x1="12" y1="10" x2="12.01" y2="10"/>
+            <line x1="16" y1="10" x2="16.01" y2="10"/>
+            <line x1="8" y1="14" x2="8.01" y2="14"/>
+            <line x1="12" y1="14" x2="12.01" y2="14"/>
+            <line x1="16" y1="14" x2="16.01" y2="14"/>
+            <line x1="8" y1="18" x2="16" y2="18"/>
+          </svg>
+        </button>
+
+        <button type="button" class="mobile-quick-item" data-tool="nutrition" aria-label="Nutrition Tips">
+          <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M12 21c-4.5-2.2-8-6-8-10.5A5.5 5.5 0 0 1 9.5 5c1 0 2 .4 2.5 1 .5-.6 1.5-1 2.5-1A5.5 5.5 0 0 1 20 10.5C20 15 16.5 18.8 12 21Z"/>
+            <path d="M12 6c0-1.5 1-3 3-3.5"/>
+          </svg>
+        </button>
+
+        <button type="button" class="mobile-quick-item" data-tool="motivation" aria-label="Daily Motivation">
+          <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M12 2c3 3.5 5 6.8 5 10a5 5 0 0 1-10 0c0-1.2.4-2.2 1-3 .2 1 1 2 2 2 1.2 0 1.5-1 1.3-2C10.8 7.5 10 5.5 12 2Z"/>
+          </svg>
+        </button>
+
+        <a href="https://www.tiktok.com/@hiruy.fitnessandspa" target="_blank" rel="noopener noreferrer" class="mobile-quick-item mobile-quick-tiktok" aria-label="Follow us on TikTok">
+          <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor" aria-hidden="true">
+            <path d="M16.6 5.82a4.28 4.28 0 0 1-3.14-1.38V14.3a4.9 4.9 0 1 1-4.9-4.9c.17 0 .34.01.5.03v2.42a2.5 2.5 0 1 0 1.75 2.38V2h2.35a4.28 4.28 0 0 0 3.44 4.22v-.4Z"/>
+          </svg>
+        </a>
+      </div>
+    </div>
+
+  <aside class="quick-nav" id="quick-nav" aria-label="Quick tools">
+    <button type="button" class="quick-nav-item" data-tool="bmi" aria-label="BMI Calculator">
+      <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <rect x="5" y="2" width="14" height="20" rx="2"/>
+        <line x1="8" y1="6" x2="16" y2="6"/>
+        <line x1="8" y1="10" x2="8.01" y2="10"/>
+        <line x1="12" y1="10" x2="12.01" y2="10"/>
+        <line x1="16" y1="10" x2="16.01" y2="10"/>
+        <line x1="8" y1="14" x2="8.01" y2="14"/>
+        <line x1="12" y1="14" x2="12.01" y2="14"/>
+        <line x1="16" y1="14" x2="16.01" y2="14"/>
+        <line x1="8" y1="18" x2="16" y2="18"/>
+      </svg>
+      <span class="quick-nav-tooltip">BMI Calculator</span>
+    </button>
+
+    <button type="button" class="quick-nav-item" data-tool="nutrition" aria-label="Nutrition Tips">
+      <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <path d="M12 21c-4.5-2.2-8-6-8-10.5A5.5 5.5 0 0 1 9.5 5c1 0 2 .4 2.5 1 .5-.6 1.5-1 2.5-1A5.5 5.5 0 0 1 20 10.5C20 15 16.5 18.8 12 21Z"/>
+        <path d="M12 6c0-1.5 1-3 3-3.5"/>
+      </svg>
+      <span class="quick-nav-tooltip">Nutrition Tips</span>
+    </button>
+
+    <button type="button" class="quick-nav-item" data-tool="motivation" aria-label="Daily Motivation">
+      <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <path d="M12 2c3 3.5 5 6.8 5 10a5 5 0 0 1-10 0c0-1.2.4-2.2 1-3 .2 1 1 2 2 2 1.2 0 1.5-1 1.3-2C10.8 7.5 10 5.5 12 2Z"/>
+      </svg>
+      <span class="quick-nav-tooltip">Motivation</span>
+    </button>
+
+    <a href="https://www.tiktok.com/@hiruy.fitnessandspa" target="_blank" rel="noopener noreferrer" class="quick-nav-item quick-nav-tiktok" aria-label="Follow us on TikTok">
+      <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor" aria-hidden="true">
+        <path d="M16.6 5.82a4.28 4.28 0 0 1-3.14-1.38V14.3a4.9 4.9 0 1 1-4.9-4.9c.17 0 .34.01.5.03v2.42a2.5 2.5 0 1 0 1.75 2.38V2h2.35a4.28 4.28 0 0 0 3.44 4.22v-.4Z"/>
+      </svg>
+      <span class="quick-nav-tooltip">TikTok</span>
+    </a>
+  </aside>
+  
+  <main>
+
+    <section class="hero" id="home">
+      <div class="hero-media">
+        <img
+          class="hero-bg-img"
+          src="https://res.cloudinary.com/dhoymhers/image/upload/f_auto,q_auto,w_1600/v1782302191/hiruy_gym_xtaefk.jpg"
+          srcset="
+            https://res.cloudinary.com/dhoymhers/image/upload/f_auto,q_auto,w_800/v1782302191/hiruy_gym_xtaefk.jpg 800w,
+            https://res.cloudinary.com/dhoymhers/image/upload/f_auto,q_auto,w_1200/v1782302191/hiruy_gym_xtaefk.jpg 1200w,
+            https://res.cloudinary.com/dhoymhers/image/upload/f_auto,q_auto,w_1600/v1782302191/hiruy_gym_xtaefk.jpg 1600w,
+            https://res.cloudinary.com/dhoymhers/image/upload/f_auto,q_auto,w_2000/v1782302191/hiruy_gym_xtaefk.jpg 2000w
+          "
+          sizes="100vw"
+          alt="Hiruy Gym training floor"
+          fetchpriority="high"
+          decoding="async"
+        />
+        <div class="hero-overlay"></div>
+      </div>
+
+      <div class="hero-content">
+        <p class="eyebrow" data-am="አዲስ አበባ · የላቀ ፊትነስ እና ጤና">Addis Ababa &middot; Premium Fitness &amp; Wellness</p>
+        <h1 class="hero-title" id="hero-title" data-am='ጥንካሬ <span class="accent">ጥንካሬ</span>'>
+          Where <span class="accent">strength</span><br />
+          meets <span class="accent">stillness</span>.
+        </h1>
+        <p class="hero-sub" data-am="ሂሩይ ጂም እና ስፓ ደረጃውን የጠበቀ ስልጠናን እና ስፓን በአንድ ጣሪያ ስር ያመጣ — ሰውነታቸውን እንደ ግባቸው ለሚያስቡ ሰዎች የተዘጋጀ።">
+          Hiruy Gym &amp; Spa brings world-class training and restorative spa
+          rituals together under one roof — built for people who take their
+          body as seriously as their ambition.
+        </p>
+        <div class="hero-actions">
+          <a href="#membership" class="btn btn-primary" data-am="እዚህ ይመዝገቡ">Register</a>
+          <a href="#about" class="btn btn-ghost" data-am="ስለ ሂሩይ">Discover Hiruy</a>
+        </div>
+      </div>
+
+      <div class="scroll-cue" aria-hidden="true">
+        <span></span>
+        <p data-am="ወደ ታች">Scroll</p>
+      </div>
+    </section>
+
+    <section class="about" id="about">
+      <div class="section-inner about-grid">
+        <div class="about-media">
+          <img src="https://res.cloudinary.com/dhoymhers/image/upload/f_auto,q_auto,w_800/v1783838609/Owner_image_vqdcxn.jpg" alt="Hiruy Gym owner" loading="lazy" />
+          <div class="comment-card">
+            <div class="comment-card-header">
+              <span class="comment-card-name">Dawit</span>
+              <span class="comment-card-badge">
+                <svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor" aria-hidden="true">
+                  <path d="M9 16.2l-3.5-3.5L4 14.2l5 5 11-11-1.5-1.5z"/>
+                </svg>
+                Verified
+              </span>
+            </div>
+            <p class="comment-card-role" data-am="ባለቤት፣ ሂሩይ ጂም እና ስፓ">Owner, Hiruy Gym &amp; Spa</p>
+            <p class="comment-card-text">"ጥንካሬ የሚገነባው በትግስት ነው፤ እያንዳንዱ ቀን አንድ እርምጃ ወደ ግባችሁ ነው።"</p>
+          </div>
+        </div>
+        <div class="about-copy">
+          <p class="eyebrow" data-am="ስለ ሂሩይ">About Hiruy</p>
+          <h2 data-am="ፍልስፍናችን">Our philosophy.</h2>
+          <p data-am="ሂሩይን የገነባነው በቀላል እምነት ላይ ነው፦ እውነተኛ ጥንካሬ ጥረትንም እረፍትንም ይፈልጋል የእኛ ጂም ለጠንካራ ስልጠና ታስቦ የተሰራ ነው — ስፓችን ሰውነትዎ እንዲያገግም ይረዳል። ሁለቱም ያለ አንዳቸው አይሰሩም።">
+            We built Hiruy on a simple belief: real wellbeing needs both
+            effort and rest. Our gym floor is designed for serious training —
+            our spa exists to help your body recover from it. Neither half
+            works without the other.
+          </p>
+          <p data-am="ከመብራታችን እስከ መሣሪያዎቻችን ድረስ እያንዳንዱ ዝርዝር ከእኛ ጋር የሚያሳልፉት ሰዓት የታሰበበት እንጂ የተጣደፈ እንዳይመስል ተደርጎ የተመረጠ ነው።">
+            Every detail, from our lighting to our equipment to our
+            treatment rooms, is chosen to make the hour you spend with us
+            feel considered, not rushed.
+          </p>
+          <div class="about-stats">
+            <div class="stat">
+              <span class="stat-num">12+</span>
+              <span class="stat-label" data-am="በአዲስ አበባ ዓመታት">Years in Addis</span>
+            </div>
+            <div class="stat">
+              <span class="stat-num">30+</span>
+              <span class="stat-label" data-am="አሰልጣኞች እና ቴራፒስቶች">Trainers &amp; Therapists</span>
+            </div>
+            <div class="stat">
+              <span class="stat-num">5</span>
+              <span class="stat-label" data-am="የሕክምና ክፍሎች">Treatment Suites</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="gym" id="gym">
+      <div class="section-inner gym-grid">
+        <div class="gym-copy">
+          <p class="eyebrow" data-am="ጂሙ">The Gym</p>
+          <h2 data-am="ለጠንካራ ስልጠና የተገነባ።">Built for serious training.</h2>
+          <p class="section-lead" data-am="የእኛ ጂም ለስፖርት ስልጠናዎ የተዘጋጀ ነው — ጥንካሬ ለመገንባት፣ ቅልጥፍናን ለማሻሻል ወይም በተሻለ ሁኔታ ለመንቀሳቀስ ታስቦ የተሰራ ነው።">
+            Our gym floor is equipped for every stage of your training journey —
+            whether you're here to build strength, sharpen performance, or just
+            move better.
+          </p>
+          <ul class="spa-list">
+            <li data-am="ክብደቶች">Free weights &amp; power racks</li>
+            <li data-am="የተግባር ስልጠና">Functional training zone</li>
+            <li data-am="የካርዲዮ እና የአካል ብቃት እንቅስቃሴ">Cardio &amp; conditioning floor</li>
+            <li data-am="የግል እና የቡድን ስልጠና">Personal &amp; group coaching</li>
+          </ul>
+          <button type="button" class="btn btn-primary book-trigger" data-am="ስልጠና ይጀምሩ">Start Training</button>
+        </div>
+        <div class="gym-media">
+          <img
+            src="https://res.cloudinary.com/dhoymhers/image/upload/f_auto,q_auto,w_800/v1782307349/hayru_gym_equioments_maiako.jpg"
+            alt="Gym equipment at Hiruy Gym"
+            loading="lazy"
+          />
+        </div>
+      </div>
+    </section>
+
+    <section class="spa" id="spa">
+      <div class="section-inner spa-grid">
+        <div class="spa-copy">
+          <p class="eyebrow" data-am="ስፓ">The Spa</p>
+          <h2 data-am="ማገገም የስራው አካል ነው።">Recovery is part of the work.</h2>
+          <p class="section-lead" data-am="የማገገሚያ ክፍሎቻችን ለጸጥታ የተሰሩ ናቸው።">
+            Our treatment rooms are designed for quiet. Massage, hydrotherapy
+          </p>
+          <ul class="spa-list">
+            <li data-am="ጥልቅ እና የስፖርት ማሳጅ">Deep tissue &amp; sports massage</li>
+            <li data-am="ሃይድሮቴራፒ እና ሳውና">Hydrotherapy &amp; sauna circuit</li>
+            <li data-am="የቆዳ እና የሰውነት ሕክምናዎች">Skin &amp; body treatments</li>
+            <li data-am="የታገዘ የመተንፈሻ ስልጠና">Guided breathwork sessions</li>
+          </ul>
+          <button type="button" class="btn btn-primary book-trigger" data-am="ይመዝገቡ">Book a Treatment</button>
+        </div>
+        <div class="spa-media">
+          <img src="https://res.cloudinary.com/dhoymhers/image/upload/f_auto,q_auto,w_800/v1782307347/hayru_gym_spa_twizim.jpg" alt="Spa treatment room at Hiruy Gym & Spa" loading="lazy" />
+        </div>
+      </div>
+    </section>
+
+    <section class="membership" id="membership">
+      <div class="section-inner">
+        <p class="eyebrow" data-am="አባልነት">Membership</p>
+        <h2 data-am="እንዴት እንደሚሰለጥኑ ይምረጡ።">Choose how you train.</h2>
+
+        <div class="pricing-grid">
+          <article class="pricing-card">
+            <h3 data-am="የጂም መዳረሻ">Gym Access</h3>
+            <p class="price">ETB 2,000<span>/mo</span></p>
+            <ul>
+              <li data-am="ሙሉ የጂም አገልግሎት">Full gym floor access</li>
+              <li data-am="የቡድን ክፍል አገልግሎት">Group class access</li>
+              <li data-am="ሎከር እና ሻወር">Locker &amp; shower</li>
+              </ul>
+            <button type="button" class="btn btn-ghost book-trigger" data-am="ይጀምሩ">Get Started</button>
+          </article>
+
+          <article class="pricing-card featured">
+            <p class="badge" data-am="በጣም ተወዳጅ">Most Popular</p>
+            <h3 data-am="ጂም + ስፓ">Gym + Spa</h3>
+            <p class="price">ETB 3,500<span>/mo</span></p>
+            <ul>
+            <li data-am="ሙሉ የጂም አገልግሎት">Full gym floor access</li>
+            <li data-am="የስፓ አገልግሎት">Spa treatments</li>
+            <li data-am="ቅድሚያ የክፍል ማስያዝ">Priority class booking</li>
+            <li data-am="ሎከር እና ሻወር">Locker &amp; shower</li>
+            <li class="li-glow" data-am="የአሰልጣኝ ክትትል">Trainer Followup</li>
+              </ul>
+            <button type="button" class="btn btn-primary book-trigger" data-am="ይጀምሩ">Get Started</button>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section class="gallery" id="gallery">
+      <div class="section-inner">
+        <p class="eyebrow">Gallery</p>
+        <h2>Inside Hiruy.</h2>
+
+        <div class="gallery-grid" id="gallery-grid">
+          <article class="gallery-card gallery-popup-trigger" data-card="equipment">
+            <img src="https://res.cloudinary.com/dhoymhers/image/upload/f_auto,q_auto,w_800/v1782307349/hayru_gym_equioments_maiako.jpg" alt="Equipment at Hiruy Gym" loading="lazy" />
+            <div class="gallery-card-overlay">
+              <h3>Equipment</h3>
+              <p class="gallery-desc-en"><strong>Precision-built power.</strong> Free weights, racks, and platforms designed for serious lifting, at every training age.</p>
+              <p class="gallery-desc-am"><strong>ጥራት ያለው የአካል ብቃት መሣሪያ።</strong> ለማንኛውም የስልጠና ደረጃ የተዘጋጁ ማሽኖችና እቃዎች።</p>
+            </div>
+          </article>
+
+          <article class="gallery-card gallery-popup-trigger" data-card="aerobics">
+            <img src="https://res.cloudinary.com/dhoymhers/image/upload/f_auto,q_auto,w_800/v1782307348/hayru_gym_aerobics_kqqu8z.jpg" alt="Aerobics class at Hiruy Gym" loading="lazy" />
+            <div class="gallery-card-overlay">
+              <h3>Aerobics Class</h3>
+              <p class="gallery-desc-en"><strong>Move together, grow together.</strong> Conditioning, mobility, and strength classes guided by coaches who pay attention.</p>
+              <p class="gallery-desc-am"><strong>በጋራ እንቅስቃሴ፣ በጋራ ለውጥ።</strong> በልምድ ያላቸው አሰልጣኞች የሚመሩ የአካል ብቃት ክፍሎች።</p>
+            </div>
+          </article>
+
+          <article class="gallery-card gallery-popup-trigger" data-card="spa">
+            <img src="https://res.cloudinary.com/dhoymhers/image/upload/f_auto,q_auto,w_800/v1782307347/hayru_gym_spa_twizim.jpg" alt="Spa at Hiruy Gym" loading="lazy" />
+            <div class="gallery-card-overlay">
+              <h3>Spa</h3>
+              <p class="gallery-desc-en"><strong>Recovery is part of the work.</strong> Massage, hydrotherapy, and skin care designed to help your body absorb the effort you give it.</p>
+              <p class="gallery-desc-am"><strong>ማገገም የስራው አካል ነው።</strong> ሰውነትዎ የሰራውን ልፋት እንዲወክል የተዘጋጀ ማሳጅና ሕክምና።</p>
+            </div>
+          </article>
+
+          <article class="gallery-card gallery-popup-trigger" data-card="interior">
+            <img src="https://res.cloudinary.com/dhoymhers/image/upload/f_auto,q_auto,w_800/v1782302191/hiruy_gym_2_hacfxp.jpg" alt="Interior of Hiruy Gym" loading="lazy" />
+            <div class="gallery-card-overlay">
+              <h3>Interior</h3>
+              <p class="gallery-desc-en"><strong>Designed for stillness and focus.</strong> Every light, surface, and corner of Hiruy is chosen with intention.</p>
+              <p class="gallery-desc-am"><strong>ለትኩረትና ለሰላም የተነደፈ ቦታ።</strong> እያንዳንዱ ጥግ በዓላማ የተመረጠ ነው።</p>
+            </div>
+          </article>
+
+          <article class="gallery-card gallery-popup-trigger" data-card="training">
+            <img src="https://res.cloudinary.com/dhoymhers/image/upload/f_auto,q_auto,w_800/v1782307349/hayru_gym_equioments_maiako.jpg" alt="Training area at Hiruy Gym" loading="lazy" />
+            <div class="gallery-card-overlay">
+              <h3>Built for Serious Training</h3>
+              <p class="gallery-desc-en"><strong>Every rep, every set, with purpose.</strong> Space and equipment shaped around real training, not just aesthetics.</p>
+              <p class="gallery-desc-am"><strong>እያንዳንዱ ልምምድ በዓላማ።</strong> ለእውነተኛ ስልጠና የተዘጋጀ ቦታና እቃዎች።</p>
+            </div>
+          </article>
+
+          <article class="gallery-card gallery-view-all" id="gallery-view-all-card">
+            <img src="https://res.cloudinary.com/dhoymhers/image/upload/f_auto,q_auto,w_800/v1782307349/hayru_gym_equioments_maiako.jpg" alt="View full Hiruy Gym gallery" loading="lazy" />
+            <div class="gallery-card-overlay gallery-view-all-overlay">
+              <button type="button" class="gallery-view-all-btn gallery-pill" id="gallery-view-all-btn">
+                <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <circle cx="12" cy="12" r="9"/>
+                  <path d="M9 8l6 4-6 4V8z"/>
+                </svg>
+                View Gallery
+              </button>
+            </div>
+          </article>
+        </div>
+      </div>
+    </section>
+
+<section class="gallery-page" id="gallery-page" aria-hidden="true">
+  <div class="gallery-page-inner">
+    <button type="button" class="gallery-page-close" id="gallery-page-close" aria-label="Back to home">
+      <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <line x1="18" y1="6" x2="6" y2="18"/>
+        <line x1="6" y1="6" x2="18" y2="18"/>
+      </svg>
+      Back
+    </button>
+
+    <div class="gallery-page-grid" id="gallery-page-grid">
+      <button type="button" class="gallery-page-card"><img src="https://res.cloudinary.com/dhoymhers/image/upload/f_auto,q_auto,w_800/v1782307349/hayru_gym_equioments_maiako.jpg" alt="Hiruy Gym gallery" loading="lazy" /></button>
+      <button type="button" class="gallery-page-card"><img src="https://res.cloudinary.com/dhoymhers/image/upload/f_auto,q_auto,w_400/v1783699133/IMG_1830_bhjegv.jpg" alt="Hiruy Gym gallery" loading="lazy" /></button>
+      <button type="button" class="gallery-page-card"><img src="https://res.cloudinary.com/dhoymhers/image/upload/f_auto,q_auto,w_400/v1783699167/IMG_1871_aohckl.jpg" alt="Hiruy Gym gallery" loading="lazy" /></button>
+      <button type="button" class="gallery-page-card"><img src="https://res.cloudinary.com/dhoymhers/image/upload/f_auto,q_auto,w_400/v1783699180/IMG_1868_rs0hxr.jpg" alt="Hiruy Gym gallery" loading="lazy" /></button>
+      <button type="button" class="gallery-page-card"><img src="https://res.cloudinary.com/dhoymhers/image/upload/f_auto,q_auto,w_400/v1783699219/IMG_1884_txsidc.jpg" alt="Hiruy Gym gallery" loading="lazy" /></button>
+      <button type="button" class="gallery-page-card"><img src="https://res.cloudinary.com/dhoymhers/image/upload/f_auto,q_auto,w_400/v1783699220/IMG_1877_aeopqo.jpg" alt="Hiruy Gym gallery" loading="lazy" /></button>
+      <button type="button" class="gallery-page-card"><img src="https://res.cloudinary.com/dhoymhers/image/upload/f_auto,q_auto,w_400/v1783699261/IMG_1890_lwfqxj.jpg" alt="Hiruy Gym gallery" loading="lazy" /></button>
+      <button type="button" class="gallery-page-card"><img src="https://res.cloudinary.com/dhoymhers/image/upload/f_auto,q_auto,w_400/v1783699321/IMG_1916_kvx2j5.jpg" alt="Hiruy Gym gallery" loading="lazy" /></button>
+      <button type="button" class="gallery-page-card"><img src="https://res.cloudinary.com/dhoymhers/image/upload/f_auto,q_auto,w_400/v1783699326/IMG_1895_njdqtc.jpg" alt="Hiruy Gym gallery" loading="lazy" /></button>
+      <button type="button" class="gallery-page-card"><img src="https://res.cloudinary.com/dhoymhers/image/upload/f_auto,q_auto,w_400/v1783699332/IMG_1918_g07hs3.jpg" alt="Hiruy Gym gallery" loading="lazy" /></button>
+      <button type="button" class="gallery-page-card"><img src="https://res.cloudinary.com/dhoymhers/image/upload/f_auto,q_auto,w_400/v1783699345/IMG_1888_nhtkmv.jpg" alt="Hiruy Gym gallery" loading="lazy" /></button>
+      <button type="button" class="gallery-page-card"><img src="https://res.cloudinary.com/dhoymhers/image/upload/f_auto,q_auto,w_400/v1783699349/IMG_1919_knbwb9.jpg" alt="Hiruy Gym gallery" loading="lazy" /></button>
+      <button type="button" class="gallery-page-card"><img src="https://res.cloudinary.com/dhoymhers/image/upload/f_auto,q_auto,w_400/v1783699385/IMG_1920_nrwqxr.jpg" alt="Hiruy Gym gallery" loading="lazy" /></button>
+      <button type="button" class="gallery-page-card"><img src="https://res.cloudinary.com/dhoymhers/image/upload/f_auto,q_auto,w_400/v1783699397/IMG_1901_vr7bsg.jpg" alt="Hiruy Gym gallery" loading="lazy" /></button>
+    </div>
+  </div>
+</section>
+
+<div class="gallery-lightbox" id="gallery-lightbox" aria-hidden="true">
+  <div class="gallery-lightbox-frame">
+    <button type="button" class="gallery-lightbox-close" id="gallery-lightbox-close" aria-label="Close">&times;</button>
+    <img class="gallery-lightbox-img" id="gallery-lightbox-img" src="" alt="" />
+  </div>
+</div>
+
+    <section class="contact" id="contact">
+      <div class="section-inner contact-grid">
+        <div class="contact-copy">
+          <p class="eyebrow" data-am="ይጎብኙን">Visit Us</p>
+          <h2 data-am="እንጀምር።">Let's get you started.</h2>
+          <p class="section-lead" data-am="መልዕክት ይላኩልን፤ ቡድናችን በአንድ የስራ ቀን ውስጥ ይመልስልዎታል።">
+            Drop us a message and our team will get back to you within one
+            business day.
+          </p>
+
+          <div class="contact-details">
+            <p data-am="<strong>አድራሻ</strong><br /> አየር ጤና፣ አዲስ አበባ፣ ኢትዮጵያ"><strong>Address</strong><br /> Airetena, Addis Ababa, Ethiopia</p>
+            <p data-am="<strong>ሰዓታት</strong><br />ሰኞ – ቅዳሜ፣ 6:00 – 22:00"><strong>Hours</strong><br />Mon – Sat, 6:00 — 22:00</p>
+            <p data-am="<strong>ስልክ</strong><br />+251 910873929"><strong>Phone</strong><br />+251 910873929</p>
+          </div>
+        </div>
+
+        <div class="contact-phone-card">
+          <p class="eyebrow" data-am="ይደውሉልን">Call Us</p>
+          <div class="contact-phone-icon">
+            <svg viewBox="0 0 24 24" width="32" height="32" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12a19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 3.61 1h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 8.59a16 16 0 0 0 6 6l.96-.96a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/>
+            </svg>
+          </div>
+          <a href="tel:+251910873929" class="contact-phone-number">+251 910873929</a>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <footer class="site-footer">
+    <div class="section-inner footer-grid">
+      <div class="footer-brand">
+        <span class="logo-mark">H</span>
+        <span class="logo-text">Hiruy <em>Gym &amp; Spa</em></span>
+        <p>Train. Restore. Elevate.</p>
+      </div>
+
+      <div class="footer-links">
+        <h4>Explore</h4>
+        <a href="#about">About</a>
+        <a href="#gym">Gym</a>
+        <a href="#spa">Spa</a>
+        <a href="#membership">Membership</a>
+      </div>
+
+      <div class="footer-links">
+        <h4>Connect</h4>
+        <a href="#">Instagram</a>
+        <a href="#">Facebook</a>
+        <a href="https://www.tiktok.com/@hiruy.fitnessandspa" target="_blank" rel="noopener noreferrer">TikTok</a>
+      </div>
+    </div>
+    <p class="footer-bottom">&copy; 2026 Hiruy Gym &amp; Spa. All rights reserved.</p>
+  </footer>
+
+  <div class="quiz-overlay" id="quiz-overlay" aria-hidden="true">
+    <div class="quiz-card" id="quiz-card">
+
+      <div class="quiz-dots" id="quiz-dots">
+        <span class="quiz-dot active"></span>
+        <span class="quiz-dot"></span>
+        <span class="quiz-dot"></span>
+        <span class="quiz-dot"></span>
+        <span class="quiz-dot"></span>
+      </div>
+
+      <button class="quiz-close" id="quiz-close" aria-label="Close">&times;</button>
+
+      <div class="quiz-question" id="quiz-question"></div>
+      <div class="quiz-choices" id="quiz-choices"></div>
+
+      <button type="button" class="btn btn-primary quiz-next" id="quiz-next" disabled>Next</button>
+    </div>
+  </div>
+
+  <div class="tool-modal-overlay" id="tool-modal-overlay" aria-hidden="true">
+    <div class="tool-modal" id="tool-modal" role="dialog" aria-modal="true" aria-labelledby="tool-modal-title">
+      <button type="button" class="tool-modal-close" id="tool-modal-close" aria-label="Close">&times;</button>
+      <h3 class="tool-modal-title" id="tool-modal-title">Coming Soon</h3>
+      <div class="tool-modal-body" id="tool-modal-body"></div>
+      <div class="tool-modal-nav" id="tool-modal-nav" hidden>
+        <button type="button" class="tool-modal-arrow tool-modal-arrow-left" id="tool-modal-prev" aria-label="Previous quote">&#8592;</button>
+        <button type="button" class="tool-modal-arrow tool-modal-arrow-right" id="tool-modal-next" aria-label="Next quote">&#8594;</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="payment-modal-overlay" id="payment-modal-overlay" aria-hidden="true">
+    <div class="payment-modal" id="payment-modal" role="dialog" aria-modal="true" aria-labelledby="payment-modal-title">
+      <button type="button" class="payment-modal-close" id="payment-modal-close" aria-label="Close">&times;</button>
+      <h3 class="payment-modal-title" id="payment-modal-title">Gym Access — ETB 2,000/mo</h3>
+
+      <div class="payment-modal-accounts">
+        <button type="button" class="payment-copy-item" data-copy="1000397343018">
+          <span class="payment-label">CBE</span>
+          <span class="payment-number">1000397343018</span>
+          <span class="copy-icon" aria-hidden="true">⧉</span>
+        </button>
+        <button type="button" class="payment-copy-item" data-copy="4514535">
+          <span class="payment-label">Abissinya</span>
+          <span class="payment-number">4514535</span>
+          <span class="copy-icon" aria-hidden="true">⧉</span>
+        </button>
+        <button type="button" class="payment-copy-item" data-copy="+251910873929">
+          <span class="payment-label">Telebirr</span>
+          <span class="payment-number">+251910873929</span>
+          <span class="copy-icon" aria-hidden="true">⧉</span>
+        </button>
+      </div>
+
+      <p class="payment-modal-name"><strong>Selam Mengistu Markos</strong></p>
+
+      <p class="payment-modal-note">After payment, please screenshot the receipt and send it via Telegram.</p>
+
+      <a href="https://t.me/Davi2116" target="_blank" rel="noopener noreferrer" class="btn btn-primary payment-modal-telegram">Send on Telegram</a>
+    </div>
+  </div>
+
+  <script type="importmap">
+  {
+    "imports": {
+      "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
+      "firebase/app": "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js",
+      "firebase/firestore": "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js"
     }
-
-    overlay.classList.add("is-active");
-    overlay.setAttribute("aria-hidden", "false");
-    document.body.style.overflow = "hidden";
   }
-
-  function closeTool() {
-    overlay.classList.remove("is-active");
-    overlay.setAttribute("aria-hidden", "true");
-    document.body.style.overflow = "";
-  }
-
-  window._closeTool = closeTool;
-
-  nav.querySelectorAll(".quick-nav-item[data-tool]").forEach((btn) => {
-    btn.addEventListener("click", () => openTool(btn.dataset.tool));
-  });
-
-  const mobileRow = document.getElementById("mobile-quick-row");
-  mobileRow?.querySelectorAll(".mobile-quick-item[data-tool]").forEach((btn) => {
-    btn.addEventListener("click", () => openTool(btn.dataset.tool));
-  });
-
-  closeBtn?.addEventListener("click", closeTool);
-
-  nextBtn?.addEventListener("click", () => {
-    if (activeTool === "nutrition") {
-      nutritionIndex = (nutritionIndex + 1) % nutritionItems.length;
-      renderNutritionCard();
-    } else {
-      bodyEl.textContent = drawNextQuote();
-      renderQuoteNav();
-    }
-  });
-
-  prevBtn?.addEventListener("click", () => {
-    if (activeTool === "nutrition") {
-      nutritionIndex = (nutritionIndex - 1 + nutritionItems.length) % nutritionItems.length;
-      renderNutritionCard();
-    } else {
-      if (historyPos <= 0) return;
-      historyPos -= 1;
-      bodyEl.textContent = motivationQuotes[quoteHistory[historyPos]];
-      renderQuoteNav();
-    }
-  });
-
-  overlay.addEventListener("click", (e) => {
-    if (e.target === overlay) closeTool();
-  });
-
-  window.addEventListener("keydown", (e) => {
-    if (e.key === "Escape") closeTool();
-  });
-}
-
-   if ("scrollRestoration" in history) {
-  history.scrollRestoration = "manual";
-}
-window.scrollTo(0, 0);
-
-function getFallbackType(img) {
-  const card = img.closest(".gallery-card[data-card]");
-  if (card) {
-    const map = {
-      equipment: "gym",
-      training: "gym",
-      aerobics: "aerobics",
-      spa: "spa",
-      interior: "interior",
-    };
-    return map[card.dataset.card] || "gallery";
-  }
-  if (img.closest(".gallery-page-card")) return "gallery";
-  if (img.closest(".about-media") || img.closest(".portal-media")) return "portrait";
-  if (img.closest(".gym-media")) return "gym";
-  if (img.closest(".spa-media")) return "spa";
-  if (img.closest(".hero-media")) return "interior";
-  if (img.closest("#gallery-lightbox")) return "gallery";
-  return "default";
-}
-
-function applyImageFallback(img) {
-  if (!img || img.dataset.fallbackApplied === "true") return;
-  if (img.closest("[data-img-fallback]")) return;
-
-  img.dataset.fallbackApplied = "true";
-
-  const wrapper = document.createElement("span");
-  wrapper.setAttribute("data-img-fallback", "");
-  wrapper.setAttribute("data-type", getFallbackType(img));
-  wrapper.style.display = "block";
-  wrapper.style.width = "100%";
-  wrapper.style.height = "100%";
-
-  img.parentNode.insertBefore(wrapper, img);
-  wrapper.appendChild(img);
-
-  const content = document.createElement("span");
-  content.className = "img-fallback-content";
-  content.innerHTML = `
-    <span class="img-fallback-icon" data-type="${wrapper.dataset.type}"></span>
-    <span class="img-fallback-text">Image couldn't be loaded</span>
-  `;
-  wrapper.appendChild(content);
-
-  const markBroken = () => wrapper.classList.add("is-broken");
-  const markFixed = () => wrapper.classList.remove("is-broken");
-
-  img.addEventListener("error", markBroken);
-  img.addEventListener("load", markFixed);
-
-  if (img.complete && img.naturalWidth === 0) {
-    markBroken();
-  }
-}
-
-function initImageFallbacks() {
-  document.querySelectorAll("img").forEach(applyImageFallback);
-
-  const observer = new MutationObserver((mutations) => {
-    mutations.forEach((mutation) => {
-      mutation.addedNodes.forEach((node) => {
-        if (node.nodeType !== 1) return;
-        if (node.tagName === "IMG") {
-          applyImageFallback(node);
-        } else {
-          node.querySelectorAll?.("img").forEach(applyImageFallback);
-        }
-      });
-    });
-  });
-
-  observer.observe(document.body, { childList: true, subtree: true });
-}
-
-function initPaymentCopy() {
-  const items = document.querySelectorAll(".payment-copy-item");
-
-  items.forEach((item) => {
-    item.addEventListener("click", async () => {
-      const value = item.dataset.copy;
-      if (!value) return;
-
-      try {
-        await navigator.clipboard.writeText(value);
-      } catch (err) {
-        const temp = document.createElement("textarea");
-        temp.value = value;
-        temp.style.position = "fixed";
-        temp.style.opacity = "0";
-        document.body.appendChild(temp);
-        temp.select();
-        document.execCommand("copy");
-        document.body.removeChild(temp);
-      }
-
-      const numberEl = item.querySelector(".payment-number");
-      const iconEl = item.querySelector(".copy-icon");
-      const originalNumber = numberEl.textContent;
-      const originalIcon = iconEl.textContent;
-
-      item.classList.add("copied");
-      numberEl.textContent = "Copied";
-      iconEl.textContent = "✓";
-
-      setTimeout(() => {
-        item.classList.remove("copied");
-        numberEl.textContent = originalNumber;
-        iconEl.textContent = originalIcon;
-      }, 3000);
-    });
-  });
-}
-
-function initPaymentModal() {
-  const overlay  = document.getElementById("payment-modal-overlay");
-  const titleEl  = document.getElementById("payment-modal-title");
-  const closeBtn = document.getElementById("payment-modal-close");
-  if (!overlay) return;
-
-  function openPaymentModal(planName, planPrice) {
-    titleEl.textContent = `${planName} — ${planPrice}`;
-    overlay.classList.add("is-active");
-    overlay.setAttribute("aria-hidden", "false");
-  }
-
-  function closePaymentModal() {
-    overlay.classList.remove("is-active");
-    overlay.setAttribute("aria-hidden", "true");
-  }
-
-  document.querySelectorAll("#membership .book-trigger").forEach(btn => {
-    btn.addEventListener("click", (e) => {
-      e.preventDefault();
-      const card = btn.closest(".pricing-card");
-      const planName = card.querySelector("h3")?.textContent.trim() || "Membership";
-      const priceEl = card.querySelector(".price");
-      const planPrice = priceEl ? priceEl.childNodes[0].textContent.trim() + (priceEl.querySelector("span")?.textContent || "") : "";
-      openPaymentModal(planName, planPrice);
-    });
-  });
-
-  closeBtn.addEventListener("click", closePaymentModal);
-
-  overlay.addEventListener("click", (e) => {
-    if (e.target === overlay) closePaymentModal();
-  });
-
-  window.addEventListener("keydown", (e) => {
-    if (e.key === "Escape") closePaymentModal();
-  });
-}
-
-document.addEventListener("DOMContentLoaded", () => {
-  initLoader();
-  initHeaderScroll();
-  initMobileMenu();
-  initActiveSection();
-  initLanguageSwitch();
-  initBackgroundScene();
-  initGalleryAccordion();
-  initGalleryFullPage();
-  initBlurContact();
-  initAdminToggle();
-  initPhoneTracking();
-  initBookingQuiz();
-  initQuickNav();
-  initImageFallbacks();
-  initPaymentCopy();
-  initPaymentModal();
-});
+  </script>
+  <script type="module" src="script.js"></script>
+  <script src="support-widget.js" defer></script>
+</body>
+</html>
