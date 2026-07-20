@@ -1162,10 +1162,10 @@ function initBookingQuiz() {
     }
   }
 
-  document.querySelectorAll(".book-trigger, #book-btn-nav, #book-btn-mobile").forEach(btn => {
+  document.querySelectorAll("#gym .book-trigger, #spa .book-trigger, #book-btn-nav, #book-btn-mobile").forEach(btn => {
     btn.addEventListener("click", (e) => {
       e.preventDefault();
-      openQuiz();
+      document.getElementById("membership").scrollIntoView({ behavior: "smooth" });
     });
   });
 
@@ -1563,6 +1563,45 @@ function initPaymentCopy() {
   });
 }
 
+function initPaymentModal() {
+  const overlay  = document.getElementById("payment-modal-overlay");
+  const titleEl  = document.getElementById("payment-modal-title");
+  const closeBtn = document.getElementById("payment-modal-close");
+  if (!overlay) return;
+
+  function openPaymentModal(planName, planPrice) {
+    titleEl.textContent = `${planName} — ${planPrice}`;
+    overlay.classList.add("is-active");
+    overlay.setAttribute("aria-hidden", "false");
+  }
+
+  function closePaymentModal() {
+    overlay.classList.remove("is-active");
+    overlay.setAttribute("aria-hidden", "true");
+  }
+
+  document.querySelectorAll("#membership .book-trigger").forEach(btn => {
+    btn.addEventListener("click", (e) => {
+      e.preventDefault();
+      const card = btn.closest(".pricing-card");
+      const planName = card.querySelector("h3")?.textContent.trim() || "Membership";
+      const priceEl = card.querySelector(".price");
+      const planPrice = priceEl ? priceEl.childNodes[0].textContent.trim() + (priceEl.querySelector("span")?.textContent || "") : "";
+      openPaymentModal(planName, planPrice);
+    });
+  });
+
+  closeBtn.addEventListener("click", closePaymentModal);
+
+  overlay.addEventListener("click", (e) => {
+    if (e.target === overlay) closePaymentModal();
+  });
+
+  window.addEventListener("keydown", (e) => {
+    if (e.key === "Escape") closePaymentModal();
+  });
+}
+
 document.addEventListener("DOMContentLoaded", () => {
   initLoader();
   initHeaderScroll();
@@ -1579,4 +1618,5 @@ document.addEventListener("DOMContentLoaded", () => {
   initQuickNav();
   initImageFallbacks();
   initPaymentCopy();
+  initPaymentModal();
 });
