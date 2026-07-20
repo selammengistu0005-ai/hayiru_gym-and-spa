@@ -975,6 +975,28 @@ section {
   opacity: 0.5;
 }
 
+.li-glow {
+  color: var(--c-red-solid) !important;
+  font-weight: 600;
+  animation: liBreathe 2.4s ease-in-out infinite;
+}
+
+.li-glow::before {
+  color: var(--c-red-solid);
+  opacity: 1 !important;
+}
+
+@keyframes liBreathe {
+  0%, 100% {
+    text-shadow: 0 0 4px rgba(230, 57, 70, 0.3);
+    opacity: 0.85;
+  }
+  50% {
+    text-shadow: 0 0 12px rgba(230, 57, 70, 0.85), 0 0 20px rgba(230, 57, 70, 0.4);
+    opacity: 1;
+  }
+}
+
 .pricing-card .btn { width: 100%; }
 
 .payment-info {
