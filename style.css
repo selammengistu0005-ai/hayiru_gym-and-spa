@@ -62,6 +62,10 @@ html {
     transition-duration: 0.001ms !important;
     scroll-behavior: auto !important;
   }
+  .li-glow {
+    animation-duration: 2.4s !important;
+    animation-iteration-count: infinite !important;
+  }
 }
 
 body, h1, h2, h3, h4, p, ul, ol, figure {
