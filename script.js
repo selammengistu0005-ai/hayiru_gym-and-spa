@@ -1018,6 +1018,7 @@ function initBookingLinks() {
   document.querySelectorAll("#gym .book-trigger, #spa .book-trigger, #book-btn-nav, #book-btn-mobile").forEach(btn => {
     btn.addEventListener("click", (e) => {
       e.preventDefault();
+      window._closeMobileMenu?.();
       document.getElementById("membership").scrollIntoView({ behavior: "smooth" });
     });
   });
