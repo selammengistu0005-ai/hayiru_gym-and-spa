@@ -2903,6 +2903,7 @@ body.admin-active #bg-canvas {
   .hero-actions { flex-direction: column; width: 100%; }
   .hero-actions .btn { width: 100%; }
 
+  .lang-switch { bottom: 1rem; left: 1rem; }
   .lang-switch-btn { padding: 0.5rem 0.8rem; font-size: 0.8rem; }
   .lang-switch-menu { min-width: 120px; }
 }
