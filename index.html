@@ -197,19 +197,6 @@
 
       <button type="button" class="nav-cta" id="book-btn-nav" data-am="ይመዝገቡ">Book a Visit</button>
 
-      <div class="lang-switch" id="lang-switch">
-        <button type="button" class="lang-switch-btn" id="lang-switch-btn" aria-haspopup="listbox" aria-expanded="false">
-          <span id="lang-switch-label">English</span>
-          <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-            <polyline points="6 9 12 15 18 9"/>
-          </svg>
-        </button>
-        <ul class="lang-switch-menu" id="lang-switch-menu" role="listbox" aria-hidden="true">
-          <li><button type="button" class="lang-switch-option active" data-lang="en" role="option" aria-selected="true">English</button></li>
-          <li><button type="button" class="lang-switch-option" data-lang="am" role="option" aria-selected="false">አማርኛ</button></li>
-        </ul>
-      </div>
-
       <button class="hamburger" id="hamburger" aria-label="Open menu" aria-expanded="false" aria-controls="mobile-menu">
         <span></span>
         <span></span>
@@ -217,6 +204,20 @@
       </button>
       </nav>
   </header>
+
+  <div class="lang-switch" id="lang-switch">
+    <button type="button" class="lang-switch-btn" id="lang-switch-btn" aria-haspopup="listbox" aria-expanded="false">
+      <span id="lang-switch-label">English</span>
+      <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <polyline points="6 9 12 15 18 9"/>
+      </svg>
+    </button>
+    <ul class="lang-switch-menu" id="lang-switch-menu" role="listbox" aria-hidden="true">
+      <li><button type="button" class="lang-switch-option active" data-lang="en" role="option" aria-selected="true">English</button></li>
+      <li><button type="button" class="lang-switch-option" data-lang="am" role="option" aria-selected="false">አማርኛ</button></li>
+    </ul>
+  </div>
+
   <div class="mobile-menu" id="mobile-menu">
       <ul class="mobile-links">
         <li><a href="#home"       class="nav-link" data-section="home" data-am="መነሻ">Home</a></li>
@@ -328,75 +329,38 @@
       </div>
 
       <div class="hero-content">
-        <p class="eyebrow" data-am="አዲስ አበባ · የላቀ ፊትነስ እና ጤና">Addis Ababa &middot; Premium Fitness &amp; Wellness</p>
-        <h1 class="hero-title" id="hero-title" data-am='ጥንካሬ <span class="accent">ጥንካሬ</span>'>
-          Where <span class="accent">strength</span><br />
-          meets <span class="accent">stillness</span>.
-        </h1>
-        <p class="hero-sub" data-am="ሂሩይ ጂም እና ስፓ ደረጃውን የጠበቀ ስልጠናን እና ስፓን በአንድ ጣሪያ ስር ያመጣ — ሰውነታቸውን እንደ ግባቸው ለሚያስቡ ሰዎች የተዘጋጀ።">
-          Hiruy Gym &amp; Spa brings world-class training and restorative spa
-          rituals together under one roof — built for people who take their
-          body as seriously as their ambition.
-        </p>
-        <div class="hero-actions">
-          <a href="#membership" class="btn btn-primary" data-am="እዚህ ይመዝገቡ">Register</a>
-          <a href="#about" class="btn btn-ghost" data-am="ስለ ሂሩይ">Discover Hiruy</a>
+        <div class="hero-copy">
+          <p class="eyebrow" data-am="አዲስ አበባ · የላቀ ፊትነስ እና ጤና">Addis Ababa &middot; Premium Fitness &amp; Wellness</p>
+          <h1 class="hero-title" id="hero-title" data-am='ጥንካሬ <span class="accent">ጥንካሬ</span>'>
+            Where <span class="accent">strength</span><br />
+            meets <span class="accent">stillness</span>.
+          </h1>
+          <p class="hero-sub" data-am="ሂሩይ ጂም እና ስፓ ደረጃውን የጠበቀ ስልጠናን እና ስፓን በአንድ ጣሪያ ስር ያመጣ — ሰውነታቸውን እንደ ግባቸው ለሚያስቡ ሰዎች የተዘጋጀ።">
+            Hiruy Gym &amp; Spa brings world-class training and restorative spa
+            rituals together under one roof — built for people who take their
+            body as seriously as their ambition.
+          </p>
+          <div class="hero-actions">
+            <a href="#membership" class="btn btn-primary" data-am="እዚህ ይመዝገቡ">Register</a>
+            <a href="#about" class="btn btn-ghost" data-am="ስለ ሂሩይ">Discover Hiruy</a>
+          </div>
+        </div>
+
+        <div class="hero-video-box">
+          <video
+            src="https://res.cloudinary.com/dhoymhers/video/upload/f_auto,q_auto,w_800/v1784724796/Hiruy_GYM_VIDEO_uyncna.mp4"
+            autoplay
+            muted
+            loop
+            playsinline
+            preload="auto"
+          ></video>
         </div>
       </div>
 
       <div class="scroll-cue" aria-hidden="true">
         <span></span>
         <p data-am="ወደ ታች">Scroll</p>
-      </div>
-    </section>
-
-    <section class="about" id="about">
-      <div class="section-inner about-grid">
-        <div class="about-media">
-          <img src="https://res.cloudinary.com/dhoymhers/image/upload/f_auto,q_auto,w_800/v1783838609/Owner_image_vqdcxn.jpg" alt="Hiruy Gym owner" loading="lazy" />
-          <div class="comment-card">
-            <div class="comment-card-header">
-              <span class="comment-card-name">Dawit</span>
-              <span class="comment-card-badge">
-                <svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor" aria-hidden="true">
-                  <path d="M9 16.2l-3.5-3.5L4 14.2l5 5 11-11-1.5-1.5z"/>
-                </svg>
-                Verified
-              </span>
-            </div>
-            <p class="comment-card-role" data-am="ባለቤት፣ ሂሩይ ጂም እና ስፓ">Owner, Hiruy Gym &amp; Spa</p>
-            <p class="comment-card-text">"ጥንካሬ የሚገነባው በትግስት ነው፤ እያንዳንዱ ቀን አንድ እርምጃ ወደ ግባችሁ ነው።"</p>
-          </div>
-        </div>
-        <div class="about-copy">
-          <p class="eyebrow" data-am="ስለ ሂሩይ">About Hiruy</p>
-          <h2 data-am="ፍልስፍናችን">Our philosophy.</h2>
-          <p data-am="ሂሩይን የገነባነው በቀላል እምነት ላይ ነው፦ እውነተኛ ጥንካሬ ጥረትንም እረፍትንም ይፈልጋል የእኛ ጂም ለጠንካራ ስልጠና ታስቦ የተሰራ ነው — ስፓችን ሰውነትዎ እንዲያገግም ይረዳል። ሁለቱም ያለ አንዳቸው አይሰሩም።">
-            We built Hiruy on a simple belief: real wellbeing needs both
-            effort and rest. Our gym floor is designed for serious training —
-            our spa exists to help your body recover from it. Neither half
-            works without the other.
-          </p>
-          <p data-am="ከመብራታችን እስከ መሣሪያዎቻችን ድረስ እያንዳንዱ ዝርዝር ከእኛ ጋር የሚያሳልፉት ሰዓት የታሰበበት እንጂ የተጣደፈ እንዳይመስል ተደርጎ የተመረጠ ነው።">
-            Every detail, from our lighting to our equipment to our
-            treatment rooms, is chosen to make the hour you spend with us
-            feel considered, not rushed.
-          </p>
-          <div class="about-stats">
-            <div class="stat">
-              <span class="stat-num">12+</span>
-              <span class="stat-label" data-am="በአዲስ አበባ ዓመታት">Years in Addis</span>
-            </div>
-            <div class="stat">
-              <span class="stat-num">30+</span>
-              <span class="stat-label" data-am="አሰልጣኞች እና ቴራፒስቶች">Trainers &amp; Therapists</span>
-            </div>
-            <div class="stat">
-              <span class="stat-num">5</span>
-              <span class="stat-label" data-am="የሕክምና ክፍሎች">Treatment Suites</span>
-            </div>
-          </div>
-        </div>
       </div>
     </section>
 
@@ -420,7 +384,7 @@
         </div>
         <div class="gym-media">
           <img
-            src="https://res.cloudinary.com/dhoymhers/image/upload/f_auto,q_auto,w_800/v1782307349/hayru_gym_equioments_maiako.jpg"
+          src="https://res.cloudinary.com/dhoymhers/image/upload/f_auto,q_auto,w_800/v1783699345/IMG_1888_nhtkmv.jpg"
             alt="Gym equipment at Hiruy Gym"
             loading="lazy"
           />
@@ -491,48 +455,22 @@
 
         <div class="gallery-grid" id="gallery-grid">
           <article class="gallery-card gallery-popup-trigger" data-card="equipment">
-            <img src="https://res.cloudinary.com/dhoymhers/image/upload/f_auto,q_auto,w_800/v1782307349/hayru_gym_equioments_maiako.jpg" alt="Equipment at Hiruy Gym" loading="lazy" />
-            <div class="gallery-card-overlay">
-              <h3>Equipment</h3>
-              <p class="gallery-desc-en"><strong>Precision-built power.</strong> Free weights, racks, and platforms designed for serious lifting, at every training age.</p>
-              <p class="gallery-desc-am"><strong>ጥራት ያለው የአካል ብቃት መሣሪያ።</strong> ለማንኛውም የስልጠና ደረጃ የተዘጋጁ ማሽኖችና እቃዎች።</p>
-            </div>
+            <img src="https://res.cloudinary.com/dhoymhers/image/upload/f_auto,q_auto,w_800/v1783699397/IMG_1901_vr7bsg.jpg" alt="Equipment at Hiruy Gym" loading="lazy" />
           </article>
 
           <article class="gallery-card gallery-popup-trigger" data-card="aerobics">
-            <img src="https://res.cloudinary.com/dhoymhers/image/upload/f_auto,q_auto,w_800/v1782307348/hayru_gym_aerobics_kqqu8z.jpg" alt="Aerobics class at Hiruy Gym" loading="lazy" />
-            <div class="gallery-card-overlay">
-              <h3>Aerobics Class</h3>
-              <p class="gallery-desc-en"><strong>Move together, grow together.</strong> Conditioning, mobility, and strength classes guided by coaches who pay attention.</p>
-              <p class="gallery-desc-am"><strong>በጋራ እንቅስቃሴ፣ በጋራ ለውጥ።</strong> በልምድ ያላቸው አሰልጣኞች የሚመሩ የአካል ብቃት ክፍሎች።</p>
-            </div>
+            <img src="https://res.cloudinary.com/dhoymhers/image/upload/f_auto,q_auto,w_800/v1783699261/IMG_1890_lwfqxj.jpg" alt="Aerobics class at Hiruy Gym" loading="lazy" />
           </article>
 
           <article class="gallery-card gallery-popup-trigger" data-card="spa">
-            <img src="https://res.cloudinary.com/dhoymhers/image/upload/f_auto,q_auto,w_800/v1782307347/hayru_gym_spa_twizim.jpg" alt="Spa at Hiruy Gym" loading="lazy" />
-            <div class="gallery-card-overlay">
-              <h3>Spa</h3>
-              <p class="gallery-desc-en"><strong>Recovery is part of the work.</strong> Massage, hydrotherapy, and skin care designed to help your body absorb the effort you give it.</p>
-              <p class="gallery-desc-am"><strong>ማገገም የስራው አካል ነው።</strong> ሰውነትዎ የሰራውን ልፋት እንዲወክል የተዘጋጀ ማሳጅና ሕክምና።</p>
-            </div>
+            <img src="https://res.cloudinary.com/dhoymhers/image/upload/f_auto,q_auto,w_800/v1783699219/IMG_1884_txsidc.jpg" alt="Spa at Hiruy Gym" loading="lazy" />
           </article>
 
           <article class="gallery-card gallery-popup-trigger" data-card="interior">
-            <img src="https://res.cloudinary.com/dhoymhers/image/upload/f_auto,q_auto,w_800/v1782302191/hiruy_gym_2_hacfxp.jpg" alt="Interior of Hiruy Gym" loading="lazy" />
-            <div class="gallery-card-overlay">
-              <h3>Interior</h3>
-              <p class="gallery-desc-en"><strong>Designed for stillness and focus.</strong> Every light, surface, and corner of Hiruy is chosen with intention.</p>
-              <p class="gallery-desc-am"><strong>ለትኩረትና ለሰላም የተነደፈ ቦታ።</strong> እያንዳንዱ ጥግ በዓላማ የተመረጠ ነው።</p>
-            </div>
+            <img src="https://res.cloudinary.com/dhoymhers/image/upload/f_auto,q_auto,w_800/v1783699167/IMG_1871_aohckl.jpg" alt="Interior of Hiruy Gym" loading="lazy" />
           </article>
-
           <article class="gallery-card gallery-popup-trigger" data-card="training">
-            <img src="https://res.cloudinary.com/dhoymhers/image/upload/f_auto,q_auto,w_800/v1782307349/hayru_gym_equioments_maiako.jpg" alt="Training area at Hiruy Gym" loading="lazy" />
-            <div class="gallery-card-overlay">
-              <h3>Built for Serious Training</h3>
-              <p class="gallery-desc-en"><strong>Every rep, every set, with purpose.</strong> Space and equipment shaped around real training, not just aesthetics.</p>
-              <p class="gallery-desc-am"><strong>እያንዳንዱ ልምምድ በዓላማ።</strong> ለእውነተኛ ስልጠና የተዘጋጀ ቦታና እቃዎች።</p>
-            </div>
+            <img src="https://res.cloudinary.com/dhoymhers/image/upload/f_auto,q_auto,w_800/v1783699332/IMG_1918_g07hs3.jpg" alt="Training area at Hiruy Gym" loading="lazy" />
           </article>
 
           <article class="gallery-card gallery-view-all" id="gallery-view-all-card">
@@ -586,6 +524,58 @@
     <img class="gallery-lightbox-img" id="gallery-lightbox-img" src="" alt="" />
   </div>
 </div>
+
+</div>
+
+    <section class="about" id="about">
+      <div class="section-inner about-grid">
+        <div class="about-media">
+          <img src="https://res.cloudinary.com/dhoymhers/image/upload/f_auto,q_auto,w_800/v1783838609/Owner_image_vqdcxn.jpg" alt="Hiruy Gym owner" loading="lazy" />
+          <div class="comment-card">
+            <div class="comment-card-header">
+              <span class="comment-card-name">Dawit</span>
+              <span class="comment-card-badge">
+                <svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor" aria-hidden="true">
+                  <path d="M9 16.2l-3.5-3.5L4 14.2l5 5 11-11-1.5-1.5z"/>
+                </svg>
+                Verified
+              </span>
+            </div>
+            <p class="comment-card-role" data-am="ባለቤት፣ ሂሩይ ጂም እና ስፓ">Owner, Hiruy Gym &amp; Spa</p>
+            <p class="comment-card-text">"ጥንካሬ የሚገነባው በትግስት ነው፤ እያንዳንዱ ቀን አንድ እርምጃ ወደ ግባችሁ ነው።"</p>
+          </div>
+        </div>
+        <div class="about-copy">
+          <p class="eyebrow" data-am="ስለ ሂሩይ">About Hiruy</p>
+          <h2 data-am="ፍልስፍናችን">Our philosophy.</h2>
+          <p data-am="ሂሩይን የገነባነው በቀላል እምነት ላይ ነው፦ እውነተኛ ጥንካሬ ጥረትንም እረፍትንም ይፈልጋል የእኛ ጂም ለጠንካራ ስልጠና ታስቦ የተሰራ ነው — ስፓችን ሰውነትዎ እንዲያገግም ይረዳል። ሁለቱም ያለ አንዳቸው አይሰሩም።">
+            We built Hiruy on a simple belief: real wellbeing needs both
+            effort and rest. Our gym floor is designed for serious training —
+            our spa exists to help your body recover from it. Neither half
+            works without the other.
+          </p>
+          <p data-am="ከመብራታችን እስከ መሣሪያዎቻችን ድረስ እያንዳንዱ ዝርዝር ከእኛ ጋር የሚያሳልፉት ሰዓት የታሰበበት እንጂ የተጣደፈ እንዳይመስል ተደርጎ የተመረጠ ነው።">
+            Every detail, from our lighting to our equipment to our
+            treatment rooms, is chosen to make the hour you spend with us
+            feel considered, not rushed.
+          </p>
+          <div class="about-stats">
+            <div class="stat">
+              <span class="stat-num">12+</span>
+              <span class="stat-label" data-am="በአዲስ አበባ ዓመታት">Years in Addis</span>
+            </div>
+            <div class="stat">
+              <span class="stat-num">30+</span>
+              <span class="stat-label" data-am="አሰልጣኞች እና ቴራፒስቶች">Trainers &amp; Therapists</span>
+            </div>
+            <div class="stat">
+              <span class="stat-num">5</span>
+              <span class="stat-label" data-am="የሕክምና ክፍሎች">Treatment Suites</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
 
     <section class="contact" id="contact">
       <div class="section-inner contact-grid">
