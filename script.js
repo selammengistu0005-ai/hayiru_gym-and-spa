@@ -678,50 +678,6 @@ if (adminBtnMobile) adminBtnMobile.addEventListener("click", () => { window._clo
   }
 }
 
-function initBlurContact() {
-  const targets = document.querySelectorAll(
-    ".contact-copy h2, .contact-copy .section-lead, .contact-details p"
-  );
-  if (!targets.length) return;
-
-  targets.forEach((el) => {
-    const words = el.textContent.trim().split(/\s+/);
-    el.innerHTML = "";
-    el.style.display = "flex";
-    el.style.flexWrap = "wrap";
-
-    words.forEach((word, i) => {
-      const span = document.createElement("span");
-      span.textContent = word + (i < words.length - 1 ? "\u00A0" : "");
-      span.style.display = "inline-block";
-      span.style.filter = "blur(10px)";
-      span.style.opacity = "0";
-      span.style.transform = "translateY(20px)";
-      span.style.transition = `filter 0.5s ease, opacity 0.5s ease, transform 0.5s ease`;
-      span.style.transitionDelay = `${i * 0.05}s`;
-      el.appendChild(span);
-    });
-  });
-
-  const observer = new IntersectionObserver(
-    (entries, obs) => {
-      entries.forEach((entry) => {
-        if (entry.isIntersecting) {
-          entry.target.querySelectorAll("span").forEach((span) => {
-            span.style.filter = "blur(0px)";
-            span.style.opacity = "1";
-            span.style.transform = "translateY(0)";
-          });
-          obs.unobserve(entry.target);
-        }
-      });
-    },
-    { threshold: 0.2 }
-  );
-
-  targets.forEach((el) => observer.observe(el));
-}
-
 function initBackgroundScene() {
   const canvas = document.getElementById("bg-canvas");
   if (!canvas) return;
@@ -1453,7 +1409,6 @@ document.addEventListener("DOMContentLoaded", () => {
   initBackgroundScene();
   initGalleryAccordion();
   initGalleryFullPage();
-  initBlurContact();
   initAdminToggle();
   initPhoneTracking();
   initBookingLinks();
