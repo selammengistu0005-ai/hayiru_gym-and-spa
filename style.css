@@ -843,30 +843,6 @@ section {
   margin-bottom: 1.2rem;
 }
 
-.about-stats {
-  display: flex;
-  gap: 2.5rem;
-  margin-top: 2rem;
-  flex-wrap: wrap;
-}
-
-.stat {
-  display: flex;
-  flex-direction: column;
-}
-
-.stat-num {
-  font-family: var(--f-display);
-  font-size: 2.2rem;
-  color: var(--c-ink);
-}
-
-.stat-label {
-  font-size: 0.8rem;
-  color: var(--c-blue-mid);
-  letter-spacing: 0.04em;
-}
-
 .spa {
   background: linear-gradient(180deg, var(--c-blue-pale) 0%, rgba(234, 241, 251, 0) 100%);
 }
