@@ -14,7 +14,7 @@
       ],
     },
     hours: {
-      bot: "We're open Mon – Sat, 6:00 — 22:00.\n\n📍 Bole Road, Addis Ababa, Ethiopia\n☎️ +251 900 000 000",
+      bot: "We're open Mon – Sat, 6:00 — 22:00.\n\n📍 Airetena, Addis Ababa, Ethiopia\n☎️ +251 910873929",
       options: [
         { label: "Call Us", action: "call" },
         { label: "Go to Contact Section", action: "scrollContact" },
@@ -29,7 +29,7 @@
       ],
     },
     pricingPlans: {
-      bot: "Gym Access — ETB 2,000/mo\n• Full gym floor access\n• Group class access\n• Locker & shower\n\nGym + Spa (Most Popular) — ETB 3,000/mo\n• Full gym floor access\n• Spa treatments\n• Priority class booking\n• Locker & shower",
+      bot: "Gym Access — ETB 2,000/mo\n• Full gym floor access\n• Group class access\n• Locker & shower\n\nGym + Spa (Most Popular) — ETB 3,500/mo\n• Full gym floor access\n• Spa treatments\n• Priority class booking\n• Locker & shower\n• Trainer Followup",
       options: [
         { label: "View Membership Page", action: "scrollMembership" },
         { label: "Book Now", action: "openQuiz" },
@@ -68,7 +68,7 @@
     contact: {
       bot: "We'd love to hear from you directly.",
       options: [
-        { label: "Call +251 900 000 000", action: "call" },
+        { label: "Call +251 910873929", action: "call" },
         { label: "Go to Contact Form", action: "scrollContact" },
       ],
     },
@@ -94,6 +94,7 @@
       transition: transform 0.25s cubic-bezier(0.22,1,0.36,1), box-shadow 0.25s cubic-bezier(0.22,1,0.36,1);
     }
     #hiruy-support-btn:hover { transform: scale(1.07); box-shadow: 0 14px 34px rgba(11, 27, 58, 0.34); }
+    #hiruy-support-btn:active { transform: scale(0.94); }
     #hiruy-support-btn svg { width: 24px; height: 24px; }
     #hiruy-support-btn .hs-icon-close { display: none; }
     #hiruy-support-btn.is-open .hs-icon-chat { display: none; }
@@ -145,12 +146,27 @@
       font-weight: 500;
       letter-spacing: 0.01em;
     }
-    #hiruy-support-panel .hs-header span {
-      display: block;
+    #hiruy-support-panel .hs-status {
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
       font-family: var(--f-body, sans-serif);
       font-size: 0.72rem;
-      opacity: 0.75;
-      margin-top: 0.15rem;
+      opacity: 0.8;
+      margin-top: 0.3rem;
+    }
+    #hiruy-support-panel .hs-status-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: #4ade80;
+      flex: none;
+      animation: hsPulse 2s infinite;
+    }
+    @keyframes hsPulse {
+      0% { box-shadow: 0 0 0 0 rgba(74, 222, 128, 0.55); }
+      70% { box-shadow: 0 0 0 6px rgba(74, 222, 128, 0); }
+      100% { box-shadow: 0 0 0 0 rgba(74, 222, 128, 0); }
     }
     #hiruy-support-panel .hs-close {
       background: none;
@@ -161,8 +177,38 @@
       line-height: 1;
       cursor: pointer;
       padding: 0.2rem;
+      transition: opacity 0.2s ease, transform 0.15s ease;
     }
     #hiruy-support-panel .hs-close:hover { opacity: 1; }
+    #hiruy-support-panel .hs-close:active { transform: scale(0.88); }
+
+    #hiruy-support-panel .hs-body-wrap {
+      position: relative;
+      flex: 1;
+      min-height: 0;
+      display: flex;
+      flex-direction: column;
+    }
+
+    #hiruy-support-panel .hs-scroll-shadow {
+      position: absolute;
+      left: 0;
+      right: 0;
+      height: 22px;
+      pointer-events: none;
+      opacity: 0;
+      transition: opacity 0.2s ease;
+      z-index: 2;
+    }
+    #hiruy-support-panel .hs-scroll-shadow--top {
+      top: 0;
+      background: linear-gradient(to bottom, rgba(255,255,255,0.95), rgba(255,255,255,0));
+    }
+    #hiruy-support-panel .hs-scroll-shadow--bottom {
+      bottom: 0;
+      background: linear-gradient(to top, rgba(255,255,255,0.95), rgba(255,255,255,0));
+    }
+    #hiruy-support-panel .hs-scroll-shadow.is-visible { opacity: 1; }
 
     #hiruy-support-panel .hs-body {
       flex: 1;
@@ -170,21 +216,54 @@
       padding: 1.1rem;
       display: flex;
       flex-direction: column;
-      gap: 0.9rem;
+      gap: 1.1rem;
+    }
+
+    .hs-message {
+      display: flex;
+      flex-direction: column;
+      align-self: flex-start;
+      max-width: 92%;
     }
 
     .hs-bubble {
+      position: relative;
       background: var(--c-blue-pale, #eaf1fb);
       color: var(--c-ink, #0b1b3a);
       padding: 0.75rem 0.95rem;
-      border-radius: 14px 14px 14px 4px;
+      border-radius: 16px 16px 16px 4px;
       font-family: var(--f-body, sans-serif);
       font-size: 0.88rem;
       line-height: 1.5;
-      white-space: pre-line;
-      max-width: 92%;
-      align-self: flex-start;
       animation: hsFadeIn 0.25s ease-in-out;
+    }
+    .hs-bubble::before {
+      content: "";
+      position: absolute;
+      left: -6px;
+      bottom: 0;
+      width: 12px;
+      height: 12px;
+      background: var(--c-blue-pale, #eaf1fb);
+      clip-path: polygon(100% 0, 100% 100%, 0% 100%);
+    }
+
+    .hs-bubble .hs-line { margin: 0 0 0.35rem; }
+    .hs-bubble .hs-line:last-child { margin-bottom: 0; }
+    .hs-bubble .hs-line-strong { font-weight: 600; }
+    .hs-bubble .hs-list {
+      margin: 0 0 0.35rem;
+      padding-left: 1.1rem;
+    }
+    .hs-bubble .hs-list:last-child { margin-bottom: 0; }
+    .hs-bubble .hs-list li { margin-bottom: 0.2rem; }
+    .hs-bubble .hs-list li:last-child { margin-bottom: 0; }
+
+    .hs-timestamp {
+      font-family: var(--f-body, sans-serif);
+      font-size: 0.68rem;
+      color: rgba(11, 27, 58, 0.42);
+      margin: 0.3rem 0 0 0.35rem;
     }
 
     @keyframes hsFadeIn {
@@ -199,6 +278,10 @@
     }
 
     .hs-option-btn {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.5rem;
       text-align: left;
       background: #fff;
       border: 1.5px solid rgba(11, 27, 58, 0.12);
@@ -211,11 +294,33 @@
       cursor: pointer;
       transition: background 0.2s ease, border-color 0.2s ease, transform 0.2s ease;
     }
+    .hs-option-btn::after {
+      content: "›";
+      flex: none;
+      font-size: 1.05rem;
+      line-height: 1;
+      opacity: 0.4;
+      transition: transform 0.2s ease, opacity 0.2s ease;
+    }
     .hs-option-btn:hover {
       background: var(--c-blue-pale, #eaf1fb);
       border-color: var(--c-blue-mid, #3d5aa6);
       transform: translateX(2px);
     }
+    .hs-option-btn:hover::after { transform: translateX(2px); opacity: 0.75; }
+    .hs-option-btn:active { transform: scale(0.97); }
+
+    .hs-option-btn--primary {
+      background: linear-gradient(145deg, var(--c-blue-deep, #12275c), var(--c-ink, #0b1b3a));
+      border-color: transparent;
+      color: #fff;
+    }
+    .hs-option-btn--primary::after { opacity: 0.8; }
+    .hs-option-btn--primary:hover {
+      background: linear-gradient(145deg, var(--c-blue-mid, #3d5aa6), var(--c-blue-deep, #12275c));
+      border-color: transparent;
+    }
+    .hs-option-btn--primary:active { transform: scale(0.97); }
 
     .hs-nav-row {
       flex: none;
@@ -235,9 +340,10 @@
       font-weight: 600;
       color: var(--c-blue-deep, #12275c);
       cursor: pointer;
-      transition: background 0.2s ease;
+      transition: background 0.2s ease, transform 0.15s ease;
     }
     .hs-nav-btn:hover { background: var(--c-blue-pale, #eaf1fb); }
+    .hs-nav-btn:active { transform: scale(0.96); }
 
     @media (max-width: 480px) {
       #hiruy-support-btn { bottom: 1rem; right: 1rem; width: 52px; height: 52px; }
@@ -279,11 +385,15 @@
       <div class="hs-header">
         <div>
           <h4>Hiruy Assistant</h4>
-          <span>Usually replies instantly</span>
+          <span class="hs-status"><span class="hs-status-dot"></span>Usually replies instantly</span>
         </div>
         <button type="button" class="hs-close" id="hiruy-support-close" aria-label="Close support">&times;</button>
       </div>
-      <div class="hs-body" id="hiruy-support-body"></div>
+      <div class="hs-body-wrap">
+        <div class="hs-scroll-shadow hs-scroll-shadow--top" id="hiruy-support-shadow-top"></div>
+        <div class="hs-body" id="hiruy-support-body"></div>
+        <div class="hs-scroll-shadow hs-scroll-shadow--bottom" id="hiruy-support-shadow-bottom"></div>
+      </div>
       <div class="hs-nav-row" id="hiruy-support-nav"></div>
     `;
 
@@ -292,12 +402,58 @@
     return { btn, panel };
   }
 
+  function getCurrentTime() {
+    const d = new Date();
+    let h = d.getHours();
+    const m = d.getMinutes().toString().padStart(2, "0");
+    const ampm = h >= 12 ? "PM" : "AM";
+    h = h % 12 || 12;
+    return `${h}:${m} ${ampm}`;
+  }
+
+  function renderBubbleContent(text) {
+    const frag = document.createDocumentFragment();
+    const blocks = text.split("\n\n");
+
+    blocks.forEach((block) => {
+      const lines = block.split("\n").filter(Boolean);
+      const hasList = lines.some((l) => l.trim().startsWith("•"));
+      let i = 0;
+
+      while (i < lines.length) {
+        if (lines[i].trim().startsWith("•")) {
+          const ul = document.createElement("ul");
+          ul.className = "hs-list";
+          while (i < lines.length && lines[i].trim().startsWith("•")) {
+            const li = document.createElement("li");
+            li.textContent = lines[i].trim().replace(/^•\s*/, "");
+            ul.appendChild(li);
+            i++;
+          }
+          frag.appendChild(ul);
+        } else {
+          const p = document.createElement("p");
+          p.className = "hs-line" + (hasList && i === 0 ? " hs-line-strong" : "");
+          p.textContent = lines[i];
+          frag.appendChild(p);
+          i++;
+        }
+      }
+    });
+
+    return frag;
+  }
+
+  const PRIMARY_ACTIONS = new Set(["openQuiz", "call"]);
+
   function initSupportWidget() {
     injectStyle();
     const { btn, panel } = buildMarkup();
     const bodyEl = panel.querySelector("#hiruy-support-body");
     const navEl = panel.querySelector("#hiruy-support-nav");
     const closeBtn = panel.querySelector("#hiruy-support-close");
+    const shadowTop = panel.querySelector("#hiruy-support-shadow-top");
+    const shadowBottom = panel.querySelector("#hiruy-support-shadow-bottom");
 
     let currentId = "root";
     const history = [];
@@ -315,7 +471,7 @@
           document.getElementById("membership")?.scrollIntoView({ behavior: "smooth" });
           break;
         case "call":
-          window.location.href = "tel:+251900000000";
+          window.location.href = "tel:+251910873929";
           break;
       }
     }
@@ -339,16 +495,32 @@
       render();
     }
 
+    function updateScrollShadows() {
+      const { scrollTop, scrollHeight, clientHeight } = bodyEl;
+      shadowTop.classList.toggle("is-visible", scrollTop > 4);
+      shadowBottom.classList.toggle("is-visible", scrollTop + clientHeight < scrollHeight - 4);
+    }
+
     function render() {
       const node = NODES[currentId];
       if (!node) return;
 
       bodyEl.innerHTML = "";
 
+      const msgWrap = document.createElement("div");
+      msgWrap.className = "hs-message";
+
       const bubble = document.createElement("div");
       bubble.className = "hs-bubble";
-      bubble.textContent = node.bot;
-      bodyEl.appendChild(bubble);
+      bubble.appendChild(renderBubbleContent(node.bot));
+      msgWrap.appendChild(bubble);
+
+      const time = document.createElement("span");
+      time.className = "hs-timestamp";
+      time.textContent = getCurrentTime();
+      msgWrap.appendChild(time);
+
+      bodyEl.appendChild(msgWrap);
 
       const optionsWrap = document.createElement("div");
       optionsWrap.className = "hs-options";
@@ -356,6 +528,9 @@
         const optBtn = document.createElement("button");
         optBtn.type = "button";
         optBtn.className = "hs-option-btn";
+        if (opt.action && PRIMARY_ACTIONS.has(opt.action)) {
+          optBtn.classList.add("hs-option-btn--primary");
+        }
         optBtn.textContent = opt.label;
         optBtn.addEventListener("click", () => {
           if (opt.to) navigateTo(opt.to);
@@ -384,6 +559,8 @@
         navEl.appendChild(homeBtn);
       }
       navEl.style.display = currentId === "root" ? "none" : "flex";
+
+      requestAnimationFrame(updateScrollShadows);
     }
 
     function openPanel() {
@@ -411,6 +588,8 @@
     });
 
     closeBtn.addEventListener("click", closePanel);
+
+    bodyEl.addEventListener("scroll", updateScrollShadows);
 
     document.addEventListener("click", (e) => {
       if (!panel.classList.contains("is-active")) return;
