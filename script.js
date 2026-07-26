@@ -1400,6 +1400,86 @@ function initPaymentModal() {
   });
 }
 
+function initEthiopianDateTime() {
+  const dateEl = document.getElementById("eth-datetime-date");
+  const timeEl = document.getElementById("eth-datetime-time");
+  if (!dateEl || !timeEl) return;
+
+  const amDays = ["እሁድ", "ሰኞ", "ማክሰኞ", "ረቡዕ", "ሐሙስ", "ዓርብ", "ቅዳሜ"];
+  const amMonths = [
+    "መስከረም", "ጥቅምት", "ኅዳር", "ታኅሳስ", "ጥር", "የካቲት",
+    "መጋቢት", "ሚያዝያ", "ግንቦት", "ሰኔ", "ሐምሌ", "ነሐሴ", "ጳጉሜ"
+  ];
+
+  const isGregorianLeap = (y) => (y % 4 === 0 && y % 100 !== 0) || y % 400 === 0;
+
+  function dayOfYear(y, m, d) {
+    const days = [31, isGregorianLeap(y) ? 29 : 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
+    let doy = d;
+    for (let i = 0; i < m - 1; i++) doy += days[i];
+    return doy;
+  }
+
+  function gregorianToEthiopian(gYear, gMonth, gDay) {
+    const newYearDay = isGregorianLeap(gYear + 1) ? 12 : 11;
+    const newYearDOY = dayOfYear(gYear, 9, newYearDay);
+    const currentDOY = dayOfYear(gYear, gMonth, gDay);
+
+    let ethYear, dayDiff;
+    if (currentDOY >= newYearDOY) {
+      ethYear = gYear - 7;
+      dayDiff = currentDOY - newYearDOY;
+    } else {
+      ethYear = gYear - 8;
+      const prevNewYearDay = isGregorianLeap(gYear) ? 12 : 11;
+      const prevNewYearDOY = dayOfYear(gYear - 1, 9, prevNewYearDay);
+      const daysInPrevYear = isGregorianLeap(gYear - 1) ? 366 : 365;
+      dayDiff = (daysInPrevYear - prevNewYearDOY) + currentDOY;
+    }
+
+    const ethMonth = Math.floor(dayDiff / 30) + 1;
+    const ethDay = (dayDiff % 30) + 1;
+    return { year: ethYear, month: ethMonth, day: ethDay };
+  }
+
+  function update() {
+    const now = new Date();
+
+    const addisParts = new Intl.DateTimeFormat("en-US", {
+      timeZone: "Africa/Addis_Ababa",
+      year: "numeric",
+      month: "numeric",
+      day: "numeric",
+      weekday: "short",
+    }).formatToParts(now);
+
+    const get = (type) => addisParts.find((p) => p.type === type)?.value;
+    const gYear = parseInt(get("year"), 10);
+    const gMonth = parseInt(get("month"), 10);
+    const gDay = parseInt(get("day"), 10);
+
+    const addisWeekdayIndex = new Date(
+      now.toLocaleString("en-US", { timeZone: "Africa/Addis_Ababa" })
+    ).getDay();
+
+    const eth = gregorianToEthiopian(gYear, gMonth, gDay);
+    const monthName = amMonths[eth.month - 1] || "";
+    const dayName = amDays[addisWeekdayIndex];
+
+    dateEl.textContent = `${dayName}, ${monthName} ${eth.day}, ${eth.year}`;
+
+    timeEl.textContent = now.toLocaleTimeString("en-US", {
+      timeZone: "Africa/Addis_Ababa",
+      hour: "numeric",
+      minute: "2-digit",
+      hour12: true,
+    });
+  }
+
+  update();
+  setInterval(update, 30000);
+}
+
 document.addEventListener("DOMContentLoaded", () => {
   initLoader();
   initHeaderScroll();
@@ -1416,4 +1496,5 @@ document.addEventListener("DOMContentLoaded", () => {
   initImageFallbacks();
   initPaymentCopy();
   initPaymentModal();
+  initEthiopianDateTime();
 });
