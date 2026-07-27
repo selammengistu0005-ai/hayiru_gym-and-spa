@@ -181,8 +181,6 @@ function initAdminToggle() {
   const portalView    = document.getElementById("admin-portal-view");
   const passwordInput = document.getElementById("admin-password");
   const eyeToggle     = document.getElementById("admin-eye-toggle");
-  const donutFill      = document.getElementById("portal-donut-fill");
-  const donutValue     = document.getElementById("portal-donut-value");
   let unsubscribeViewed = null;
   if (!adminBtn || !overlay) return;
 
@@ -213,14 +211,6 @@ function openAdmin() {
   function showPortal() {
   loginView?.classList.add("is-hidden");
   portalView?.classList.add("is-active");
-  const placeholderPercent = 68;
-  if (donutFill) {
-    const offset = 97.4 - (97.4 * placeholderPercent) / 100;
-    requestAnimationFrame(() => {
-      donutFill.style.strokeDashoffset = offset;
-    });
-  }
-  if (donutValue) donutValue.textContent = `${placeholderPercent}%`;
 
   initViewedCard();
 
@@ -268,6 +258,10 @@ function initViewedCard() {
   });
 }
 
+let allDays = [];
+let allCounts = {};
+let currentRange = "30";
+
 function initAnalytics() {
   const q = query(
     collection(db, "agents", "hiruy_gym", "logs"),
@@ -278,7 +272,7 @@ function initAnalytics() {
     setTimeout(() => {
     const today = new Date();
     const days = [];
-    for (let i = 13; i >= 0; i--) {
+    for (let i = 89; i >= 0; i--) {
       const d = new Date(today);
       d.setDate(today.getDate() - i);
       days.push(d.toISOString().slice(0, 10));
@@ -294,18 +288,85 @@ function initAnalytics() {
       if (counts[key] !== undefined) counts[key]++;
     });
 
-    drawChart(days, counts);
-    drawMiniGraph(days, counts);
-    drawTable(days, counts);
+    allDays = days;
+    allCounts = counts;
 
-    initGraphOverlay(days, counts);
+    renderAnalyticsForRange(currentRange);
+    updateViewedDelta(days, counts);
+    initRangeToggle();
+    initGraphOverlay();
     }, 350);
   }, (err) => {
     console.error("Analytics error:", err);
   });
 }
 
-function initGraphOverlay(days, counts) {
+function sliceRange(range) {
+  if (range === "all") return allDays;
+  const n = parseInt(range, 10);
+  return allDays.slice(-n);
+}
+
+function renderAnalyticsForRange(range) {
+  const days = sliceRange(range);
+  const counts = allCounts;
+  drawChart(days, counts);
+  drawTable(days, counts);
+}
+
+function updateViewedDelta(days, counts) {
+  const deltaEl = document.getElementById("portal-viewed-delta");
+  if (!deltaEl) return;
+
+  const last7 = days.slice(-7).reduce((sum, d) => sum + (counts[d] || 0), 0);
+  const prev7 = days.slice(-14, -7).reduce((sum, d) => sum + (counts[d] || 0), 0);
+
+  if (prev7 === 0 && last7 === 0) {
+    deltaEl.textContent = "No data yet";
+    deltaEl.classList.remove("is-negative");
+    return;
+  }
+
+  if (prev7 === 0) {
+    deltaEl.textContent = `+${last7} this week`;
+    deltaEl.classList.remove("is-negative");
+    return;
+  }
+
+  const pctChange = Math.round(((last7 - prev7) / prev7) * 100);
+  const sign = pctChange >= 0 ? "+" : "";
+  deltaEl.textContent = `${sign}${pctChange}% this week`;
+  deltaEl.classList.toggle("is-negative", pctChange < 0);
+}
+
+function initRangeToggle() {
+  const toggles = [
+    document.getElementById("chart-range-toggle"),
+    document.getElementById("chart-range-toggle-mobile"),
+  ].filter(Boolean);
+
+  toggles.forEach(toggle => {
+    const fresh = toggle.cloneNode(true);
+    toggle.parentNode.replaceChild(fresh, toggle);
+  });
+
+  document.querySelectorAll(".range-btn").forEach(btn => {
+    btn.classList.toggle("active", btn.dataset.range === currentRange);
+    btn.addEventListener("click", () => {
+      currentRange = btn.dataset.range;
+      document.querySelectorAll(".range-btn").forEach(b => {
+        b.classList.toggle("active", b.dataset.range === currentRange);
+      });
+      renderAnalyticsForRange(currentRange);
+      const mobileCanvas = document.getElementById("portal-chart-mobile");
+      if (mobileCanvas && mobileCanvas.offsetParent !== null) {
+        drawChartOnCanvas(mobileCanvas, sliceRange(currentRange), allCounts);
+      }
+    });
+  });
+}
+
+function initGraphOverlay() {
   const graphBtn     = document.getElementById("graph-btn");
   const overlay      = document.getElementById("graph-overlay");
   const backBtn      = document.getElementById("graph-overlay-back");
@@ -319,7 +380,7 @@ function initGraphOverlay(days, counts) {
     overlay.classList.add("is-active");
     overlay.setAttribute("aria-hidden", "false");
     document.body.style.overflow = "hidden";
-    setTimeout(() => drawChartOnCanvas(mobileCanvas, days, counts), 50);
+    setTimeout(() => drawChartOnCanvas(mobileCanvas, sliceRange(currentRange), allCounts), 50);
   });
 
   backBtn.addEventListener("click", () => {
