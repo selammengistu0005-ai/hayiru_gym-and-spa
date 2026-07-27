@@ -1878,6 +1878,15 @@ body.admin-active #bg-canvas {
   gap: 0.3rem;
 }
 
+.dash-primary-number {
+  font-family: var(--f-body);
+  font-size: 3.2rem;
+  font-weight: 700;
+  color: #fff;
+  line-height: 1;
+  letter-spacing: -0.02em;
+}
+
 .dash-primary-delta {
   display: inline-flex;
   align-items: center;
