@@ -75,32 +75,11 @@
           <div class="dash-primary-info">
             <span class="dash-primary-number" id="portal-viewed-number">—</span>
             <span class="dash-primary-label">Viewed</span>
+            <span class="dash-primary-delta" id="portal-viewed-delta" aria-live="polite">—</span>
           </div>
         </div>
 
         <div class="dash-small-cards">
-
-          <div class="dash-small-card">
-            <div class="dash-small-card-top">
-              <span class="dash-small-label">Profile Views</span>
-            </div>
-            <span class="dash-small-number" id="dash-profile-views">—</span>
-            <canvas class="dash-mini-graph" id="dash-mini-graph" aria-hidden="true"></canvas>
-          </div>
-
-          <div class="dash-small-card">
-            <div class="dash-small-card-top">
-              <span class="dash-small-label">Engagement Rate</span>
-            </div>
-            <span class="dash-small-number">68%</span>
-            <div class="dash-mini-ring" aria-hidden="true">
-              <svg viewBox="0 0 36 36">
-                <circle class="dash-mini-ring-bg" cx="18" cy="18" r="15.5" />
-                <circle class="dash-mini-ring-fill" cx="18" cy="18" r="15.5" />
-              </svg>
-              <span>68%</span>
-            </div>
-          </div>
 
           <div class="dash-small-card">
             <div class="dash-small-card-top">
@@ -117,7 +96,14 @@
         </div>
 
         <div class="dash-chart-card">
-          <span class="dash-chart-title">Views Over Time</span>
+          <div class="dash-chart-card-top">
+            <span class="dash-chart-title">Views Over Time</span>
+            <div class="chart-range-toggle" id="chart-range-toggle" role="group" aria-label="Chart range">
+              <button type="button" class="range-btn" data-range="7">7d</button>
+              <button type="button" class="range-btn active" data-range="30">30d</button>
+              <button type="button" class="range-btn" data-range="all">All</button>
+            </div>
+          </div>
           <canvas id="portal-chart" class="dash-chart-canvas"></canvas>
         </div>
 
@@ -142,13 +128,6 @@
               </span>
             </div>
             <p class="comment-card-role">Owner, Hiruy Gym &amp; Spa</p>
-            <div class="portal-donut" id="portal-donut">
-              <svg viewBox="0 0 36 36">
-                <circle class="portal-donut-bg" cx="18" cy="18" r="15.5" />
-                <circle class="portal-donut-fill" id="portal-donut-fill" cx="18" cy="18" r="15.5" />
-              </svg>
-              <span class="portal-donut-value" id="portal-donut-value">0%</span>
-            </div>
           </div>
         </div>
 
@@ -168,6 +147,11 @@
           Back
         </button>
         <span class="graph-overlay-title">Views Over Time</span>
+        <div class="chart-range-toggle" id="chart-range-toggle-mobile" role="group" aria-label="Chart range">
+          <button type="button" class="range-btn" data-range="7">7d</button>
+          <button type="button" class="range-btn active" data-range="30">30d</button>
+          <button type="button" class="range-btn" data-range="all">All</button>
+        </div>
         <canvas id="portal-chart-mobile" class="dash-chart-canvas"></canvas>
       </div>
 
