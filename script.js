@@ -247,7 +247,7 @@ function initViewedCard() {
 
   const q = query(
     collection(db, "agents", "hiruy_gym", "logs"),
-    where("action", "==", "booking_quiz")
+    where("action", "==", "site_visit")
   );
 
   unsubscribeViewed = onSnapshot(q, (snap) => {
@@ -265,7 +265,7 @@ let currentRange = "30";
 function initAnalytics() {
   const q = query(
     collection(db, "agents", "hiruy_gym", "logs"),
-    where("action", "==", "booking_quiz")
+    where("action", "==", "site_visit")
   );
 
   onSnapshot(q, (snap) => {
@@ -1014,6 +1014,28 @@ function initGalleryFullPage() {
   }
 }
 
+function initDwellTracking() {
+  const DWELL_THRESHOLD_MS = 10000; // 10 seconds
+  const SESSION_FLAG = "hiruy_site_visit_logged";
+
+  if (sessionStorage.getItem(SESSION_FLAG)) return;
+
+  const timer = setTimeout(async () => {
+    try {
+      sessionStorage.setItem(SESSION_FLAG, "true");
+      await addDoc(collection(db, "agents", "hiruy_gym", "logs"), {
+        timestamp: serverTimestamp(),
+        action: "site_visit",
+        page: "home"
+      });
+    } catch (err) {
+      console.error("Site visit log failed:", err);
+    }
+  }, DWELL_THRESHOLD_MS);
+
+  window.addEventListener("beforeunload", () => clearTimeout(timer));
+}
+
 function initPhoneTracking() {
   const phoneLink = document.querySelector(".contact-phone-number");
   if (!phoneLink) return;
@@ -1552,6 +1574,7 @@ document.addEventListener("DOMContentLoaded", () => {
   initGalleryFullPage();
   initAdminToggle();
   initPhoneTracking();
+  initDwellTracking();
   initBookingLinks();
   initQuickNav();
   initImageFallbacks();
