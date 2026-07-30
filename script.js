@@ -1014,6 +1014,106 @@ function initGalleryFullPage() {
   }
 }
 
+function initReels() {
+  const overlay  = document.getElementById("reels-overlay");
+  const closeBtn = document.getElementById("reels-close");
+  const feed     = document.getElementById("reels-feed");
+  if (!overlay || !feed) return;
+
+  const triggers = document.querySelectorAll(".reels-trigger");
+  const items    = feed.querySelectorAll(".reel-item");
+  const videos   = feed.querySelectorAll(".reel-video");
+
+  // Wrap each like button in a .reel-actions container and add a count label,
+  // then wire up the localStorage-backed like toggle.
+  items.forEach((item, i) => {
+    const btn   = item.querySelector(".reel-like-btn");
+    const video = item.querySelector(".reel-video");
+    if (!btn || !video) return;
+
+    const actions = document.createElement("div");
+    actions.className = "reel-actions";
+    btn.parentNode.insertBefore(actions, btn);
+    actions.appendChild(btn);
+
+    const countEl = document.createElement("span");
+    countEl.className = "reel-like-count";
+    actions.appendChild(countEl);
+
+    const likedKey = `hiruy_reel_liked_${i}`;
+    const countKey = `hiruy_reel_count_${i}`;
+
+    let liked = localStorage.getItem(likedKey) === "1";
+    let count = parseInt(localStorage.getItem(countKey), 10);
+    if (isNaN(count)) count = liked ? 1 : 0;
+
+    const render = () => {
+      countEl.textContent = count;
+      btn.classList.toggle("is-liked", liked);
+    };
+    render();
+
+    btn.addEventListener("click", () => {
+      liked = !liked;
+      count = Math.max(0, count + (liked ? 1 : -1));
+      localStorage.setItem(likedKey, liked ? "1" : "0");
+      localStorage.setItem(countKey, String(count));
+
+      if (liked) {
+        btn.classList.remove("is-liked");
+        void btn.offsetWidth; // restart the pop animation
+      }
+      render();
+    });
+  });
+
+  const openReels = () => {
+    overlay.classList.add("is-active");
+    overlay.setAttribute("aria-hidden", "false");
+    document.body.classList.add("reels-active");
+    const first = videos[0];
+    if (first) first.play().catch(() => {});
+  };
+
+  const closeReels = () => {
+    overlay.classList.remove("is-active");
+    overlay.setAttribute("aria-hidden", "true");
+    document.body.classList.remove("reels-active");
+    videos.forEach((v) => v.pause());
+    feed.scrollTop = 0;
+  };
+
+  triggers.forEach((trigger) => {
+    trigger.addEventListener("click", (e) => {
+      e.preventDefault();
+      openReels();
+    });
+  });
+
+  if (closeBtn) closeBtn.addEventListener("click", closeReels);
+
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "Escape" && overlay.classList.contains("is-active")) closeReels();
+  });
+
+  // Autoplay the video in view, pause everything else — the core TikTok behavior.
+  const observer = new IntersectionObserver(
+    (entries) => {
+      entries.forEach((entry) => {
+        const video = entry.target;
+        if (entry.isIntersecting && entry.intersectionRatio >= 0.6) {
+          video.play().catch(() => {});
+        } else {
+          video.pause();
+        }
+      });
+    },
+    { threshold: [0, 0.6, 1] }
+  );
+
+  videos.forEach((v) => observer.observe(v));
+}
+
 function initDwellTracking() {
   const DWELL_THRESHOLD_MS = 10000; // 10 seconds
   const SESSION_FLAG = "hiruy_site_visit_logged";
@@ -1572,6 +1672,7 @@ document.addEventListener("DOMContentLoaded", () => {
   initBackgroundScene();
   initGalleryAccordion();
   initGalleryFullPage();
+  initReels();
   initAdminToggle();
   initPhoneTracking();
   initDwellTracking();
