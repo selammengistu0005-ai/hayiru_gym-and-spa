@@ -175,6 +175,7 @@
         <li><a href="#spa"        class="nav-link" data-section="spa" data-am="ስፓ">Spa</a></li>
         <li><a href="#membership" class="nav-link" data-section="membership" data-am="አባልነት">Membership</a></li>
         <li><a href="#gallery"    class="nav-link gallery-page-trigger" data-section="gallery" data-am="ፎቶዎች">Gallery</a></li>
+        <li><a href="#reels"      class="nav-link reels-trigger" data-section="reels" data-am="ቪዲዮ">Reels</a></li>
         <li><a href="#contact"    class="nav-link" data-section="contact" data-am="አግኙን">Contact</a></li>
         <li><button type="button" class="nav-link nav-admin-btn" id="admin-btn" data-am="አስተዳዳሪ">Admin</button></li>
       </ul>
@@ -210,6 +211,7 @@
         <li><a href="#spa"        class="nav-link" data-section="spa" data-am="ስፓ">Spa</a></li>
         <li><a href="#membership" class="nav-link" data-section="membership" data-am="አባልነት">Membership</a></li>
         <li><a href="#gallery"    class="nav-link gallery-page-trigger" data-section="gallery" data-am="ፎቶዎች">Gallery</a></li>
+        <li><a href="#reels"      class="nav-link reels-trigger" data-section="reels" data-am="ቪዲዮ">Reels</a></li>
         <li><a href="#contact"    class="nav-link" data-section="contact" data-am="አግኙን">Contact</a></li>
         <li><button type="button" class="nav-link nav-admin-btn" id="admin-btn-mobile" data-am="አስተዳዳሪ">Admin</button></li>
       </ul>
@@ -512,6 +514,50 @@
   <div class="gallery-lightbox-frame">
     <button type="button" class="gallery-lightbox-close" id="gallery-lightbox-close" aria-label="Close">&times;</button>
     <img class="gallery-lightbox-img" id="gallery-lightbox-img" src="" alt="" />
+  </div>
+</div>
+
+<div class="reels-overlay" id="reels-overlay" aria-hidden="true">
+  <button type="button" class="reels-close" id="reels-close" aria-label="Close">&times;</button>
+
+  <div class="reels-feed" id="reels-feed">
+
+    <div class="reel-item">
+      <video class="reel-video" src="https://res.cloudinary.com/dhoymhers/video/upload/v1785406095/hiruy_gym_tiktok_1_uvyoaa.mp4" muted loop playsinline preload="none"></video>
+      <button type="button" class="reel-like-btn" aria-label="Like">
+        <svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M12 21s-6.7-4.35-9.3-8.1C.8 9.9 1.6 6.4 4.6 5 6.8 4 9.2 4.7 12 7.3 14.8 4.7 17.2 4 19.4 5c3 1.4 3.8 4.9 1.9 7.9C18.7 16.65 12 21 12 21Z"/>
+        </svg>
+      </button>
+    </div>
+
+    <div class="reel-item">
+      <video class="reel-video" src="https://res.cloudinary.com/dhoymhers/video/upload/v1785405912/hiruy_gym_tiktok_2_rk5fif.mp4" muted loop playsinline preload="none"></video>
+      <button type="button" class="reel-like-btn" aria-label="Like">
+        <svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M12 21s-6.7-4.35-9.3-8.1C.8 9.9 1.6 6.4 4.6 5 6.8 4 9.2 4.7 12 7.3 14.8 4.7 17.2 4 19.4 5c3 1.4 3.8 4.9 1.9 7.9C18.7 16.65 12 21 12 21Z"/>
+        </svg>
+      </button>
+    </div>
+
+    <div class="reel-item">
+      <video class="reel-video" src="https://res.cloudinary.com/dhoymhers/video/upload/v1785406106/hiruy_gym_tiktok_3_yzqeyx.mp4" muted loop playsinline preload="none"></video>
+      <button type="button" class="reel-like-btn" aria-label="Like">
+        <svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M12 21s-6.7-4.35-9.3-8.1C.8 9.9 1.6 6.4 4.6 5 6.8 4 9.2 4.7 12 7.3 14.8 4.7 17.2 4 19.4 5c3 1.4 3.8 4.9 1.9 7.9C18.7 16.65 12 21 12 21Z"/>
+        </svg>
+      </button>
+    </div>
+
+    <div class="reel-item">
+      <video class="reel-video" src="https://res.cloudinary.com/dhoymhers/video/upload/v1785406124/hiruy_gym_tiktok_4_v3lj0o.mp4" muted loop playsinline preload="none"></video>
+      <button type="button" class="reel-like-btn" aria-label="Like">
+        <svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M12 21s-6.7-4.35-9.3-8.1C.8 9.9 1.6 6.4 4.6 5 6.8 4 9.2 4.7 12 7.3 14.8 4.7 17.2 4 19.4 5c3 1.4 3.8 4.9 1.9 7.9C18.7 16.65 12 21 12 21Z"/>
+        </svg>
+      </button>
+    </div>
+
   </div>
 </div>
 
